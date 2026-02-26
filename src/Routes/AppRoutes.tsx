@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
+import { Loader } from "../assets/Images/image";
 
 const Home = lazy(() => import("../Pages/Home"));
 const Login = lazy(() => import("../Pages/Login"));
@@ -9,7 +10,7 @@ const AppRoutes = () => {
   return (
     <div className="wrapper">
       <div className="content">
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div className="loader-box"><img src={Loader} alt="Loader" /></div>}>
           <Routes>
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />

@@ -58,6 +58,15 @@ img {
   --font-main: 'Outfit', sans-serif;
   --text-main: #ffffff;
 }
+.loader-box{
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color:var(--dark-bg) ;
+}
 
 /* --- LAYOUT UTILITIES --- */
 .container {
