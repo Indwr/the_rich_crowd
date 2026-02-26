@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Logo } from "../assets/Images/image";
 
 const Footer = () => {
@@ -21,16 +22,16 @@ const Footer = () => {
             </div>
             <div className="footer-col">
               <h4>Quick Links</h4>
-              <a href="#home">Home</a>
-              <a href="#about">About Us</a>
-              <a href="#token">Tokenomics</a>
-              <a href="#roadmap">Roadmap</a>
+              <Link to="#home">Home</Link>
+              <Link to="#about">About Us</Link>
+              <Link to="#token">Tokenomics</Link>
+              <Link to="#roadmap">Roadmap</Link>
             </div>
             <div className="footer-col">
               <h4>Legal</h4>
-              <a href="#">Smart Contract</a>
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
+              <Link to="#">Smart Contract</Link>
+              <Link to="#">Privacy Policy</Link>
+              <Link to="#">Terms of Service</Link>
             </div>
           </div>
           <div className="copyright">

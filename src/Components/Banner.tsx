@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const Banner = () => {
   return (
     <>
@@ -8,9 +10,9 @@ const Banner = () => {
             Welcome to The Rich Crowd. Enter a domain where decentralization
             prevails, devoid of administrators, but abundant in opportunities.
           </p>
-          <a href="/" className="btn">
+          <Link to="/" className="btn">
             Join the Revolution
-          </a>
+          </Link>
         </div>
       </section>
     </>

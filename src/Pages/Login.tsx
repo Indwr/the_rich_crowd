@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Logo } from "../assets/Images/image";
 import SvgIcons from "../assets/Svg/SvgIcons";
 
@@ -12,9 +13,9 @@ const Login = () => {
         </div>
         <div className="auth-container">
           <div className="logo-container">
-            <a href="/">
+            <Link to="/">
               <img src={Logo} alt="The Rich Crowd Logo" />
-            </a>
+            </Link>
           </div>
           <h2>Member Access</h2>
           <p className="sub-title">Secure Decentralized Gateway</p>
@@ -47,7 +48,7 @@ const Login = () => {
           </form>
           <div className="register-link">
             Not a member yet?{" "}
-            <a href="/register">Join the Elite</a>
+            <Link to="/register">Join the Elite</Link>
           </div>
         </div>
       </div>

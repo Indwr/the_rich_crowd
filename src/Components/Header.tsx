@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Logo } from "../assets/Images/image";
+import { Link } from "react-router-dom";
 
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -47,22 +48,22 @@ const Header = () => {
 
           {/* Nav Links */}
           <div className={`nav-links ${menuOpen ? "nav-active" : ""}`}>
-            <a href="#home" onClick={e => handleScroll(e, "#home")}>
+            <Link to="#home" onClick={e => handleScroll(e, "#home")}>
               Home
-            </a>
-            <a href="#about" onClick={e => handleScroll(e, "#about")}>
+            </Link>
+            <Link to="#about" onClick={e => handleScroll(e, "#about")}>
               About
-            </a>
-            <a href="#token" onClick={e => handleScroll(e, "#token")}>
+            </Link>
+            <Link to="#token" onClick={e => handleScroll(e, "#token")}>
               KSN Token
-            </a>
-            <a href="#tech" onClick={e => handleScroll(e, "#tech")}>
+            </Link>
+            <Link to="#tech" onClick={e => handleScroll(e, "#tech")}>
               Technology
-            </a>
-            <a href="#roadmap" onClick={e => handleScroll(e, "#roadmap")}>
+            </Link>
+            <Link to="#roadmap" onClick={e => handleScroll(e, "#roadmap")}>
               Roadmap
-            </a>
-            <a href="/login">Login</a>
+            </Link>
+            <Link to="/login">Login</Link>
           </div>
         </nav>
       </div>
