@@ -3,7 +3,7 @@ import { type BaseQueryFn } from '@reduxjs/toolkit/query';
 import { fetchBaseQuery } from '@reduxjs/toolkit/query';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
-import { tokenKey, userKey } from 'src/utils/constants';
+import { tokenKey, userKey } from '../../utils/constants';
 import { env } from 'src/utils/env';
 import { getErrorMessage } from './types.ts';
 import { logoutUser } from '../reducers/auth.reducer';

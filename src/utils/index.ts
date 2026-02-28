@@ -17,6 +17,7 @@ export const decodeBase64 = (input: string) => {
     }
 
     return new TextDecoder().decode(bytes);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     throw new Error('Invalid Base64 string');
   }
@@ -40,6 +41,7 @@ export const isBase64 = (param: string): boolean => {
   return base64Regex.test(param);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const encodeQueryParams = (baseUrl: string, params: Record<string, any>): string => {
   const queryString = Object.entries(params)
     .filter(([key, value]) => {
@@ -73,6 +75,7 @@ export const decodeQueryParams = (search: string): Record<string, string> => {
   return decodedParams;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const filterValues = (payload: Record<string, any>) =>
   Object.fromEntries(
     Object.entries(payload).filter(

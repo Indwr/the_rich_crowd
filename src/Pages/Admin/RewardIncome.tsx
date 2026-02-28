@@ -1,5 +1,6 @@
 import AdminTable from "../../Components/AdminComponent/AdminTable";
 
+
 const RewardIncome = () => {
   const columns = [
     { header: "Date & Time", accessor: "dateTime" },
