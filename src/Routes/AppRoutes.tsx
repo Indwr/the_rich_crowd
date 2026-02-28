@@ -1,20 +1,76 @@
 import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import { Loader } from "../assets/Images/image";
+import PublicLayout from "../layouts/PublicLayout";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 const Home = lazy(() => import("../Pages/Home"));
 const Login = lazy(() => import("../Pages/Login"));
 const Register = lazy(() => import("../Pages/Register"));
+const Dashboard = lazy(() => import("../Pages/Admin/Dashboard"));
+const X3Staking = lazy(() => import("../Pages/Admin/X3Staking"));
+const AutoCompounding = lazy(() => import("../Pages/Admin/AutoCompounding"));
+const Profile = lazy(() => import("../Pages/Admin/Profile"));
+const Mytree = lazy(() => import("../Pages/Admin/Mytree"));
+const Directs = lazy(() => import("../Pages/Admin/Directs"));
+const Downlines = lazy(() => import("../Pages/Admin/Downlines"));
+const X2Deposit = lazy(() => import("../Pages/Admin/X2Deposit"));
+const X3Deposit = lazy(() => import("../Pages/Admin/X3Deposit"));
+const X2DepositHistory = lazy(() => import("../Pages/Admin/X2DepositHistory"));
+const X3DepositHistory = lazy(() => import("../Pages/Admin/X3DepositHistory"));
+const HoldingHistory = lazy(() => import("../Pages/Admin/HoldingHistory"));
+const UpgradeActivations = lazy(() => import("../Pages/Admin/UpgradeActivations"));
+const X3StakingHistory = lazy(() => import("../Pages/Admin/X3StakingHistory"));
+const X3CompoundingHistory = lazy(() => import("../Pages/Admin/X3CompoundingHistory"));
+const X2DirectIncome = lazy(() => import("../Pages/Admin/X2DirectIncome"));
+const HybridLevelIncome = lazy(() => import("../Pages/Admin/HybridLevelIncome"));
+const TRCSpecialIncome = lazy(() => import("../Pages/Admin/TRCSpecialIncome"));
+const RoyaltyIncome = lazy(() => import("../Pages/Admin/RoyaltyIncome"));
+const RewardIncome = lazy(() => import("../Pages/Admin/RewardIncome"));
+const X2IncomeLedger = lazy(() => import("../Pages/Admin/X2IncomeLedger"));
 
 const AppRoutes = () => {
   return (
     <div className="wrapper">
       <div className="content">
-        <Suspense fallback={<div className="loader-box"><img src={Loader} alt="Loader" /></div>}>
+        <Suspense
+          fallback={
+            <div className="loader-box">
+              <img src={Loader} alt="Loader" />
+            </div>
+          }
+        >
           <Routes>
-            <Route index element={<Home />} />
-            <Route path="login" element={<Login />} />
-            <Route path="register" element={<Register />} />
+            <Route element={<PublicLayout />}>
+              <Route index element={<Home />} />
+              <Route path="login" element={<Login />} />
+              <Route path="register" element={<Register />} />
+            </Route>
+            <Route  element={<DashboardLayout />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="x3-staking" element={<X3Staking />} />
+              <Route path="auto-compounding" element={<AutoCompounding />} />
+              <Route path="profile" element={<Profile />} />
+              <Route path="mytree" element={<Mytree />} />
+              <Route path="directs" element={<Directs />} />
+              <Route path="downlines" element={<Downlines />} />
+              <Route path="x2-deposit" element={<X2Deposit />} />
+              <Route path="x2-deposit-history" element={<X2DepositHistory />} />
+              <Route path="holding-history" element={<HoldingHistory />} />
+              <Route path="activate-upgrade-history" element={<UpgradeActivations />} />
+              <Route path="x3-deposit" element={<X3Deposit />} />
+              <Route path="x3-deposit-history" element={<X3DepositHistory />} />
+              <Route path="x3-staking-history" element={<X3StakingHistory />} />
+              <Route path="auto-compounding-history" element={<X3CompoundingHistory />} />
+              <Route path="income-x2">
+                <Route path="direct-income" element={<X2DirectIncome />} />
+                <Route path="hybrid-level-income" element={<HybridLevelIncome />} />
+                <Route path="trc-special-income" element={<TRCSpecialIncome />} />
+                <Route path="royalty-income" element={<RoyaltyIncome />} />
+                <Route path="reward-income" element={<RewardIncome />} />
+                <Route path="income-ledger" element={<X2IncomeLedger />} />
+              </Route>
+            </Route>
           </Routes>
         </Suspense>
       </div>

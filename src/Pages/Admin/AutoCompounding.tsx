@@ -1,0 +1,108 @@
+const AutoCompounding = () => {
+  return (
+    <>
+      <div className="content-wrapper">
+        <div className="page-header">
+          <h1 className="page-title">Auto Compounding</h1>
+          <div className="page-desc">
+            Maximize wealth with long-term growth strategies
+          </div>
+        </div>
+        <div className="compounding-card">
+          <div className="level-badge-container">
+            <span className="lb-label">Current X2 Slot</span>
+            <span className="lb-value">Slot 0</span>
+          </div>
+          <div className="locked-overlay">
+            <i className="fas fa-lock" />
+            <span>
+              Not Eligible. Minimum <b>1 X2 Upgrade</b> required to unlock.
+            </span>
+          </div>
+          <div className="limit-section">
+            <div className="limit-info">
+              <span className="limit-label">Limit Used</span>
+              <span className="limit-vals">
+                <span>$0</span> / $0{" "}
+              </span>
+            </div>
+            <div className="progress-track">
+              <div className="progress-fill" style={{ width: "0%" }} />
+            </div>
+          </div>
+          <div className="stats-container">
+            <div className="stat-item">
+              <span>Remaining Limit</span>
+              <h3 className="highlight-gold">$0</h3>
+            </div>
+            <div className="stat-item" style={{ textAlign: "right" }}>
+              <span>X3 Balance</span>
+              <h3>$0.00</h3>
+            </div>
+          </div>
+          <div className="plan-selector-title">Select Duration</div>
+          <div className="plan-buttons">
+            <div
+              className="plan-btn active"
+              onClick={undefined}
+            >
+              <span className="plan-year">3 Years</span>
+              <span className="plan-min">Min: $100</span>
+            </div>
+            <div className="plan-btn" onClick={undefined}>
+              <span className="plan-year">5 Years</span>
+              <span className="plan-min">Min: $100</span>
+            </div>
+            <div className="plan-btn" onClick={undefined}>
+              <span className="plan-year">10 Years</span>
+              <span className="plan-min">Min: $100</span>
+            </div>
+          </div>
+          <div className="input-group">
+            <div className="wallet-info">
+              <span className="wi-label">Amount to Compound</span>
+              <span className="wi-bal" id="minStakeLabel">
+                Min: $100
+              </span>
+            </div>
+            <input
+              type="number"
+              id="compoundAmount"
+              className="custom-input"
+              placeholder={"0.0"}
+              disabled
+            />
+            <div className="input-actions">
+              <span className="currency-badge">USDT</span>
+              <button className="btn-max" onClick={undefined}>
+                MAX
+              </button>
+            </div>
+          </div>
+          <div className="summary-box">
+            <div>
+              <span className="sb-label">Start Date:</span>
+              <span className="sb-val">2026-02-28</span>
+            </div>
+            <div>
+              <span className="sb-label">End Date:</span>
+              <span className="sb-val" id="endDateDisplay">
+                2029-02-28
+              </span>
+            </div>
+          </div>
+          <button
+            className="btn-submit"
+            id="btnConfirm"
+            onClick={undefined}
+            disabled
+          >
+            Upgrade X2 to Unlock{" "}
+          </button>
+          <div className="status-msg" id="statusMsg" />
+        </div>
+      </div>
+    </>
+  );
+};
+export default AutoCompounding;
