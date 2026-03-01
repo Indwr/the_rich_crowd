@@ -756,7 +756,7 @@
   box-shadow: 0 0 8px #4ade80;
 }
 
-.public-layout .public-layout button {
+.public-layout button {
   width: 100%;
   padding: 1.2rem;
   background: var(--gold-gradient);
@@ -775,7 +775,7 @@
   z-index: 1;
 }
 
-.public-layout .public-layout button::before {
+.public-layout button::before {
   content: '';
   position: absolute;
   top: 0;
@@ -787,7 +787,7 @@
   z-index: -1;
 }
 
-.public-layout .public-layout button:hover {
+.public-layout button:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 30px rgba(244, 196, 48, 0.3);
 }

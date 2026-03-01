@@ -28,6 +28,11 @@ const TRCSpecialIncome = lazy(() => import("../Pages/Admin/TRCSpecialIncome"));
 const RoyaltyIncome = lazy(() => import("../Pages/Admin/RoyaltyIncome"));
 const RewardIncome = lazy(() => import("../Pages/Admin/RewardIncome"));
 const X2IncomeLedger = lazy(() => import("../Pages/Admin/X2IncomeLedger"));
+const BiMonthly = lazy(() => import("../Pages/Admin/BiMonthly"));
+const X3DirectIncome = lazy(() => import("../Pages/Admin/X3DirectIncome"));
+const X3HybridLevelIncome = lazy(() => import("../Pages/Admin/X3HybridLevelIncome"));
+const X3IncomeLedger = lazy(() => import("../Pages/Admin/X3IncomeLedger"));
+const BonanzaBusiness = lazy(() => import("../Pages/Admin/BonanzaBusiness"));
 
 const AppRoutes = () => {
   return (
@@ -69,6 +74,13 @@ const AppRoutes = () => {
                 <Route path="royalty-income" element={<RoyaltyIncome />} />
                 <Route path="reward-income" element={<RewardIncome />} />
                 <Route path="income-ledger" element={<X2IncomeLedger />} />
+              </Route>
+              <Route path="mpr-income" element={<BiMonthly />} />
+              <Route path="x3-hybrid-level-income" element={<X3HybridLevelIncome />} />
+              <Route path="x3-income-ledger" element={<X3IncomeLedger />} />
+              <Route path="bonanza-business" element={<BonanzaBusiness />} />
+              <Route path="income-x3">
+                <Route path="x3-direct-income" element={<X3DirectIncome />} />
               </Route>
             </Route>
           </Routes>

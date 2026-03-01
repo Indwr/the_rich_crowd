@@ -18,7 +18,7 @@ const AdminSidebar = ({
     setOpenDropdown(openDropdown === menu ? null : menu);
   };
 
-  // Auto open dropdown when child route active
+  // ✅ Auto open dropdown when child route is active
   useEffect(() => {
     const path = location.pathname;
 
@@ -29,25 +29,36 @@ const AdminSidebar = ({
     ) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpenDropdown("team");
-    }
-
-    if (path.startsWith("/x2")) {
+    } 
+    else if (
+      path.startsWith("/x2-deposit") ||
+      path.startsWith("/x2-deposit-history") ||
+      path.startsWith("/holding-history") ||
+      path.startsWith("/activate-upgrade-history")
+    ) {
       setOpenDropdown("x2");
-    }
-
-    if (path.startsWith("/x3")) {
+    } 
+    else if (
+      path.startsWith("/x3-deposit") ||
+      path.startsWith("/x3-deposit-history") ||
+      path.startsWith("/x3-staking-history") ||
+      path.startsWith("/auto-compounding-history")
+    ) {
       setOpenDropdown("x3");
-    }
-
-    if (path.startsWith("/income-x2")) {
+    } 
+    else if (path.startsWith("/income-x2")) {
       setOpenDropdown("incomeX2");
-    }
-
-    if (
+    } 
+    else if (
       path.startsWith("/income-x3") ||
-      path.startsWith("/mpr-income")
+      path.startsWith("/mpr-income") ||
+      path.startsWith("/x3-hybrid-level-income") ||
+      path.startsWith("/x3-income-ledger")
     ) {
       setOpenDropdown("incomeX3");
+    } 
+    else {
+      setOpenDropdown(null);
     }
   }, [location.pathname]);
 
@@ -91,7 +102,11 @@ const AdminSidebar = ({
         </NavLink>
 
         {/* My Team */}
-        <div className={`nav-dropdown ${openDropdown === "team" ? "dropdown-open active" : ""}`}>
+        <div
+          className={`nav-dropdown ${
+            openDropdown === "team" ? "dropdown-open active" : ""
+          }`}
+        >
           <a
             href="#"
             className="nav-item dropdown-trigger"
@@ -119,7 +134,11 @@ const AdminSidebar = ({
         </div>
 
         {/* X2 Deposit */}
-        <div className={`nav-dropdown ${openDropdown === "x2" ? "dropdown-open active" : ""}`}>
+        <div
+          className={`nav-dropdown ${
+            openDropdown === "x2" ? "dropdown-open active" : ""
+          }`}
+        >
           <a
             href="#"
             className="nav-item dropdown-trigger"
@@ -150,7 +169,11 @@ const AdminSidebar = ({
         </div>
 
         {/* X3 Deposit */}
-        <div className={`nav-dropdown ${openDropdown === "x3" ? "dropdown-open active" : ""}`}>
+        <div
+          className={`nav-dropdown ${
+            openDropdown === "x3" ? "dropdown-open active" : ""
+          }`}
+        >
           <a
             href="#"
             className="nav-item dropdown-trigger"
@@ -181,7 +204,11 @@ const AdminSidebar = ({
         </div>
 
         {/* Income X2 */}
-        <div className={`nav-dropdown ${openDropdown === "incomeX2" ? "dropdown-open active" : ""}`}>
+        <div
+          className={`nav-dropdown ${
+            openDropdown === "incomeX2" ? "dropdown-open active" : ""
+          }`}
+        >
           <a
             href="#"
             className="nav-item dropdown-trigger"
@@ -218,7 +245,11 @@ const AdminSidebar = ({
         </div>
 
         {/* Income X3 */}
-        <div className={`nav-dropdown ${openDropdown === "incomeX3" ? "dropdown-open active" : ""}`}>
+        <div
+          className={`nav-dropdown ${
+            openDropdown === "incomeX3" ? "dropdown-open active" : ""
+          }`}
+        >
           <a
             href="#"
             className="nav-item dropdown-trigger"
