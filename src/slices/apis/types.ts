@@ -1,5 +1,4 @@
 import { type FetchBaseQueryError } from '@reduxjs/toolkit/query';
-import { type ISource, type RoleType } from 'src/store/jotai/signup';
 
 interface ErrorResponse {
   message: string;
@@ -96,8 +95,6 @@ export interface ISignupArgs {
   gender: string;
   dob: string;
   category?: string;
-  source: ISource;
-  type: RoleType;
   organizationName?: string;
 }
 
