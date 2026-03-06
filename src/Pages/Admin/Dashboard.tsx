@@ -1,13 +1,27 @@
 import { type FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import "animate.css";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import { Logo } from "../../assets/Images/image";
 import { useAuth } from "../../features/auth/hooks/useAuth";
+import { useDashboardData } from "../../features/dashboard/hooks/useDashboardData";
+import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
+import { shortenAddress } from "../../utils";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { authenticatePreview, isAuthenticating } = useAuth();
+  const { dashboardResponse, userPackages, isDashboardLoading, dashboardError } = useDashboardData();
+  const { copyText } = useCopyToClipboard();
   const [previewId, setPreviewId] = useState("");
+  const user = dashboardResponse?.data?.user;
+  const dashboardSummary = dashboardResponse?.data?.dashboard_summary;
+  const x3Summary = dashboardResponse?.data?.x3_summary;
+  const walletAddress = user?.wallet_address ?? "0x81f7...77C7";
+
+  const formatAmount = (value?: number) => Number(value ?? 0).toFixed(2);
 
   const handlePreviewLogin = async (event: FormEvent) => {
     event.preventDefault();
@@ -23,15 +37,107 @@ const Dashboard = () => {
     }
   };
 
-  return (
-    <>
-      <div className="dashboard-container">
-        <div className="user-container">
-          <div className="user-greeting">
-            <p id="greetingMessage">Good Evening, </p>
+  const referralLink = `${import.meta.env.VITE_SITE_URL}register?ref=${user?.user_id ?? ""}`;
+  const totalBusiness =
+  (dashboardSummary?.left_business ?? 0) +
+  (dashboardSummary?.right_business ?? 0);
+  const totalx2Team =
+  (dashboardSummary?.left_team ?? 0) +
+  (dashboardSummary?.right_team ?? 0);
+  const x3StakingBusiness =
+  (x3Summary?.x3_left_business ?? 0) +
+  (x3Summary?.x3_right_business ?? 0);
+  const x3CompoundingBusiness =
+  (x3Summary?.x3_compound_left_business ?? 0) +
+  (x3Summary?.x3_compound_right_business ?? 0);
+  const x3CommonBusiness = Math.min(
+    x3Summary?.x3_left_business ?? 0,
+    x3Summary?.x3_right_business ?? 0,
+  );
+  const showSkeleton = isDashboardLoading && !dashboardResponse;
+
+  const getSlotCardClass = (status: number) => {
+    if (status === 1) return "status-active";
+    if (status === 2) return "status-next";
+    return "status-locked";
+  };
+
+  const getSlotLabel = (status: number) => {
+    if (status === 1) return "Activated";
+    if (status === 2) return "Upgrade Now";
+    return "Locked";
+  };
+
+  const getSlotButton = (status: number) => {
+    if (status === 1) return "Activated";
+    if (status === 2) return "Activate";
+    return "Locked";
+  };
+
+  if (showSkeleton) {
+    return (
+      <SkeletonTheme baseColor="#1f2937" highlightColor="#374151" borderRadius={12}>
+        <div className="dashboard-container animate__animated animate__fadeIn">
+          <div className="user-container animate__animated animate__fadeInDown">
+            <div className="user-greeting">
+              <Skeleton width={220} height={18} />
+            </div>
+          </div>
+
+          <div className="profile-hero-section animate__animated animate__fadeInUp">
+            <div className="hero-card user-info">
+              <Skeleton height={180} borderRadius={16} />
+            </div>
+            <div className="right-column">
+              <div className="hero-card links-info">
+                <Skeleton height={120} borderRadius={16} />
+              </div>
+              <div className="hero-card ksn-card">
+                <Skeleton height={70} borderRadius={16} />
+              </div>
+            </div>
+          </div>
+
+          <div className="metric-grid animate__animated animate__fadeInUp">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <div key={`metric-skeleton-${index}`} className="metric-card">
+                <Skeleton height={90} borderRadius={12} />
+              </div>
+            ))}
+          </div>
+
+          <div className="x2-section-container animate__animated animate__fadeInUp">
+            <h2 className="x2-section-title">The Rich Crowd X2</h2>
+            <div className="x2-grid">
+              {Array.from({ length: 10 }).map((_, index) => (
+                <div key={`slot-skeleton-${index}`} className="x2-card status-locked">
+                  <Skeleton height={180} borderRadius={16} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="x3-promo-container animate__animated animate__fadeInUp">
+            <div className="x3-promo-card">
+              <Skeleton height={120} borderRadius={16} />
+            </div>
           </div>
         </div>
-        <div className="profile-hero-section">
+      </SkeletonTheme>
+    );
+  }
+
+  return (
+    <>
+      <div className="dashboard-container animate__animated animate__fadeIn">
+        <div className="user-container animate__animated animate__fadeInDown">
+          <div className="user-greeting">
+            <p id="greetingMessage">Good Evening, </p>
+            {isDashboardLoading && <small>Loading dashboard data...</small>}
+            {dashboardError && <small>{dashboardError}</small>}
+          </div>
+        </div>
+        <div className="profile-hero-section animate__animated animate__fadeInUp">
           <div className="hero-card user-info">
             <div className="user-header">
               <div className="user-avatar-circle">
@@ -42,10 +148,10 @@ const Dashboard = () => {
               </div>
               <div className="user-text">
                 <h3>
-                  User ID <span>3869766</span>
+                  User ID <span>{user?.user_id ?? "--"}</span>
                 </h3>
                 <p>
-                  Sponsor by ID <span>2072139</span>
+                  Sponsor by ID <span>{user?.sponser_id ?? "--"}</span>
                 </p>
               </div>
             </div>
@@ -64,11 +170,15 @@ const Dashboard = () => {
                 <i className="fas fa-star" />
               </div>
             </div>
-            <div className="wallet-pill" onClick={undefined}>
-              <span id="walletAddressDisplay">0x81f7...77C7</span>
+            <div className="wallet-pill">
+              <span id="walletAddressDisplay">{shortenAddress(walletAddress)}</span>
               <i
                 className="fas fa-copy"
-                onClick={undefined}
+                onClick={() =>
+                  copyText(walletAddress, {
+                    successMessage: "Wallet address copied.",
+                  })
+                }
               />
             </div>
           </div>
@@ -79,11 +189,18 @@ const Dashboard = () => {
                 <div className="input-group">
                   <input
                     type="text"
-                    defaultValue="https://therichcrowd.live/register?ref=3869766"
+                    value={referralLink}
                     readOnly
                     id="refLinkInput"
                   />
-                  <i className="fas fa-copy" onClick={undefined} />
+                  <i
+                    className="fas fa-copy"
+                    onClick={() =>
+                      copyText(referralLink, {
+                        successMessage: "Referral link copied.",
+                      })
+                    }
+                  />
                 </div>
               </div>
               <form className="preview-group" onSubmit={handlePreviewLogin}>
@@ -111,7 +228,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-        <div className="metric-grid">
+        <div className="metric-grid animate__animated animate__fadeInUp">
           <div className="grid-section-title">
             <i className="fas fa-wallet" /> Wallet &amp; Earnings
           </div>
@@ -122,12 +239,12 @@ const Dashboard = () => {
             </div>
             <div className="split-container">
               <div className="split-item">
-                <div className="split-value">111,110.00</div>
+                <div className="split-value">{formatAmount(dashboardSummary?.holdingWallet)}</div>
                 <span className="split-label">X2 Auto Upgrade</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
-                <div className="split-value">0.00</div>
+                <div className="split-value">{formatAmount(dashboardSummary?.holdingWalletx3)}</div>
                 <span className="split-label">X3 Wallet</span>
               </div>
             </div>
@@ -138,7 +255,7 @@ const Dashboard = () => {
               <i className="fas fa-chart-line metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0.00 <span>USDT</span>
+              {formatAmount(dashboardSummary?.total_income) + formatAmount(dashboardSummary?.total_income_x3)} <span>USDT</span>
             </div>
           </div>
           <div className="metric-card">
@@ -146,7 +263,7 @@ const Dashboard = () => {
               <div className="metric-title">Partners</div>
               <i className="fas fa-users metric-icon-bg" />
             </div>
-            <div className="metric-value">0</div>
+            <div className="metric-value">{user?.directs ?? 0}</div>
           </div>
           <div className="grid-section-title">
             <i className="fas fa-briefcase" /> X2 Business Overview
@@ -157,7 +274,7 @@ const Dashboard = () => {
               <i className="fas fa-hand-holding-usd metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0 <span>USDT</span>
+              {formatAmount(totalBusiness)} <span>USDT</span>
             </div>
           </div>
           <div className="metric-card">
@@ -167,12 +284,12 @@ const Dashboard = () => {
             </div>
             <div className="split-container">
               <div className="split-item">
-                <div className="split-value">0.00</div>
+                <div className="split-value">{formatAmount(dashboardSummary?.left_business)}</div>
                 <span className="split-label">Left (USDT)</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
-                <div className="split-value">0.00</div>
+                <div className="split-value">{formatAmount(dashboardSummary?.right_business)}</div>
                 <span className="split-label">Right (USDT)</span>
               </div>
             </div>
@@ -184,12 +301,12 @@ const Dashboard = () => {
             </div>
             <div className="split-container">
               <div className="split-item">
-                <div className="split-value">0</div>
+                <div className="split-value">{dashboardSummary?.left_team}</div>
                 <span className="split-label">Left Team</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
-                <div className="split-value">0</div>
+                <div className="split-value">{dashboardSummary?.right_team}</div>
                 <span className="split-label">Right Team</span>
               </div>
             </div>
@@ -199,7 +316,7 @@ const Dashboard = () => {
               <div className="metric-title">X2 Total Team</div>
               <i className="fas fa-user-friends metric-icon-bg" />
             </div>
-            <div className="metric-value">0</div>
+            <div className="metric-value">{totalx2Team}</div>
           </div>
           <div className="grid-section-title">
             <i className="fas fa-coins" /> X3 Staking Business
@@ -209,7 +326,9 @@ const Dashboard = () => {
               <div className="metric-title">X3 Staking Biz</div>
               <i className="fas fa-layer-group metric-icon-bg" />
             </div>
-            <div className="metric-value">0</div>
+            <div className="metric-value">
+              {formatAmount(x3StakingBusiness)} <span>USDT</span>
+            </div>
           </div>
           <div className="metric-card">
             <div className="metric-header">
@@ -218,12 +337,12 @@ const Dashboard = () => {
             </div>
             <div className="split-container">
               <div className="split-item">
-                <div className="split-value">0</div>
+                <div className="split-value">{formatAmount(x3Summary?.x3_left_business)}</div>
                 <span className="split-label">Left</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
-                <div className="split-value">0</div>
+                <div className="split-value">{formatAmount(x3Summary?.x3_right_business)}</div>
                 <span className="split-label">Right</span>
               </div>
             </div>
@@ -233,7 +352,9 @@ const Dashboard = () => {
               <div className="metric-title">X3 Common Biz</div>
               <i className="fas fa-globe metric-icon-bg" />
             </div>
-            <div className="metric-value">0</div>
+            <div className="metric-value">
+              {formatAmount(x3CommonBusiness)} <span>USDT</span>
+            </div>
           </div>
           <div className="grid-section-title">
             <i className="fas fa-sync" /> X3 Compounding Business
@@ -243,7 +364,9 @@ const Dashboard = () => {
               <div className="metric-title">X3 Compounding</div>
               <i className="fas fa-recycle metric-icon-bg" />
             </div>
-            <div className="metric-value">0</div>
+            <div className="metric-value">
+              {formatAmount(x3CompoundingBusiness)} <span>USDT</span>
+            </div>
           </div>
           <div className="metric-card">
             <div className="metric-header">
@@ -252,12 +375,12 @@ const Dashboard = () => {
             </div>
             <div className="split-container">
               <div className="split-item">
-                <div className="split-value">0</div>
+                <div className="split-value">{formatAmount(x3Summary?.x3_compound_left_business)}</div>
                 <span className="split-label">Left</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
-                <div className="split-value">0</div>
+                <div className="split-value">{formatAmount(x3Summary?.x3_compound_right_business)}</div>
                 <span className="split-label">Right</span>
               </div>
             </div>
@@ -277,7 +400,7 @@ const Dashboard = () => {
               <i className="fas fa-hand-holding-usd metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0 <span>USDT</span>
+              {formatAmount(dashboardSummary?.direct_referral)} <span>USDT</span>
             </div>
           </div>
           <div className="metric-card program-card">
@@ -286,7 +409,7 @@ const Dashboard = () => {
               <i className="fas fa-layer-group metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0 <span>USDT</span>
+              {formatAmount(dashboardSummary?.hybrid_turbo_bonus)} <span>USDT</span>
             </div>
           </div>
           <div className="metric-card program-card subsection-title-card">
@@ -298,7 +421,7 @@ const Dashboard = () => {
               <i className="fas fa-star metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0 <span>USDT</span>
+              {formatAmount(dashboardSummary?.trc_special)} <span>USDT</span>
             </div>
           </div>
           <div className="metric-card program-card subsection-title-card">
@@ -310,7 +433,7 @@ const Dashboard = () => {
               <i className="fas fa-coins metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0 <span>USDT</span>
+              {formatAmount(dashboardSummary?.staking_income)} <span>USDT</span>
             </div>
           </div>
           <div className="metric-card program-card">
@@ -319,7 +442,7 @@ const Dashboard = () => {
               <i className="fas fa-user-check metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0 <span>USDT</span>
+            {formatAmount(dashboardSummary?.direct_referralX3)} <span>USDT</span>
             </div>
           </div>
           <div className="metric-card program-card">
@@ -328,7 +451,7 @@ const Dashboard = () => {
               <i className="fas fa-project-diagram metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0 <span>USDT</span>
+              {formatAmount(dashboardSummary?.level_incomeX3)} <span>USDT</span>
             </div>
           </div>
           <div className="metric-card program-card subsection-title-card">
@@ -340,106 +463,27 @@ const Dashboard = () => {
               <i className="fas fa-crown metric-icon-bg" />
             </div>
             <div className="metric-value">
-              0 <span>USDT</span>
+              {formatAmount(dashboardSummary?.royalty)} <span>USDT</span>
             </div>
           </div>
         </div>
-        <div className="x2-section-container">
+        <div className="x2-section-container animate__animated animate__fadeInUp">
           <h2 className="x2-section-title">The Rich Crowd X2</h2>
           <div className="x2-grid">
-            <div className="x2-card status-next">
-              <span className="x2-bg-number">1</span>
-              <span className="x2-level-badge">Slot 1</span>
-              <div className="x2-price">$35</div>
-              <div className="x2-label">Upgrade Now</div>
-              <button className="x2-btn" onClick={undefined}>
-                Activate{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">2</span>
-              <span className="x2-level-badge">Slot 2</span>
-              <div className="x2-price">$40</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">3</span>
-              <span className="x2-level-badge">Slot 3</span>
-              <div className="x2-price">$70</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">4</span>
-              <span className="x2-level-badge">Slot 4</span>
-              <div className="x2-price">$225</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">5</span>
-              <span className="x2-level-badge">Slot 5</span>
-              <div className="x2-price">$675</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">6</span>
-              <span className="x2-level-badge">Slot 6</span>
-              <div className="x2-price">$1,250</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">7</span>
-              <span className="x2-level-badge">Slot 7</span>
-              <div className="x2-price">$2,000</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">8</span>
-              <span className="x2-level-badge">Slot 8</span>
-              <div className="x2-price">$5,000</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">9</span>
-              <span className="x2-level-badge">Slot 9</span>
-              <div className="x2-price">$8,000</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
-            <div className="x2-card status-locked">
-              <span className="x2-bg-number">10</span>
-              <span className="x2-level-badge">Slot 10</span>
-              <div className="x2-price">$12,000</div>
-              <div className="x2-label">Locked</div>
-              <button className="x2-btn" disabled>
-                <i className="fas fa-lock" /> Locked{" "}
-              </button>
-            </div>
+            {userPackages.map((slot, index) => (
+              <div key={`${slot.plan}-${slot.price}-${index}`} className={`x2-card ${getSlotCardClass(slot.status)}`}>
+                <span className="x2-bg-number">{index + 1}</span>
+                <span className="x2-level-badge">Slot {index + 1}</span>
+                <div className="x2-price">${Number(slot.price ?? 0).toLocaleString()}</div>
+                <div className="x2-label">{getSlotLabel(slot.status)}</div>
+                <button className="x2-btn" disabled={slot.status !== 2}>
+                  {slot.status === 0 && <i className="fas fa-lock" />} {getSlotButton(slot.status)}
+                </button>
+              </div>
+            ))}
           </div>
         </div>
-        <div className="x3-promo-container">
+        <div className="x3-promo-container animate__animated animate__fadeInUp">
           <div className="x3-promo-card">
             <div className="x3-top-row">
               <div className="x3-text-content">
@@ -465,11 +509,11 @@ const Dashboard = () => {
             <div className="x3-stats-bar">
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total Staked</span>
-                <span className="x3-stat-value">0.00</span>
+                <span className="x3-stat-value">{formatAmount(dashboardSummary?.totalStaked)}</span>
               </div>
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total Compound</span>
-                <span className="x3-stat-value">0.00</span>
+                <span className="x3-stat-value">{formatAmount(dashboardSummary?.totalCompound)}</span>
               </div>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { type TypedUseSelectorHook } from 'react-redux';
 import { apiSlice } from '../../slices/apis/app.api';
 
 import { authReducer } from '../../slices/reducers/auth.reducer';
+import { dashboardReducer } from '../../slices/reducers/dashboard.reducer';
 
 import { persistReducer, persistStore } from 'redux-persist';
 
@@ -22,6 +23,7 @@ const persistConfig = {
 
 const reducer = combineReducers({
   auth: authReducer,
+  dashboard: dashboardReducer,
 
   [apiSlice.reducerPath]: apiSlice.reducer,
 });
