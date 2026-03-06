@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 import { Loader } from "../assets/Images/image";
 import PublicLayout from "../layouts/PublicLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
+import PreviewProtectedRoute from "../features/auth/components/PreviewProtectedRoute";
 
 const Home = lazy(() => import("../Pages/Home"));
 const Login = lazy(() => import("../Pages/Login"));
@@ -49,24 +50,103 @@ const AppRoutes = () => {
             <Route element={<PublicLayout />}>
               <Route index element={<Home />} />
               <Route path="login" element={<Login />} />
+              <Route path="sign-in" element={<Login />} />
               <Route path="register" element={<Register />} />
+              <Route path="sign-up" element={<Register />} />
             </Route>
             <Route  element={<DashboardLayout />}>
               <Route path="dashboard" element={<Dashboard />} />
-              <Route path="x3-staking" element={<X3Staking />} />
-              <Route path="auto-compounding" element={<AutoCompounding />} />
-              <Route path="profile" element={<Profile />} />
+              <Route
+                path="x3-staking"
+                element={
+                  <PreviewProtectedRoute>
+                    <X3Staking />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="auto-compounding"
+                element={
+                  <PreviewProtectedRoute>
+                    <AutoCompounding />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="profile"
+                element={
+                  <PreviewProtectedRoute>
+                    <Profile />
+                  </PreviewProtectedRoute>
+                }
+              />
               <Route path="mytree" element={<Mytree />} />
               <Route path="directs" element={<Directs />} />
               <Route path="downlines" element={<Downlines />} />
-              <Route path="x2-deposit" element={<X2Deposit />} />
-              <Route path="x2-deposit-history" element={<X2DepositHistory />} />
-              <Route path="holding-history" element={<HoldingHistory />} />
-              <Route path="activate-upgrade-history" element={<UpgradeActivations />} />
-              <Route path="x3-deposit" element={<X3Deposit />} />
-              <Route path="x3-deposit-history" element={<X3DepositHistory />} />
-              <Route path="x3-staking-history" element={<X3StakingHistory />} />
-              <Route path="auto-compounding-history" element={<X3CompoundingHistory />} />
+              <Route
+                path="x2-deposit"
+                element={
+                  <PreviewProtectedRoute>
+                    <X2Deposit />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="x2-deposit-history"
+                element={
+                  <PreviewProtectedRoute>
+                    <X2DepositHistory />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="holding-history"
+                element={
+                  <PreviewProtectedRoute>
+                    <HoldingHistory />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="activate-upgrade-history"
+                element={
+                  <PreviewProtectedRoute>
+                    <UpgradeActivations />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="x3-deposit"
+                element={
+                  <PreviewProtectedRoute>
+                    <X3Deposit />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="x3-deposit-history"
+                element={
+                  <PreviewProtectedRoute>
+                    <X3DepositHistory />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="x3-staking-history"
+                element={
+                  <PreviewProtectedRoute>
+                    <X3StakingHistory />
+                  </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="auto-compounding-history"
+                element={
+                  <PreviewProtectedRoute>
+                    <X3CompoundingHistory />
+                  </PreviewProtectedRoute>
+                }
+              />
               <Route path="income-x2">
                 <Route path="direct-income" element={<X2DirectIncome />} />
                 <Route path="hybrid-level-income" element={<HybridLevelIncome />} />

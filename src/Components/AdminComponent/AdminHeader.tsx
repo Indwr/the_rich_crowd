@@ -1,9 +1,10 @@
 
 interface AdminHeaderProps {
   toggleSidebar: () => void;
+  onLogout: () => void;
 }
 
-const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
+const AdminHeader = ({ toggleSidebar, onLogout }: AdminHeaderProps) => {
   return (
     <>
       <header className="dashboard-header">
@@ -20,7 +21,7 @@ const AdminHeader = ({ toggleSidebar }: AdminHeaderProps) => {
         <button
           type="button"
           className="btn-logout"
-          onClick={undefined}
+          onClick={onLogout}
         >
           <i className="fas fa-sign-out-alt" />
           <span className="logout-text">Logout</span>

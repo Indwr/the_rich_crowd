@@ -1,7 +1,28 @@
-import { Link } from "react-router-dom";
+import { type FormEvent, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 import { Logo } from "../../assets/Images/image";
+import { useAuth } from "../../features/auth/hooks/useAuth";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const { authenticatePreview, isAuthenticating } = useAuth();
+  const [previewId, setPreviewId] = useState("");
+
+  const handlePreviewLogin = async (event: FormEvent) => {
+    event.preventDefault();
+    const userId = previewId.trim();
+    if (!userId) return;
+
+    try {
+      await authenticatePreview(userId);
+      toast.success("Preview mode enabled.");
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast.error(error?.message ?? "Failed to start preview mode.");
+    }
+  };
+
   return (
     <>
       <div className="dashboard-container">
@@ -65,25 +86,18 @@ const Dashboard = () => {
                   <i className="fas fa-copy" onClick={undefined} />
                 </div>
               </div>
-              <form
-                action="https://therichcrowd.live/auth/loginByUserId"
-                method="post"
-                className="preview-group"
-              >
-                <input
-                  type="hidden"
-                  name="csrf_test_name"
-                  defaultValue="b9168aae19b16f0ceed1a4b89cbb9497"
-                />{" "}
+              <form className="preview-group" onSubmit={handlePreviewLogin}>
                 <input
                   type="text"
                   name="userid"
                   className="preview-input"
                   placeholder="Preview ID..."
                   required
+                  value={previewId}
+                  onChange={(event) => setPreviewId(event.target.value)}
                 />
-                <button type="submit" className="go-btn">
-                  GO
+                <button type="submit" className="go-btn" disabled={isAuthenticating}>
+                  {isAuthenticating ? "Loading..." : "GO"}
                 </button>
               </form>
             </div>

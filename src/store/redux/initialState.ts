@@ -4,6 +4,8 @@ export const initialState: IRootState = {
     email: '',
     role: '',
     token: '',
+    walletAddress: '',
+    loginMode: 'normal',
   },
 };
 
@@ -12,6 +14,8 @@ export interface IUserData {
   email: string;
   role: string;
   token: string;
+  walletAddress: string;
+  loginMode: 'normal' | 'preview';
 }
 
 interface IRootState {

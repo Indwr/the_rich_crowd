@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink, useLocation, Link } from "react-router-dom";
 import { Logo } from "../../assets/Images/image";
+import { useAppSelector } from "../../store/redux";
 
 interface AdminSidebarProps {
   sidebarActive: boolean;
@@ -11,6 +12,8 @@ const AdminSidebar = ({
   sidebarActive,
   setSidebarActive,
 }: AdminSidebarProps) => {
+  const loginMode = useAppSelector((state) => state.auth.loginMode);
+  const isPreview = loginMode === "preview";
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
 
@@ -91,15 +94,17 @@ const AdminSidebar = ({
         </NavLink>
 
         {/* Profile */}
-        <NavLink
-          to="/profile"
-          className={({ isActive }) =>
-            isActive ? "nav-item active" : "nav-item"
-          }
-        >
-          <i className="fas fa-user" />
-          <span>Profile</span>
-        </NavLink>
+        {!isPreview && (
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <i className="fas fa-user" />
+            <span>Profile</span>
+          </NavLink>
+        )}
 
         {/* My Team */}
         <div
@@ -134,6 +139,7 @@ const AdminSidebar = ({
         </div>
 
         {/* X2 Deposit */}
+        {!isPreview && (
         <div
           className={`nav-dropdown ${
             openDropdown === "x2" ? "dropdown-open active" : ""
@@ -167,8 +173,10 @@ const AdminSidebar = ({
             </NavLink>
           </div>
         </div>
+        )}
 
         {/* X3 Deposit */}
+        {!isPreview && (
         <div
           className={`nav-dropdown ${
             openDropdown === "x3" ? "dropdown-open active" : ""
@@ -202,6 +210,7 @@ const AdminSidebar = ({
             </NavLink>
           </div>
         </div>
+        )}
 
         {/* Income X2 */}
         <div
@@ -289,6 +298,13 @@ const AdminSidebar = ({
           <i className="fas fa-gift" />
           <span>Bonanza Business</span>
         </NavLink>
+
+        {isPreview && (
+          <div className="nav-item" style={{ opacity: 0.7 }}>
+            <i className="fas fa-eye" />
+            <span>Preview Mode Active</span>
+          </div>
+        )}
 
       </div>
     </nav>

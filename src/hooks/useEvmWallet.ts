@@ -5,6 +5,7 @@ type WalletState = {
   address: string | null;
   chainId: string | null;
   isConnecting: boolean;
+  isSigning: boolean;
   error: string | null;
 };
 
@@ -13,6 +14,7 @@ export function useEvmWallet() {
     address: null,
     chainId: null,
     isConnecting: false,
+    isSigning: false,
     error: null,
   });
 
@@ -26,7 +28,7 @@ export function useEvmWallet() {
         ...s,
         error: 'No EVM wallet found. Install MetaMask or a compatible wallet.',
       }));
-      return;
+      return null;
     }
     try {
       setState((s) => ({ ...s, isConnecting: true, error: null }));
@@ -39,18 +41,52 @@ export function useEvmWallet() {
       const chainIdHex: string = await eth.request({ method: 'eth_chainId' });
       const chainId = parseInt(chainIdHex, 16).toString();
 
-      setState({ address, chainId, isConnecting: false, error: null });
+      setState((s) => ({ ...s, address, chainId, isConnecting: false, error: null }));
+      return address;
     } catch (err: any) {
       setState((s) => ({
         ...s,
         isConnecting: false,
         error: err?.message ?? 'Failed to connect wallet.',
       }));
+      return null;
     }
   }, [hasProvider]);
 
+  const signMessage = useCallback(
+    async (message: string) => {
+      if (!hasProvider || !state.address) {
+        setState((s) => ({
+          ...s,
+          error: 'Connect wallet before signing the message.',
+        }));
+        return null;
+      }
+
+      try {
+        setState((s) => ({ ...s, isSigning: true, error: null }));
+        const eth = (window as any).ethereum as InjectedProvider;
+        const signature: string = await eth.request({
+          method: 'personal_sign',
+          params: [message, state.address],
+        });
+
+        setState((s) => ({ ...s, isSigning: false }));
+        return signature;
+      } catch (err: any) {
+        setState((s) => ({
+          ...s,
+          isSigning: false,
+          error: err?.message ?? 'Failed to sign wallet message.',
+        }));
+        return null;
+      }
+    },
+    [hasProvider, state.address]
+  );
+
   const disconnect = useCallback(() => {
-    setState({ address: null, chainId: null, isConnecting: false, error: null });
+    setState({ address: null, chainId: null, isConnecting: false, isSigning: false, error: null });
   }, []);
 
   useEffect(() => {
@@ -65,7 +101,7 @@ export function useEvmWallet() {
       setState((s) => ({ ...s, chainId: parseInt(_chainId, 16).toString() }));
     };
     const handleDisconnect = () => {
-      setState({ address: null, chainId: null, isConnecting: false, error: null });
+      setState({ address: null, chainId: null, isConnecting: false, isSigning: false, error: null });
     };
 
     eth.on?.('accountsChanged', handleAccountsChanged);
@@ -83,6 +119,7 @@ export function useEvmWallet() {
     ...state,
     hasProvider,
     connect,
+    signMessage,
     disconnect,
   };
 }
