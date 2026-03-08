@@ -1,0 +1,153 @@
+import { type FormEvent } from "react";
+import { useProfile } from "../hooks/useProfile";
+
+const ProfileForm = () => {
+  const {
+    identity,
+    form,
+    onFieldChange,
+    submitProfile,
+    isLoading,
+    isUpdating,
+    error,
+  } = useProfile();
+
+  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await submitProfile();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="content-wrapper">
+        <div className="profile-card">
+          <div className="card-body">Loading profile...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="content-wrapper">
+        <div className="profile-card">
+          <div className="card-body">Failed to load profile: {error}</div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="content-wrapper">
+      <div className="profile-card">
+        <div className="card-header">
+          <div className="profile-avatar">
+            <i className="fas fa-user" />
+          </div>
+          <div className="header-text">
+            <h2>Profile Settings</h2>
+            <p>Manage your personal information</p>
+          </div>
+        </div>
+        <div className="card-body">
+          <form id="profileForm" onSubmit={onSubmit}>
+            <div className="form-grid">
+              <div className="form-group">
+                <label className="form-label">Member ID</label>
+                <input type="text" className="custom-input" value={identity.user_id} readOnly />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Sponsor ID</label>
+                <input type="text" className="custom-input" value={identity.sponser_id} readOnly />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Wallet Address (BEP20)</label>
+                <input type="text" className="custom-input" value={identity.eth_address} readOnly />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input
+                  type="email"
+                  className="custom-input"
+                  value={form.email}
+                  onChange={(e) => onFieldChange("email", e.target.value)}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">First Name</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.first_name}
+                  onChange={(e) => onFieldChange("first_name", e.target.value)}
+                  placeholder="Enter First Name"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Last Name</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.last_name}
+                  onChange={(e) => onFieldChange("last_name", e.target.value)}
+                  placeholder="Enter Last Name"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone Number</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.phone}
+                  onChange={(e) => onFieldChange("phone", e.target.value)}
+                  placeholder="Enter Phone Number"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Date of Birth</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.dob}
+                  onChange={(e) => onFieldChange("dob", e.target.value)}
+                  placeholder="DD-MM-YYYY"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">City</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.city}
+                  onChange={(e) => onFieldChange("city", e.target.value)}
+                  placeholder="Enter City"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">State</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.state}
+                  onChange={(e) => onFieldChange("state", e.target.value)}
+                  placeholder="Enter State"
+                />
+              </div>
+            </div>
+            <div className="action-row">
+              <button type="submit" id="btnSave" className="btn-update" disabled={isUpdating}>
+                {isUpdating ? "Updating..." : "Update Profile"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProfileForm;
+
