@@ -9,6 +9,7 @@ import { apiSlice } from '../../slices/apis/app.api';
 import { authReducer } from '../../slices/reducers/auth.reducer';
 import { dashboardReducer } from '../../slices/reducers/dashboard.reducer';
 import { profileReducer } from '../../slices/reducers/profile.reducer';
+import { treeReducer } from '../../slices/reducers/tree.reducer';
 
 import { persistReducer, persistStore } from 'redux-persist';
 
@@ -26,6 +27,7 @@ const reducer = combineReducers({
   auth: authReducer,
   dashboard: dashboardReducer,
   profile: profileReducer,
+  tree: treeReducer,
 
   [apiSlice.reducerPath]: apiSlice.reducer,
 });
