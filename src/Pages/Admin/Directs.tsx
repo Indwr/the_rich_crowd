@@ -1,33 +1,109 @@
 import AdminTable from "../../Components/AdminComponent/AdminTable";
+import { useState } from "react";
+import TableSearchBar from "../../Components/AdminComponent/TableSearchBar";
+import { useDirects } from "src/features/team/hooks/useDirects";
 
 const Directs = () => {
+  const {
+    directs,
+    totalCount,
+    selectedUserId,
+    searchType,
+    searchText,
+    currentPage,
+    pageSize,
+    isLoading,
+    error,
+    viewByUserId,
+    applySearch,
+    setCurrentPage,
+    resetToRoot,
+  } = useDirects();
+  const [searchInput, setSearchInput] = useState(searchText);
+  const [searchTypeInput, setSearchTypeInput] = useState<"userId" | "wallet">(searchType);
+
   const columns = [
     { header: "#", accessor: "id" },
     { header: "Member ID", accessor: "memberId" },
     { header: "Wallet Address", accessor: "wallet" },
-    { header: "Upgrade", accessor: "upgrade" },
-    { header: "Status", accessor: "status" },
-    { header: "Join Date", accessor: "joinDate" },
+    { header: "Directs", accessor: "directs" },
+    { header: "Total Package", accessor: "totalPackage" },
+    { header: "Action", accessor: "action" },
+  ];
+  const searchOptions = [
+    { value: "userId", label: "User ID" },
+    { value: "wallet", label: "Wallet" },
   ];
 
-  const data = [
-    {
-      id: 1,
-      memberId: "3869766",
-      wallet: "0x81f7...77C7",
-      upgrade: "Slot 1",
-      status: "Active",
-      joinDate: "12-02-2025",
-    },
-  ];
+  const data = directs.map((item, index) => ({
+    id: index + 1,
+    memberId: item.user_id,
+    wallet: item.eth_address,
+    directs: item.directs,
+    totalPackage: item.total_package,
+    action: (
+      <button
+        type="button"
+        className="btn-update"
+        style={{ padding: "6px 12px", fontSize: "0.8rem" }}
+        onClick={() => viewByUserId(item.user_id)}
+      >
+        View
+      </button>
+    ),
+  }));
+
   return (
     <>
-    <div className="dashboard-container">
-      <div className="glass-panel">
-        <h2 className="table-heading">My Direct Referrals</h2>
-        <AdminTable columns={columns} data={data}  />
+      <div className="dashboard-container">
+        <div className="glass-panel">
+          <h2 className="table-heading">My Direct Referrals</h2>
+          <TableSearchBar
+            searchType={searchTypeInput}
+            searchValue={searchInput}
+            searchOptions={searchOptions}
+            onSearchTypeChange={(value) => setSearchTypeInput(value as "userId" | "wallet")}
+            onSearchValueChange={setSearchInput}
+            onSearch={() => applySearch(searchTypeInput, searchInput.trim())}
+            onClear={() => {
+              setSearchInput("");
+              setSearchTypeInput("userId");
+              applySearch("userId", "");
+            }}
+          />
+          <div style={{ marginBottom: 12, color: "#ccc", fontSize: "0.9rem" }}>
+            Active userId param: {selectedUserId || "(empty)"}
+            {selectedUserId && (
+              <button
+                type="button"
+                onClick={resetToRoot}
+                style={{ marginLeft: 10, cursor: "pointer" }}
+              >
+                Reset
+              </button>
+            )}
+          </div>
+        
+          <div style={{ marginBottom: 12, color: "#ccc", fontSize: "0.9rem" }}>
+            Total Count: {totalCount}
+          </div>
+          <AdminTable
+            columns={columns}
+            data={data}
+            isLoading={isLoading && data.length === 0}
+            error={error}
+            emptyMessage="No direct referrals found."
+            pagination={{
+              enabled: true,
+              pageSize,
+              totalCount,
+              currentPage,
+              serverSide: true,
+              onPageChange: setCurrentPage,
+            }}
+          />
+        </div>
       </div>
-    </div>
     </>
   );
 };

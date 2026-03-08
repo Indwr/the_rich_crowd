@@ -28,7 +28,8 @@ const AdminSidebar = ({
     if (
       path.startsWith("/mytree") ||
       path.startsWith("/directs") ||
-      path.startsWith("/downlines")
+      path.startsWith("/generation") ||
+      path.startsWith("/placement-generation")
     ) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setOpenDropdown("team");
@@ -132,8 +133,11 @@ const AdminSidebar = ({
             <NavLink to="/directs" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>My Directs</span>
             </NavLink>
-            <NavLink to="/downlines" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-              <span>Total Team</span>
+            <NavLink to="/generation" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Generation</span>
+            </NavLink>
+            <NavLink to="/placement-generation" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Placement Generation</span>
             </NavLink>
           </div>
         </div>

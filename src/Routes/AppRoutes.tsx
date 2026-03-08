@@ -14,7 +14,9 @@ const AutoCompounding = lazy(() => import("../Pages/Admin/AutoCompounding"));
 const Profile = lazy(() => import("../Pages/Admin/Profile"));
 const Mytree = lazy(() => import("../Pages/Admin/Mytree"));
 const Directs = lazy(() => import("../Pages/Admin/Directs"));
-const Downlines = lazy(() => import("../Pages/Admin/Downlines"));
+const Generation = lazy(() => import("../Pages/Admin/Generation"));
+const PlacementGeneration = lazy(() => import("../Pages/Admin/PlacementGeneration"));
+const GenerationLevelDetails = lazy(() => import("../Pages/Admin/GenerationLevelDetails"));
 const X2Deposit = lazy(() => import("../Pages/Admin/X2Deposit"));
 const X3Deposit = lazy(() => import("../Pages/Admin/X3Deposit"));
 const X2DepositHistory = lazy(() => import("../Pages/Admin/X2DepositHistory"));
@@ -82,7 +84,9 @@ const AppRoutes = () => {
               />
               <Route path="mytree" element={<Mytree />} />
               <Route path="directs" element={<Directs />} />
-              <Route path="downlines" element={<Downlines />} />
+              <Route path="generation" element={<Generation />} />
+              <Route path="placement-generation" element={<PlacementGeneration />} />
+              <Route path="generation/:level" element={<GenerationLevelDetails />} />
               <Route
                 path="x2-deposit"
                 element={

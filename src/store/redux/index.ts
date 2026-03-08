@@ -10,6 +10,8 @@ import { authReducer } from '../../slices/reducers/auth.reducer';
 import { dashboardReducer } from '../../slices/reducers/dashboard.reducer';
 import { profileReducer } from '../../slices/reducers/profile.reducer';
 import { treeReducer } from '../../slices/reducers/tree.reducer';
+import { directsReducer } from '../../slices/reducers/directs.reducer';
+import { generationReducer } from '../../slices/reducers/generation.reducer';
 
 import { persistReducer, persistStore } from 'redux-persist';
 
@@ -28,6 +30,8 @@ const reducer = combineReducers({
   dashboard: dashboardReducer,
   profile: profileReducer,
   tree: treeReducer,
+  directs: directsReducer,
+  generation: generationReducer,
 
   [apiSlice.reducerPath]: apiSlice.reducer,
 });
