@@ -1,41 +1,12 @@
-import AdminTable from "../../Components/AdminComponent/AdminTable";
+import IncomeHistoryTable from "src/features/income/components/IncomeHistoryTable";
 
-const RoyaltyIncome = () => {
-  const columns = [
-    { header: "Date & Time", accessor: "dateTime" },
-    { header: "From User", accessor: "fromUser" },
-    { header: "Wallet", accessor: "wallet" },
-    { header: "Amount", accessor: "amount" },
-    { header: "Description", accessor: "description" },
-  ];
+const RoyaltyIncome = () => (
+  <IncomeHistoryTable
+    title="Royalty Income"
+    iconClassName="fas fa-crown"
+    incomeId="X2"
+    incomeType="royalty_for_user"
+  />
+);
 
-  const data = [
-    {
-      dateTime: "12-06-2025",
-      fromUser: "1",
-      wallet: "deposit",
-      amount: "USD 452",
-      description: "Lorem ipsum ",
-    },
-  ];
-  return (
-    <>
-      <div className="content-wrapper">
-        <div className="history-card">
-            <div className="history-header">
-            <h3 className="history-title">
-              <i className="fas fa-crown" />    Royalty Income
-            </h3>
-            <div>
-                <span className="total-pill">
-                    <i className="fas fa-coins"></i>
-                    Total: $0.00                </span>
-            </div>
-          </div>
-          <AdminTable columns={columns} data={data} />
-        </div>
-      </div>
-    </>
-  );
-};
 export default RoyaltyIncome;
