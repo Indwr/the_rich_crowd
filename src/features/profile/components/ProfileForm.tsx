@@ -96,6 +96,16 @@ const ProfileForm = () => {
                 />
               </div>
               <div className="form-group">
+                <label className="form-label">Country Code</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.country_code}
+                  onChange={(e) => onFieldChange("country_code", e.target.value)}
+                  placeholder="Enter Country Code (e.g. +91)"
+                />
+              </div>
+              <div className="form-group">
                 <label className="form-label">Phone Number</label>
                 <input
                   type="text"
@@ -117,6 +127,16 @@ const ProfileForm = () => {
                 />
               </div>
               <div className="form-group">
+                <label className="form-label">Country</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.country}
+                  onChange={(e) => onFieldChange("country", e.target.value)}
+                  placeholder="Enter Country"
+                />
+              </div>
+              <div className="form-group">
                 <label className="form-label">City</label>
                 <input
                   type="text"
@@ -134,6 +154,26 @@ const ProfileForm = () => {
                   value={form.state}
                   onChange={(e) => onFieldChange("state", e.target.value)}
                   placeholder="Enter State"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Pin Code</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.pin_code}
+                  onChange={(e) => onFieldChange("pin_code", e.target.value)}
+                  placeholder="Enter Pin Code"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">District</label>
+                <input
+                  type="text"
+                  className="custom-input"
+                  value={form.district}
+                  onChange={(e) => onFieldChange("district", e.target.value)}
+                  placeholder="Enter District"
                 />
               </div>
             </div>

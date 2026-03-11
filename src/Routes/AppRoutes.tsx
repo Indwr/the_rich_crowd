@@ -4,6 +4,7 @@ import { Loader } from "../assets/Images/image";
 import PublicLayout from "../layouts/PublicLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 import PreviewProtectedRoute from "../features/auth/components/PreviewProtectedRoute";
+import DashboardSummary from "src/Pages/Admin/DashboardSummary";
 
 const Home = lazy(() => import("../Pages/Home"));
 const Login = lazy(() => import("../Pages/Login"));
@@ -80,6 +81,12 @@ const AppRoutes = () => {
                   <PreviewProtectedRoute>
                     <Profile />
                   </PreviewProtectedRoute>
+                }
+              />
+              <Route
+                path="dashboard-summary"
+                element={
+                    <DashboardSummary />
                 }
               />
               <Route path="mytree" element={<Mytree />} />

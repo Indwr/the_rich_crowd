@@ -42,12 +42,24 @@ export const useProfile = () => {
     },
   });
 
-  const onFieldChange = (field: keyof UpdateProfilePayload, value: string) => {
+  const onFieldChange = (field: keyof typeof form, value: string) => {
     dispatch(setProfileField({ field, value }));
   };
 
   const submitProfile = async () => {
-    await updateMutation.mutateAsync(form);
+    await updateMutation.mutateAsync({
+      first_name: form.first_name,
+      last_name: form.last_name,
+      email: form.email,
+      phone: form.phone,
+      dob: form.dob,
+      city: form.city,
+      state: form.state,
+      country: form.country,
+      country_code: form.country_code,
+      pin_code: form.pin_code,
+      district: form.district,
+    });
   };
 
   return {

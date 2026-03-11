@@ -94,6 +94,19 @@ const AdminSidebar = ({
           <span>Dashboard</span>
         </NavLink>
 
+         {/* Profile */}
+        
+          <NavLink
+            to="/dashboard-summary"
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <i className="fas fa-user" />
+            <span>Dashboard Summary</span>
+          </NavLink>
+        
+
         {/* Profile */}
         {!isPreview && (
           <NavLink

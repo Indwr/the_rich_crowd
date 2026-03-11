@@ -18,7 +18,7 @@ const Dashboard = () => {
   const [previewId, setPreviewId] = useState("");
   const user = dashboardResponse?.data?.user;
   const dashboardSummary = dashboardResponse?.data?.dashboard_summary;
-  const x3Summary = dashboardResponse?.data?.x3_summary;
+  // const x3Summary = dashboardResponse?.data?.x3_summary;
   const walletAddress = user?.wallet_address ?? "0x81f7...77C7";
 
   const formatAmount = (value?: number) => Number(value ?? 0).toFixed(2);
@@ -38,22 +38,22 @@ const Dashboard = () => {
   };
 
   const referralLink = `${import.meta.env.VITE_SITE_URL}register?ref=${user?.user_id ?? ""}`;
-  const totalBusiness =
-  (dashboardSummary?.left_business ?? 0) +
-  (dashboardSummary?.right_business ?? 0);
-  const totalx2Team =
-  (dashboardSummary?.left_team ?? 0) +
-  (dashboardSummary?.right_team ?? 0);
-  const x3StakingBusiness =
-  (x3Summary?.x3_left_business ?? 0) +
-  (x3Summary?.x3_right_business ?? 0);
-  const x3CompoundingBusiness =
-  (x3Summary?.x3_compound_left_business ?? 0) +
-  (x3Summary?.x3_compound_right_business ?? 0);
-  const x3CommonBusiness = Math.min(
-    x3Summary?.x3_left_business ?? 0,
-    x3Summary?.x3_right_business ?? 0,
-  );
+  // const totalBusiness =
+  // (dashboardSummary?.left_business ?? 0) +
+  // (dashboardSummary?.right_business ?? 0);
+  // const totalx2Team =
+  // (dashboardSummary?.left_team ?? 0) +
+  // (dashboardSummary?.right_team ?? 0);
+  // const x3StakingBusiness =
+  // (x3Summary?.x3_left_business ?? 0) +
+  // (x3Summary?.x3_right_business ?? 0);
+  // const x3CompoundingBusiness =
+  // (x3Summary?.x3_compound_left_business ?? 0) +
+  // (x3Summary?.x3_compound_right_business ?? 0);
+  // const x3CommonBusiness = Math.min(
+  //   x3Summary?.x3_left_business ?? 0,
+  //   x3Summary?.x3_right_business ?? 0,
+  // );
   const showSkeleton = isDashboardLoading && !dashboardResponse;
 
   const getSlotCardClass = (status: number) => {
@@ -151,7 +151,10 @@ const Dashboard = () => {
                   User ID <span>{user?.user_id ?? "--"}</span>
                 </h3>
                 <p>
-                  Sponsor by ID <span>{user?.sponser_id ?? "--"}</span>
+                  Sponsor ID <span>{user?.sponser_id ?? "--"}</span>
+                </p>
+                <p>
+                Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
                 </p>
               </div>
             </div>
@@ -265,7 +268,7 @@ const Dashboard = () => {
             </div>
             <div className="metric-value">{user?.directs ?? 0}</div>
           </div>
-          <div className="grid-section-title">
+          {/* <div className="grid-section-title">
             <i className="fas fa-briefcase" /> X2 Business Overview
           </div>
           <div className="metric-card">
@@ -296,6 +299,13 @@ const Dashboard = () => {
           </div>
           <div className="metric-card">
             <div className="metric-header">
+              <div className="metric-title">X2 Total Team</div>
+              <i className="fas fa-user-friends metric-icon-bg" />
+            </div>
+            <div className="metric-value">{totalx2Team}</div>
+          </div> */}
+          {/* <div className="metric-card">
+            <div className="metric-header">
               <div className="metric-title">X2 L/R Team</div>
               <i className="fas fa-network-wired metric-icon-bg" />
             </div>
@@ -310,15 +320,9 @@ const Dashboard = () => {
                 <span className="split-label">Right Team</span>
               </div>
             </div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-header">
-              <div className="metric-title">X2 Total Team</div>
-              <i className="fas fa-user-friends metric-icon-bg" />
-            </div>
-            <div className="metric-value">{totalx2Team}</div>
-          </div>
-          <div className="grid-section-title">
+          </div> */}
+         
+          {/* <div className="grid-section-title">
             <i className="fas fa-coins" /> X3 Staking Business
           </div>
           <div className="metric-card">
@@ -346,19 +350,13 @@ const Dashboard = () => {
                 <span className="split-label">Right</span>
               </div>
             </div>
-          </div>
-          <div className="metric-card">
-            <div className="metric-header">
-              <div className="metric-title">X3 Common Biz</div>
-              <i className="fas fa-globe metric-icon-bg" />
-            </div>
-            <div className="metric-value">
-              {formatAmount(x3CommonBusiness)} <span>USDT</span>
-            </div>
-          </div>
-          <div className="grid-section-title">
+          </div> */}
+          
+          {/* <div className="grid-section-title">
             <i className="fas fa-sync" /> X3 Compounding Business
           </div>
+
+          
           <div className="metric-card">
             <div className="metric-header">
               <div className="metric-title">X3 Compounding</div>
@@ -368,6 +366,7 @@ const Dashboard = () => {
               {formatAmount(x3CompoundingBusiness)} <span>USDT</span>
             </div>
           </div>
+          
           <div className="metric-card">
             <div className="metric-header">
               <div className="metric-title">X3 Compounding L/R</div>
@@ -385,8 +384,37 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+          <div className="grid-section-title">
+            <i className="fas fa-sync" /> X3 Combined Business
+          </div>
+          <div className="metric-card">
+            <div className="metric-header">
+              <div className="metric-title">X3 Total Business</div>
+              <i className="fas fa-globe metric-icon-bg" />
+            </div>
+            <div className="metric-value">
+              {formatAmount(x3CommonBusiness)} <span>USDT</span>
+            </div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-header">
+              <div className="metric-title">X3 Total L/R</div>
+              <i className="fas fa-random metric-icon-bg" />
+            </div>
+            <div className="split-container">
+              <div className="split-item">
+                <div className="split-value">{formatAmount(x3Summary?.x3_compound_left_business)}</div>
+                <span className="split-label">Left</span>
+              </div>
+              <div className="split-divider" />
+              <div className="split-item right">
+                <div className="split-value">{formatAmount(x3Summary?.x3_compound_right_business)}</div>
+                <span className="split-label">Right</span>
+              </div>
+            </div>
+          </div> */}
         </div>
-        <div className="program-section-header">
+        {/* <div className="program-section-header">
           <i className="fas fa-th-large" />
           <span>The Rich Crowd Programs</span>
         </div>
@@ -466,7 +494,7 @@ const Dashboard = () => {
               {formatAmount(dashboardSummary?.royalty)} <span>USDT</span>
             </div>
           </div>
-        </div>
+        </div> */}
         <div className="x2-section-container animate__animated animate__fadeInUp">
           <h2 className="x2-section-title">The Rich Crowd X2</h2>
           <div className="x2-grid">

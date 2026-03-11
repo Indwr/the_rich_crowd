@@ -13,6 +13,10 @@ export interface UserProfileData {
   dob: string;
   city: string;
   state: string;
+  country: string;
+  country_code: string;
+  pin_code: string;
+  district: string;
 }
 
 export interface UserProfileResponse {
@@ -30,6 +34,10 @@ export interface UpdateProfilePayload {
   dob: string;
   city: string;
   state: string;
+  country: string;
+  country_code: string;
+  pin_code: string;
+  district: string;
 }
 
 const PROFILE_ENDPOINT = "user/profile";

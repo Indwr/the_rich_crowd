@@ -10,6 +10,7 @@ export interface DashboardUser {
   directs: number;
   package_amount: number;
   total_package: number;
+  parent_id: number;
 }
 
 export interface DashboardSummary {

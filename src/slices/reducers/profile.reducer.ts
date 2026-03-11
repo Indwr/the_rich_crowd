@@ -10,6 +10,10 @@ interface ProfileFormState {
   dob: string;
   city: string;
   state: string;
+  country: string;
+  country_code: string;
+  pin_code: string;
+  district: string;
 }
 
 interface ProfileIdentityState {
@@ -37,6 +41,10 @@ const initialState: ProfileState = {
     dob: "",
     city: "",
     state: "",
+    country: "",
+    country_code: "",
+    pin_code: "",
+    district: "",
   },
 };
 
@@ -59,6 +67,10 @@ const profileSlice = createSlice({
         dob: payload.dob ?? "",
         city: payload.city ?? "",
         state: payload.state ?? "",
+        country: payload.country ?? "",
+        country_code: payload.country_code ?? "",
+        pin_code: payload.pin_code ?? "",
+        district: payload.district ?? "",
       };
     },
     setProfileField: (
