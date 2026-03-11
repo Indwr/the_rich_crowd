@@ -57,7 +57,7 @@ export const useProfile = () => {
       state: form.state,
       country: form.country,
       country_code: form.country_code,
-      pin_code: form.pin_code,
+      pin_code: String(form.pin_code ?? ""),
       district: form.district,
     });
   };

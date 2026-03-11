@@ -31,7 +31,7 @@ const Dashboard = () => {
     try {
       await authenticatePreview(userId);
       toast.success("Preview mode enabled.");
-      navigate("/dashboard");
+      window.location.reload();
     } catch (error: any) {
       toast.error(error?.message ?? "Failed to start preview mode.");
     }
