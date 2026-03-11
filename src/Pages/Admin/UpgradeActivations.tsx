@@ -1,30 +1,29 @@
 import AdminTable from "../../Components/AdminComponent/AdminTable";
+import { useState } from "react";
+import { useHistoryList } from "src/features/history/hooks/useHistoryList";
 
 const UpgradeActivations = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const { rows, totalCount, isLoading, isFetching, error } = useHistoryList({
+    endpoint: "user/x2/activation/upgrade/history",
+    currentPage,
+    pageSize,
+  });
+
   const columns = [
-    { header: "User ID", accessor: "id" },
-    { header: "Upgrade", accessor: "upgrade" },
-    { header: "Amount Paid", accessor: "amountPaid" },
-    { header: "Status", accessor: "status" },
-    { header: "Date Activated", accessor: "dateActivated" },
+    { header: "#", accessor: "srNo" },
+    { header: "Amount", accessor: "amount" },
+    { header: "Type", accessor: "type" },
+    { header: "Date", accessor: "createdAt" },
   ];
 
-  const data = [
-    {
-      id: 1111,
-      upgrade: "1",
-      amountPaid: "deposit",
-      status: "x2",
-      dateActivated: "2025-12-25 16:19:11",
-    },
-    {
-      id: 1111,
-      upgrade: "1",
-      amountPaid: "deposit",
-      status: "x2",
-      dateActivated: "2025-12-25 16:19:11",
-    },
-  ];
+  const data = rows.map((item, index) => ({
+    srNo: (currentPage - 1) * pageSize + index + 1,
+    amount: item.amount ?? "-",
+    type: item.type ?? "-",
+    createdAt: item.created_at ?? "-",
+  }));
   return (
     <>
       <div className="content-wrapper">
@@ -34,7 +33,21 @@ const UpgradeActivations = () => {
               <i className="fas fa-layer-group"></i> X2 Activate & Upgrade history
             </h3>
           </div>
-          <AdminTable columns={columns} data={data} />
+          <AdminTable
+            columns={columns}
+            data={data}
+            isLoading={isLoading && !isFetching}
+            error={error}
+            emptyMessage="No X2 activation/upgrade history found."
+            pagination={{
+              enabled: true,
+              pageSize,
+              totalCount,
+              currentPage,
+              serverSide: true,
+              onPageChange: setCurrentPage,
+            }}
+          />
         </div>
       </div>
     </>

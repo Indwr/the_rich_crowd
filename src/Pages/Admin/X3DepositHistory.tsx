@@ -1,30 +1,34 @@
 import AdminTable from "../../Components/AdminComponent/AdminTable";
+import { useState } from "react";
+import { useHistoryList } from "src/features/history/hooks/useHistoryList";
 
 const X3DepositHistory = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+  const { rows, totalCount, isLoading, isFetching, error } = useHistoryList({
+    endpoint: "user/x3/deposit/history",
+    currentPage,
+    pageSize,
+  });
+
   const columns = [
-    { header: "User ID", accessor: "id" },
+    { header: "#", accessor: "srNo" },
+    { header: "User ID", accessor: "userId" },
     { header: "Amount", accessor: "amount" },
     { header: "Type", accessor: "type" },
     { header: "Remark", accessor: "remark" },
-    { header: "Date", accessor: "date" },
+    { header: "Date", accessor: "createdAt" },
   ];
 
-  const data = [
-    {
-      id: 1111,
-      amount: "1",
-      type: "deposit",
-      remark: "",
-      date: "2025-12-25 16:19:11",
-    },
-    {
-      id: 1111,
-      amount: "1",
-      type: "deposit",
-      remark: "",
-      date: "2025-12-25 16:19:11",
-    },
-  ];
+  const data = rows.map((item, index) => ({
+    srNo: (currentPage - 1) * pageSize + index + 1,
+    userId: item.user_id ?? "-",
+    amount: item.amount ?? "-",
+    type: item.type ?? "-",
+    remark: item.description ?? item.hash ?? "-",
+    createdAt: item.created_at ?? "-",
+  }));
+
   return (
     <>
       <div className="content-wrapper">
@@ -34,7 +38,21 @@ const X3DepositHistory = () => {
               <i className="fas fa-history" /> X3 Deposit History
             </h3>
           </div>
-          <AdminTable columns={columns} data={data} />
+          <AdminTable
+            columns={columns}
+            data={data}
+            isLoading={isLoading && !isFetching}
+            error={error}
+            emptyMessage="No X3 deposit history found."
+            pagination={{
+              enabled: true,
+              pageSize,
+              totalCount,
+              currentPage,
+              serverSide: true,
+              onPageChange: setCurrentPage,
+            }}
+          />
         </div>
       </div>
     </>
