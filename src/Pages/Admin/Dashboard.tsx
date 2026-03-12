@@ -62,11 +62,6 @@ const Dashboard = () => {
     return "status-locked";
   };
 
-  const getSlotLabel = (status: number) => {
-    if (status === 1) return "Activated";
-    if (status === 2) return "Upgrade Now";
-    return "Locked";
-  };
 
   const getSlotButton = (status: number) => {
     if (status === 1) return "Activated";
