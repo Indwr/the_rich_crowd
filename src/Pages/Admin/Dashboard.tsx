@@ -9,11 +9,17 @@ import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useDashboardData } from "../../features/dashboard/hooks/useDashboardData";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 import { shortenAddress } from "../../utils";
+import MultiColorProgress from "src/Components/AdminComponent/MultiColorProgress";
 
 const Dashboard = () => {
   // const navigate = useNavigate();
   const { authenticatePreview, isAuthenticating } = useAuth();
-  const { dashboardResponse, userPackages, isDashboardLoading, dashboardError } = useDashboardData();
+  const {
+    dashboardResponse,
+    userPackages,
+    isDashboardLoading,
+    dashboardError,
+  } = useDashboardData();
   const { copyText } = useCopyToClipboard();
   const [previewId, setPreviewId] = useState("");
   const user = dashboardResponse?.data?.user;
@@ -62,7 +68,6 @@ const Dashboard = () => {
     return "status-locked";
   };
 
-
   const getSlotButton = (status: number) => {
     if (status === 1) return "Activated";
     if (status === 2) return "Activate";
@@ -70,7 +75,7 @@ const Dashboard = () => {
   };
   const getGreeting = () => {
     const hour = new Date().getHours();
-  
+
     if (hour < 12) {
       return "Good Morning";
     } else if (hour < 17) {
@@ -82,7 +87,11 @@ const Dashboard = () => {
 
   if (showSkeleton) {
     return (
-      <SkeletonTheme baseColor="#1f2937" highlightColor="#374151" borderRadius={12}>
+      <SkeletonTheme
+        baseColor="#1f2937"
+        highlightColor="#374151"
+        borderRadius={12}
+      >
         <div className="dashboard-container animate__animated animate__fadeIn">
           <div className="user-container animate__animated animate__fadeInDown">
             <div className="user-greeting">
@@ -116,7 +125,10 @@ const Dashboard = () => {
             <h2 className="x2-section-title">The Rich Crowd X2</h2>
             <div className="x2-grid">
               {Array.from({ length: 10 }).map((_, index) => (
-                <div key={`slot-skeleton-${index}`} className="x2-card status-locked">
+                <div
+                  key={`slot-skeleton-${index}`}
+                  className="x2-card status-locked"
+                >
                   <Skeleton height={180} borderRadius={16} />
                 </div>
               ))}
@@ -138,7 +150,9 @@ const Dashboard = () => {
       <div className="dashboard-container animate__animated animate__fadeIn">
         <div className="user-container animate__animated animate__fadeInDown">
           <div className="user-greeting">
-            <p id="greetingMessage">{getGreeting()}, {user?.first_name ?? "--"}</p>
+            <p id="greetingMessage">
+              {getGreeting()}, {user?.first_name ?? "--"}
+            </p>
             {isDashboardLoading && <small>Loading dashboard data...</small>}
             {dashboardError && <small>{dashboardError}</small>}
           </div>
@@ -160,7 +174,7 @@ const Dashboard = () => {
                   Sponsor ID <span>{user?.sponser_id ?? "--"}</span>
                 </p>
                 <p>
-                Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
+                  Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
                 </p>
               </div>
             </div>
@@ -180,7 +194,9 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="wallet-pill">
-              <span id="walletAddressDisplay">{shortenAddress(walletAddress)}</span>
+              <span id="walletAddressDisplay">
+                {shortenAddress(walletAddress)}
+              </span>
               <i
                 className="fas fa-copy"
                 onClick={() =>
@@ -220,9 +236,13 @@ const Dashboard = () => {
                   placeholder="Preview ID..."
                   required
                   value={previewId}
-                  onChange={(event) => setPreviewId(event.target.value)}
+                  onChange={event => setPreviewId(event.target.value)}
                 />
-                <button type="submit" className="go-btn" disabled={isAuthenticating}>
+                <button
+                  type="submit"
+                  className="go-btn"
+                  disabled={isAuthenticating}
+                >
                   {isAuthenticating ? "Loading..." : "GO"}
                 </button>
               </form>
@@ -248,26 +268,38 @@ const Dashboard = () => {
             </div>
             <div className="split-container">
               <div className="split-item">
-                <div className="split-value">{formatAmount(dashboardSummary?.holdingWallet)}</div>
+                <div className="split-value">
+                  {formatAmount(dashboardSummary?.holdingWallet)}
+                </div>
                 <span className="split-label">X2 Auto Upgrade</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
-                <div className="split-value">{formatAmount(dashboardSummary?.holdingWalletx3)}</div>
+                <div className="split-value">
+                  {formatAmount(dashboardSummary?.holdingWalletx3)}
+                </div>
                 <span className="split-label">X3 Wallet</span>
               </div>
             </div>
           </div>
-          <div className="metric-card">
+          <div className="metric-card metric-card2 metric-card-earning">
+            <div className="grid-section-title">
+              <i className="fas fa-wallet" /> Earnings
+            </div>
             <div className="metric-header">
               <div className="metric-title">Profits</div>
               <i className="fas fa-chart-line metric-icon-bg" />
             </div>
             <div className="metric-value">
-              {formatAmount(dashboardSummary?.total_income) + formatAmount(dashboardSummary?.total_income_x3)} <span>USDT</span>
+              {formatAmount(dashboardSummary?.total_income) +
+                formatAmount(dashboardSummary?.total_income_x3)}{" "}
+              <span>USDT</span>
             </div>
           </div>
-          <div className="metric-card">
+          <div className="metric-card metric-card2 metric-card-partner">
+            <div className="grid-section-title">
+              <i className="fa-solid fa-users"></i> Partners
+            </div>
             <div className="metric-header">
               <div className="metric-title">Partners</div>
               <i className="fas fa-users metric-icon-bg" />
@@ -327,7 +359,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div> */}
-         
+
           {/* <div className="grid-section-title">
             <i className="fas fa-coins" /> X3 Staking Business
           </div>
@@ -357,7 +389,7 @@ const Dashboard = () => {
               </div>
             </div>
           </div> */}
-          
+
           {/* <div className="grid-section-title">
             <i className="fas fa-sync" /> X3 Compounding Business
           </div>
@@ -505,13 +537,19 @@ const Dashboard = () => {
           <h2 className="x2-section-title">X2 SLOTS</h2>
           <div className="x2-grid">
             {userPackages.map((slot, index) => (
-              <div key={`${slot.plan}-${slot.price}-${index}`} className={`x2-card ${getSlotCardClass(slot.status)}`}>
+              <div
+                key={`${slot.plan}-${slot.price}-${index}`}
+                className={`x2-card ${getSlotCardClass(slot.status)}`}
+              >
                 <span className="x2-bg-number">{index + 1}</span>
                 <span className="x2-level-badge">Slot {index + 1}</span>
-                <div className="x2-price">${Number(slot.price ?? 0).toLocaleString()}</div>
+                <div className="x2-price">
+                  ${Number(slot.price ?? 0).toLocaleString()}
+                </div>
                 {/* <div className="x2-label">{getSlotLabel(slot.status)}</div> */}
                 <button className="x2-btn" disabled={slot.status !== 2}>
-                  {slot.status === 0 && <i className="fas fa-lock" />} {getSlotButton(slot.status)}
+                  {slot.status === 0 && <i className="fas fa-lock" />}{" "}
+                  {getSlotButton(slot.status)}
                 </button>
               </div>
             ))}
@@ -525,35 +563,58 @@ const Dashboard = () => {
                 <p>The Rich Crowd are wealthy trendsetters.</p>
               </div>
               <div className="x3-actions">
-                <Link
-                  to="/x3-staking"
-                  style={{ textDecoration: "none" }}
-                >
-                  <button className="x3-action-btn">Start X3 Staking <i className="fas fa-arrow-right" /></button>
+                <Link to="/x3-staking" style={{ textDecoration: "none" }}>
+                  <button className="x3-action-btn">
+                    Start X3 Staking <i className="fas fa-arrow-right" />
+                  </button>
                 </Link>
                 <Link to="/auto-compounding">
-                <button
-                  className="x3-action-btn"
-                  >
-                 Start Auto Compounding <i className="fas fa-arrow-right" />
-                </button>
-                  </Link>
+                  <button className="x3-action-btn">
+                    Start Auto Compounding <i className="fas fa-arrow-right" />
+                  </button>
+                </Link>
               </div>
             </div>
             <div className="x3-stats-bar">
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total X3 Staked</span>
-                <span className="x3-stat-value">{formatAmount(dashboardSummary?.totalStaked)}</span>
+                <span className="x3-stat-value">
+                  {formatAmount(dashboardSummary?.totalStaked)}
+                </span>
               </div>
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total X3 Auto Compounded</span>
-                <span className="x3-stat-value">{formatAmount(dashboardSummary?.totalCompound)}</span>
+                <span className="x3-stat-value">
+                  {formatAmount(dashboardSummary?.totalCompound)}
+                </span>
               </div>
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total Combined Staked</span>
-                <span className="x3-stat-value">{formatAmount(dashboardSummary?.totalCompound)}</span>
+                <span className="x3-stat-value">
+                  {formatAmount(dashboardSummary?.totalCompound)}
+                </span>
               </div>
             </div>
+            <div className="x3-stats-bar">
+              <div className="x3-stat-item">
+                <span className="x3-stat-label">Total X3 Staked</span>
+                <span className="x3-stat-value">
+                  {formatAmount(dashboardSummary?.totalStaked)}%
+                </span>
+              </div>
+              <div className="progress-bar-dashboard">
+                <MultiColorProgress />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="active-user">
+          <div className="grid-section-title">
+            <i className="fa-solid fa-chart-line"></i> Platform recent activity
+          </div>
+          <div className="metric-card">
+            <div className="metric-title">Members total</div>
+            <div className="metric-value">25856</div>
           </div>
         </div>
       </div>

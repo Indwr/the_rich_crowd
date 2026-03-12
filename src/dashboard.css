@@ -2822,7 +2822,7 @@ input[type=number]::-webkit-outer-spin-button {
   padding: 0;
   margin: 0;
   cursor: pointer;
-} 
+}
 
 
 .close-popup i {
@@ -2835,6 +2835,168 @@ input[type=number]::-webkit-outer-spin-button {
   width: 100%;
   position: sticky;
   top: 40px;
+}
+
+.x3-actions .x3-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboard-header .bell {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  color: #fff;
+  transform: rotate(0deg);
+  transform-origin: 50% 4px;
+}
+
+.dashboard-header .fa-layers {
+  position: relative;
+  margin-right: 10px;
+  display: inline-flex;
+  width: 20px;
+}
+
+.dashboard-header .fa-layers.active .bell {
+  animation: ring 2.3s infinite;
+}
+
+.dashboard-header .fa-layers .notification-bubble {
+  opacity: 1;
+  visibility: visible;
+}
+
+.dashboard-header .fa-layers.active .notification-bubble::before {
+  animation-name: bounce;
+  animation-delay: 450ms;
+}
+
+.dashboard-header .notification-bubble {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 0;
+  left: 65%;
+}
+
+.dashboard-header .active .notification-bubble::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #F4C430;
+  border-radius: 50%;
+  transform: scale(0);
+  animation-duration: 800ms;
+  animation-fill-mode: both;
+  right: -2px;
+  top: 0;
+}
+
+.notification-box {
+  margin-right: 15px;
+  cursor: pointer;
+}
+
+span.notification-text {
+  font-size: 16px;
+}
+
+.progress-bar-dashboard div div:nth-child(2) {
+  margin-top: -20px;
+}
+
+text.CircularProgressbar-text {
+  fill: #fff !important;
+}
+
+.active-user {
+  margin-top: 50px;
+}
+
+.active-user .metric-card {
+  margin-top: 30px;
+  text-align: center;
+  display: flex;
+  gap: 20px;
+}
+
+@keyframes ring {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  17.542% {
+    transform: rotate(0deg);
+  }
+
+  35.084% {
+    transform: rotate(-20deg);
+  }
+
+  48.2405% {
+    transform: rotate(20deg);
+  }
+
+  57.0115% {
+    transform: rotate(-20deg);
+  }
+
+  64.9054% {
+    transform: rotate(8deg);
+  }
+
+  74.5535% {
+    transform: rotate(-15deg);
+  }
+
+  78.939% {
+    transform: rotate(-1deg);
+  }
+}
+
+@keyframes bounce {
+  0% {
+    transform: scale(0);
+  }
+
+  14% {
+    transform: scale(1.15);
+  }
+
+  28% {
+    transform: scale(1);
+  }
+
+  42% {
+    transform: scale(1.15);
+  }
+
+  70% {
+    transform: scale(1);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.metric-card.metric-card2 .grid-section-title {
+  position: absolute;
+  top: -72px;
+  background: #101010;
+  padding: 0 5px 0 10px;
+  left: -10px;
+}
+
+.metric-card.metric-card2 {
+  overflow: unset;
 }
 
 @media (max-width: 900px) {
@@ -2892,6 +3054,16 @@ input[type=number]::-webkit-outer-spin-button {
   }
 }
 
+@media (max-width: 1232px) {
+  .metric-card.metric-card2.metric-card-partner {
+    margin-top: 70px !important;
+  }
+
+  .metric-card.metric-card2.metric-card-partner .grid-section-title {
+    width: 100%;
+  }
+}
+
 @media (max-width: 992px) {
   .dashboard-container {
     margin-left: 0;
@@ -2915,6 +3087,14 @@ input[type=number]::-webkit-outer-spin-button {
   .preview-input {
     width: 100%;
     min-width: 0;
+  }
+
+  .metric-card.metric-card2.metric-card-earning {
+    margin-top: 70px;
+  }
+
+  .metric-card.metric-card2.metric-card-earning .grid-section-title {
+    width: 100%;
   }
 }
 
@@ -3011,6 +3191,22 @@ input[type=number]::-webkit-outer-spin-button {
     font-size: 0 !important;
     gap: 0 !important;
     width: 55px;
+  }
+
+  span.notification-text {
+    display: none;
+  }
+
+  .notification-box {
+    margin-right: 5px;
+  }
+
+  .history-title {
+    font-size: 1.2rem;
+  }
+
+  .tree-title {
+    font-size: 1.5rem;
   }
 }
 
