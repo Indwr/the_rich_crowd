@@ -5,6 +5,7 @@ import { tokenKey } from "src/utils/constants";
 export interface DashboardUser {
   user_id: string;
   wallet_address?: string;
+  first_name?: string;
   eth_address?: string;
   sponser_id: string;
   directs: number;

@@ -22,7 +22,7 @@ const AdminHeader = ({ toggleSidebar, onLogout }: AdminHeaderProps) => {
         <i className="fa-solid fa-share-from-square"></i>
           Our Social
         </Link>
-        <Link to="#" className="btn-update header-btn" target="_blank" style={{ padding: "0.6rem 1.2rem", fontSize: "0.8rem", }}>
+        <Link to="https://keysystem.in" className="btn-update header-btn" target="_blank" style={{ padding: "0.6rem 1.2rem", fontSize: "0.8rem", }}>
         <i className="fa-solid fa-key"></i>
           Key
         </Link>
