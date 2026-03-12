@@ -3156,6 +3156,25 @@ text.CircularProgressbar-text {
     align-items: flex-start;
     gap: 1.5rem;
   }
+
+  .x3-stats-bar.x3-stats-bar-progress {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .x3-stats-bar.x3-stats-bar-progress .x3-stat-item {
+    width: 100%;
+  }
+
+  .progress-bar-dashboard {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .progress-bar-dashboard>div {
+    margin: 0 auto;
+  }
 }
 
 @media (max-width: 768px) {
