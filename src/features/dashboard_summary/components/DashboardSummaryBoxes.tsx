@@ -256,7 +256,7 @@ const DashboardSummaryBoxes = () => {
           </div>
           <div className="metric-card program-card">
             <div className="metric-header">
-              <div className="metric-title">Royalty Income (40%)</div>
+              <div className="metric-title">Royalty Income (10%)</div>
               <i className="fas fa-crown metric-icon-bg" />
             </div>
             <div className="metric-value">
