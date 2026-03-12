@@ -315,6 +315,24 @@ const AdminSidebar = ({
           <i className="fas fa-gift" />
           <span>Bonanza Business</span>
         </NavLink>
+        <NavLink
+          to="/bonanza-business-monthly"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <i className="fas fa-gift" />
+          <span>Bonanza Business Monthly</span>
+        </NavLink>
+        <NavLink
+          to="/royalty-achiver"
+          className={({ isActive }) =>
+            isActive ? "nav-item active" : "nav-item"
+          }
+        >
+          <i className="fa-solid fa-crown" />
+          <span>Royalty Achiver</span>
+        </NavLink>
 
         {isPreview && (
           <div className="nav-item" style={{ opacity: 0.7 }}>

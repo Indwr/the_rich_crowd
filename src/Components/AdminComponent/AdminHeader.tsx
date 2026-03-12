@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 
 interface AdminHeaderProps {
   toggleSidebar: () => void;
@@ -17,6 +18,14 @@ const AdminHeader = ({ toggleSidebar, onLogout }: AdminHeaderProps) => {
         </button>
 
         <div style={{ flexGrow: 1 }} />
+        <Link to="https://linktr.ee/KSN_Token" className="btn-update header-btn" target="_blank" style={{ padding: "0.6rem 1.2rem", fontSize: "0.8rem", }}>
+        <i className="fa-solid fa-share-from-square"></i>
+          Our Social
+        </Link>
+        <Link to="#" className="btn-update header-btn" target="_blank" style={{ padding: "0.6rem 1.2rem", fontSize: "0.8rem", }}>
+        <i className="fa-solid fa-key"></i>
+          Key
+        </Link>
 
         <button
           type="button"

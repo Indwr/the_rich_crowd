@@ -46,6 +46,7 @@ const IncomeHistoryTable = ({
     { header: "User Id", accessor: "user_id" },
     { header: "Slot", accessor: "slot" },
     { header: "Amount", accessor: "amount" },
+    { header: "Hash Id", accessor: "hashId" },
     { header: "Description", accessor: "description" },
   ];
 

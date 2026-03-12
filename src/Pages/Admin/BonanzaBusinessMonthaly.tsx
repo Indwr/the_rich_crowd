@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 
-const BonanzaBusiness = () => {
+const BonanzaBusinessMonthaly = () => {
   return (
     <>
       <div className="content-wrapper">
         <div className="filter-card">
-          <h2 className="page-title">BONANZA BUSINESS</h2>
+          <h2 className="page-title">BONANZA BUSINESS MONTHLY</h2>
           <div className="date-controls">
             <div className="input-group">
               <label className="input-label">Start Date:</label>
@@ -82,13 +82,20 @@ const BonanzaBusiness = () => {
             </div>
           </div>
         </div>
+
         <div className="b-b-btn">
-          <Link to={""} target="_blank" className="go-btn header-btn" style={{ padding: "0.6rem 1.2rem", fontSize: "0.8rem", }}>
-          <i className="fa-solid fa-file-lines"></i>
-          Plan PDF & Video</Link>
+          <Link
+            to={""}
+            target="_blank"
+            className="go-btn header-btn"
+            style={{ padding: "0.6rem 1.2rem", fontSize: "0.8rem" }}
+          >
+            <i className="fa-solid fa-file-lines"></i>
+            Plan PDF & Video
+          </Link>
         </div>
       </div>
     </>
   );
 };
-export default BonanzaBusiness;
+export default BonanzaBusinessMonthaly;

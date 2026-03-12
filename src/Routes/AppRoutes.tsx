@@ -37,6 +37,9 @@ const X3DirectIncome = lazy(() => import("../Pages/Admin/X3DirectIncome"));
 const X3HybridLevelIncome = lazy(() => import("../Pages/Admin/X3HybridLevelIncome"));
 const X3IncomeLedger = lazy(() => import("../Pages/Admin/X3IncomeLedger"));
 const BonanzaBusiness = lazy(() => import("../Pages/Admin/BonanzaBusiness"));
+const BonanzaBusinessMonthaly = lazy(() => import("../Pages/Admin/BonanzaBusinessMonthaly"));
+const RoyaltyAchiver = lazy(() => import("../Pages/Admin/RoyaltyAchiver"));
+const RoyaltyAchiverList = lazy(() => import("../Pages/Admin/RoyaltyAchiverList"));
 
 const AppRoutes = () => {
   return (
@@ -170,6 +173,11 @@ const AppRoutes = () => {
               <Route path="x3-hybrid-level-income" element={<X3HybridLevelIncome />} />
               <Route path="x3-income-ledger" element={<X3IncomeLedger />} />
               <Route path="bonanza-business" element={<BonanzaBusiness />} />
+              <Route path="bonanza-business-monthly" element={<BonanzaBusinessMonthaly />} />
+              <Route path="royalty-achiver" element={<RoyaltyAchiver />} />
+              <Route path="royalty-achiver">
+                <Route path="royalty-achiver-list" element={<RoyaltyAchiverList />} />
+              </Route>
               <Route path="income-x3">
                 <Route path="x3-direct-income" element={<X3DirectIncome />} />
               </Route>
