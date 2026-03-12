@@ -22,7 +22,7 @@ const DashboardSummaryBoxes = () => {
   return (
     <div className="content-wrapper">
       <div className="tree-page-header">
-        <h1 className="tree-title">
+        <h1 className="tree-title" style={{ marginBottom: "30px" }}>
           <i className="fas fa-network-wired" /> Dashboard Summary
         </h1>
         <div className="metric-grid animate__animated animate__fadeInUp">
