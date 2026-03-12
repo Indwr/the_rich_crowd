@@ -595,7 +595,7 @@ const Dashboard = () => {
                 </span>
               </div>
             </div>
-            <div className="x3-stats-bar">
+            <div className="x3-stats-bar x3-stats-bar-progress">
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total X3 Staked</span>
                 <span className="x3-stat-value">
