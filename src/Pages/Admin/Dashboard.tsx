@@ -1,5 +1,5 @@
 import { type FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import "animate.css";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
@@ -11,7 +11,7 @@ import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 import { shortenAddress } from "../../utils";
 
 const Dashboard = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { authenticatePreview, isAuthenticating } = useAuth();
   const { dashboardResponse, userPackages, isDashboardLoading, dashboardError } = useDashboardData();
   const { copyText } = useCopyToClipboard();
