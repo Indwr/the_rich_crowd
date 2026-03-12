@@ -73,6 +73,17 @@ const Dashboard = () => {
     if (status === 2) return "Activate";
     return "Locked";
   };
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+  
+    if (hour < 12) {
+      return "Good Morning";
+    } else if (hour < 17) {
+      return "Good Afternoon";
+    } else {
+      return "Good Evening";
+    }
+  };
 
   if (showSkeleton) {
     return (
@@ -132,7 +143,7 @@ const Dashboard = () => {
       <div className="dashboard-container animate__animated animate__fadeIn">
         <div className="user-container animate__animated animate__fadeInDown">
           <div className="user-greeting">
-            <p id="greetingMessage">Good Evening, </p>
+            <p id="greetingMessage">{getGreeting()}, {user?.first_name ?? "--"}</p>
             {isDashboardLoading && <small>Loading dashboard data...</small>}
             {dashboardError && <small>{dashboardError}</small>}
           </div>
@@ -233,7 +244,7 @@ const Dashboard = () => {
         </div>
         <div className="metric-grid animate__animated animate__fadeInUp">
           <div className="grid-section-title">
-            <i className="fas fa-wallet" /> Wallet &amp; Earnings
+            <i className="fas fa-wallet" /> Wallet
           </div>
           <div className="metric-card">
             <div className="metric-header">
@@ -496,14 +507,14 @@ const Dashboard = () => {
           </div>
         </div> */}
         <div className="x2-section-container animate__animated animate__fadeInUp">
-          <h2 className="x2-section-title">The Rich Crowd X2</h2>
+          <h2 className="x2-section-title">X2 SLOTS</h2>
           <div className="x2-grid">
             {userPackages.map((slot, index) => (
               <div key={`${slot.plan}-${slot.price}-${index}`} className={`x2-card ${getSlotCardClass(slot.status)}`}>
                 <span className="x2-bg-number">{index + 1}</span>
                 <span className="x2-level-badge">Slot {index + 1}</span>
                 <div className="x2-price">${Number(slot.price ?? 0).toLocaleString()}</div>
-                <div className="x2-label">{getSlotLabel(slot.status)}</div>
+                {/* <div className="x2-label">{getSlotLabel(slot.status)}</div> */}
                 <button className="x2-btn" disabled={slot.status !== 2}>
                   {slot.status === 0 && <i className="fas fa-lock" />} {getSlotButton(slot.status)}
                 </button>
@@ -515,7 +526,7 @@ const Dashboard = () => {
           <div className="x3-promo-card">
             <div className="x3-top-row">
               <div className="x3-text-content">
-                <h2>The Rich Crowd x3</h2>
+                <h2>X3 STAKING</h2>
                 <p>The Rich Crowd are wealthy trendsetters.</p>
               </div>
               <div className="x3-actions">
@@ -523,24 +534,28 @@ const Dashboard = () => {
                   to="/x3-staking"
                   style={{ textDecoration: "none" }}
                 >
-                  <button className="x3-action-btn">Proceed with x3</button>
+                  <button className="x3-action-btn">Start X3 Staking <i className="fas fa-arrow-right" /></button>
                 </Link>
                 <Link to="/auto-compounding">
                 <button
                   className="x3-action-btn"
                   >
-                  Proceed with Auto Compounding
+                 Start Auto Compounding <i className="fas fa-arrow-right" />
                 </button>
                   </Link>
               </div>
             </div>
             <div className="x3-stats-bar">
               <div className="x3-stat-item">
-                <span className="x3-stat-label">Total Staked</span>
+                <span className="x3-stat-label">Total X3 Staked</span>
                 <span className="x3-stat-value">{formatAmount(dashboardSummary?.totalStaked)}</span>
               </div>
               <div className="x3-stat-item">
-                <span className="x3-stat-label">Total Compound</span>
+                <span className="x3-stat-label">Total X3 Auto Compounded</span>
+                <span className="x3-stat-value">{formatAmount(dashboardSummary?.totalCompound)}</span>
+              </div>
+              <div className="x3-stat-item">
+                <span className="x3-stat-label">Total Combined Staked</span>
                 <span className="x3-stat-value">{formatAmount(dashboardSummary?.totalCompound)}</span>
               </div>
             </div>
