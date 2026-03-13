@@ -12,6 +12,7 @@ export interface DashboardUser {
   package_amount: number;
   total_package: number;
   parent_id: number;
+  trainer_id: string;
 }
 
 export interface DashboardSummary {

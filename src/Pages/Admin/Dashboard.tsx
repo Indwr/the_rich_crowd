@@ -173,9 +173,12 @@ const Dashboard = () => {
                 <p>
                   Sponsor ID <span>{user?.sponser_id ?? "--"}</span>
                 </p>
-                <p>
-                  Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
-                </p>
+                    <p>
+                      Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
+                    </p>
+                    <p>
+                      Trainer ID <span>{user?.trainer_id ?? "--"}</span>
+                    </p>
               </div>
             </div>
             <div className="rank-section">
