@@ -5,6 +5,7 @@ import { Logo } from '../assets/Images/image';
 import SvgIcons from '../assets/Svg/SvgIcons';
 import { useEvmWallet } from '../hooks/useEvmWallet';
 import { useRegisterMutation } from '../features/auth/hooks/useRegisterMutation';
+import { checkSponsorName, checkTrainerId } from '../features/auth/services/authAPI';
 import { useAppSelector } from '../store/redux';
 
 const getRegisterSignatureMessage = (walletAddress: string) =>
@@ -28,8 +29,16 @@ const Register = () => {
     useRegisterMutation();
 
   const [sponsorId, setSponsorId] = useState('');
+  const [trainerId, setTrainerId] = useState('');
   const [name, setName] = useState('');
   const [signature, setSignature] = useState('');
+  const [sponsorName, setSponsorName] = useState('');
+  const [sponsorMessage, setSponsorMessage] = useState('');
+  const [isSponsorValid, setIsSponsorValid] = useState(false);
+  const [isCheckingSponsor, setIsCheckingSponsor] = useState(false);
+  const [trainerMessage, setTrainerMessage] = useState('');
+  const [isTrainerValid, setIsTrainerValid] = useState(false);
+  const [isCheckingTrainer, setIsCheckingTrainer] = useState(false);
 
   useEffect(() => {
     if (token) navigate('/dashboard');
@@ -51,6 +60,104 @@ const Register = () => {
     setSignature('');
   }, [address]);
 
+  useEffect(() => {
+    const trimmedSponsorId = sponsorId.trim();
+
+    if (!trimmedSponsorId) {
+      setSponsorName('');
+      setSponsorMessage('');
+      setIsSponsorValid(false);
+      setIsCheckingSponsor(false);
+      return;
+    }
+
+    setSponsorName('');
+    setSponsorMessage('');
+    setIsSponsorValid(false);
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setIsCheckingSponsor(true);
+        const response = await checkSponsorName({ sponser_id: trimmedSponsorId });
+
+        if (response.statusCode === 200) {
+          setSponsorName(response.data?.name ?? '');
+          setSponsorMessage(response.message ?? 'Sponsor Name is valid');
+          setIsSponsorValid(true);
+          return;
+        }
+
+        setSponsorName('');
+        setSponsorMessage(response.message ?? 'Invalid sponsor ID');
+        setIsSponsorValid(false);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to verify sponsor ID.';
+        setSponsorName('');
+        setSponsorMessage(message);
+        setIsSponsorValid(false);
+      } finally {
+        setIsCheckingSponsor(false);
+      }
+    }, 500);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      setIsCheckingSponsor(false);
+    };
+  }, [sponsorId]);
+
+  useEffect(() => {
+    const trimmedTrainerId = trainerId.trim();
+    const trimmedSponsorId = sponsorId.trim();
+
+    if (!trimmedTrainerId) {
+      setTrainerMessage('');
+      setIsTrainerValid(false);
+      setIsCheckingTrainer(false);
+      return;
+    }
+
+    if (!trimmedSponsorId) {
+      setTrainerMessage('Please enter Sponsor ID first.');
+      setIsTrainerValid(false);
+      setIsCheckingTrainer(false);
+      return;
+    }
+
+    setTrainerMessage('');
+    setIsTrainerValid(false);
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setIsCheckingTrainer(true);
+        const response = await checkTrainerId({
+          trainer_id: trimmedTrainerId,
+          sponser_id: trimmedSponsorId,
+        });
+
+        if (response.statusCode === 200 && response.data?.status === true) {
+          setTrainerMessage('Trainer ID is valid');
+          setIsTrainerValid(true);
+          return;
+        }
+
+        setTrainerMessage(response.message || 'Trainer ID is invalid');
+        setIsTrainerValid(false);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unable to verify trainer ID.';
+        setTrainerMessage(message);
+        setIsTrainerValid(false);
+      } finally {
+        setIsCheckingTrainer(false);
+      }
+    }, 500);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      setIsCheckingTrainer(false);
+    };
+  }, [trainerId, sponsorId]);
+
   const handleConnectWallet = async () => {
     const connectedAddress = await connect();
     if (connectedAddress) toast.success('Wallet connected successfully.');
@@ -59,6 +166,14 @@ const Register = () => {
   const handleRegister = async (event: FormEvent) => {
     event.preventDefault();
     if (!address) return;
+    if (!isSponsorValid) {
+      toast.error(sponsorMessage || 'Please enter a valid sponsor ID.');
+      return;
+    }
+    if (!isTrainerValid) {
+      toast.error(trainerMessage || 'Please enter a valid trainer ID.');
+      return;
+    }
 
     if (!signature) {
       const message = getRegisterSignatureMessage(address);
@@ -70,6 +185,7 @@ const Register = () => {
 
     await registerUser({
       sponsorId: sponsorId.trim(),
+      trainerId: trainerId.trim(),
       name: name.trim(),
       walletAddress: address.toLowerCase(),
     });
@@ -86,10 +202,15 @@ const Register = () => {
   const isSubmitDisabled =
     !address ||
     !sponsorId.trim() ||
+    !isSponsorValid ||
+    !trainerId.trim() ||
+    !isTrainerValid ||
     !name.trim() ||
     isConnecting ||
     isSigning ||
     isRegistering ||
+    isCheckingSponsor ||
+    isCheckingTrainer ||
     !hasProvider;
 
   return (
@@ -149,6 +270,32 @@ const Register = () => {
                   onChange={(event) => setSponsorId(event.target.value)}
                   required
                 />
+                {isCheckingSponsor && sponsorId.trim() ? (
+                  <small style={{ color: '#9ca3af' }}>Checking sponsor...</small>
+                ) : null}
+                {!isCheckingSponsor && sponsorMessage ? (
+                  <small style={{ color: isSponsorValid ? '#10b981' : '#ef4444' }}>{sponsorMessage}</small>
+                ) : null}
+                {!isCheckingSponsor && sponsorName ? (
+                  <small style={{ display: 'block', color: '#e5e7eb' }}>Sponsor Name: {sponsorName}</small>
+                ) : null}
+              </div>
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="trainer_id"
+                  id="trainer_id"
+                  placeholder="Trainer ID"
+                  value={trainerId}
+                  onChange={(event) => setTrainerId(event.target.value)}
+                  required
+                />
+                {isCheckingTrainer && trainerId.trim() ? (
+                  <small style={{ color: '#9ca3af' }}>Checking trainer...</small>
+                ) : null}
+                {!isCheckingTrainer && trainerMessage ? (
+                  <small style={{ color: isTrainerValid ? '#10b981' : '#ef4444' }}>{trainerMessage}</small>
+                ) : null}
               </div>
               <div className="form-group">
                 <input

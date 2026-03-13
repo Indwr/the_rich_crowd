@@ -7,6 +7,7 @@ import { walletRegister } from '../services/authAPI';
 
 interface RegisterArgs {
   sponsorId: string;
+  trainerId: string;
   name: string;
   walletAddress: string;
 }
@@ -15,9 +16,10 @@ export const useRegisterMutation = () => {
   const dispatch = useAppDispatch();
 
   return useMutation({
-    mutationFn: async ({ sponsorId, name, walletAddress }: RegisterArgs) => {
+    mutationFn: async ({ sponsorId, trainerId, name, walletAddress }: RegisterArgs) => {
       const response = await walletRegister({
         sponsor_id: sponsorId,
+        trainer_id: trainerId,
         name,
         wallet_address: walletAddress,
       });

@@ -173,9 +173,12 @@ const Dashboard = () => {
                 <p>
                   Sponsor ID <span>{user?.sponser_id ?? "--"}</span>
                 </p>
-                <p>
-                  Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
-                </p>
+                    <p>
+                      Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
+                    </p>
+                    <p>
+                      Trainer ID <span>{user?.trainer_id ?? "--"}</span>
+                    </p>
               </div>
             </div>
             <div className="rank-section">
@@ -269,14 +272,14 @@ const Dashboard = () => {
             <div className="split-container">
               <div className="split-item">
                 <div className="split-value">
-                  {formatAmount(dashboardSummary?.holdingWallet)}
+                  ${formatAmount(dashboardSummary?.holdingWallet)}
                 </div>
                 <span className="split-label">X2 Auto Upgrade</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
                 <div className="split-value">
-                  {formatAmount(dashboardSummary?.holdingWalletx3)}
+                  ${formatAmount(dashboardSummary?.holdingWalletx3)}
                 </div>
                 <span className="split-label">X3 Wallet</span>
               </div>
@@ -291,9 +294,9 @@ const Dashboard = () => {
               <i className="fas fa-chart-line metric-icon-bg" />
             </div>
             <div className="metric-value">
-              {formatAmount(dashboardSummary?.total_income) +
+              ${formatAmount(dashboardSummary?.total_income) +
                 formatAmount(dashboardSummary?.total_income_x3)}{" "}
-              <span>USDT</span>
+            
             </div>
           </div>
           <div className="metric-card metric-card2 metric-card-partner">
@@ -301,7 +304,7 @@ const Dashboard = () => {
               <i className="fa-solid fa-users"></i> Partners
             </div>
             <div className="metric-header">
-              <div className="metric-title">Partners</div>
+              <div className="metric-title">Directs</div>
               <i className="fas fa-users metric-icon-bg" />
             </div>
             <div className="metric-value">{user?.directs ?? 0}</div>
@@ -597,7 +600,7 @@ const Dashboard = () => {
             </div>
             <div className="x3-stats-bar x3-stats-bar-progress">
               <div className="x3-stat-item">
-                <span className="x3-stat-label">Total X3 Staked</span>
+                <span className="x3-stat-label">3X Max</span>
                 <span className="x3-stat-value">
                   {formatAmount(dashboardSummary?.totalStaked)}%
                 </span>
