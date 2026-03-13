@@ -4,7 +4,7 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
-const value = 90;
+const value = 100;
 
 const getGradientStops = (value:number) => {
   if (value <= 33) {

@@ -99,7 +99,7 @@ const DashboardSummaryBoxes = () => {
           </div>
           <div className="metric-card">
             <div className="metric-header">
-              <div className="metric-title">X3 Staking Biz</div>
+              <div className="metric-title">X3 Staking Business</div>
               <i className="fas fa-layer-group metric-icon-bg" />
             </div>
             <div className="metric-value">
@@ -114,14 +114,14 @@ const DashboardSummaryBoxes = () => {
             <div className="split-container">
               <div className="split-item">
                 <div className="split-value">
-                  {formatAmount(x3Summary?.x3_left_business)}
+                  ${formatAmount(x3Summary?.x3_left_business)}
                 </div>
                 <span className="split-label">Left</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
                 <div className="split-value">
-                  {formatAmount(x3Summary?.x3_right_business)}
+                  ${formatAmount(x3Summary?.x3_right_business)}
                 </div>
                 <span className="split-label">Right</span>
               </div>
@@ -158,14 +158,14 @@ const DashboardSummaryBoxes = () => {
             <div className="split-container">
               <div className="split-item">
                 <div className="split-value">
-                  {formatAmount(x3Summary?.x3_compound_left_business)}
+                  ${formatAmount(x3Summary?.x3_compound_left_business)}
                 </div>
                 <span className="split-label">Left</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
                 <div className="split-value">
-                  {formatAmount(x3Summary?.x3_compound_right_business)}
+                  ${formatAmount(x3Summary?.x3_compound_right_business)}
                 </div>
                 <span className="split-label">Right</span>
               </div>
