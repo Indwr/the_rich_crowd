@@ -1,65 +1,61 @@
 import { Link } from "react-router-dom";
 import AdminTable from "src/Components/AdminComponent/AdminTable";
+import { useRoyalty } from "src/features/team/hooks/useRoyalty";
+
+const formatPoolName = (pool: string) =>
+  pool
+    .replaceAll("_", " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 
 const RoyaltyAchiver = () => {
+  const { pools, isLoading, error } = useRoyalty();
+
   const columns = [
     { header: "Royalty Pool", accessor: "royaltyPool" },
     { header: "Total Members", accessor: "totalMembers" },
     { header: "Pool Income", accessor: "poolIncome" },
     { header: "Ryoalty Achiver List", accessor: "ryoaltyAchiverList" },
   ];
-  const data =[
-    {
-        royaltyPool:"1st Pool",
-        totalMembers:"2",
-        poolIncome:"15%",
-        ryoaltyAchiverList:<Link className="btn-update header-btn" to="royalty-achiver-list">Achiver List</Link>,
-    },
-    {
-        royaltyPool:"2st Pool",
-        totalMembers:"2",
-        poolIncome:"15%",
-        ryoaltyAchiverList:<Link className="btn-update header-btn" to="royalty-achiver-list">Achiver List</Link>,
-    },
-    {
-        royaltyPool:"3st Pool",
-        totalMembers:"2",
-        poolIncome:"15%",
-        ryoaltyAchiverList:<Link className="btn-update header-btn" to="royalty-achiver-list">Achiver List</Link>,
-    },
-    {
-        royaltyPool:"4st Pool",
-        totalMembers:"2",
-        poolIncome:"15%",
-        ryoaltyAchiverList:<Link className="btn-update header-btn" to="royalty-achiver-list">Achiver List</Link>,
-    },
-    {
-        royaltyPool:"5st Pool",
-        totalMembers:"2",
-        poolIncome:"15%",
-        ryoaltyAchiverList:<Link className="btn-update header-btn" to="royalty-achiver-list">Achiver List</Link>,
-    },
-    {
-        royaltyPool:"6st Pool",
-        totalMembers:"2",
-        poolIncome:"15%",
-        ryoaltyAchiverList:<Link className="btn-update header-btn" to="royalty-achiver-list">Achiver List</Link>,
-    },
-    {
-        royaltyPool:"7st Pool",
-        totalMembers:"2",
-        poolIncome:"15%",
-        ryoaltyAchiverList:<Link className="btn-update header-btn" to="royalty-achiver-list">Achiver List</Link>,
-    },
-    {
-        royaltyPool:"8st Pool",
-        totalMembers:"2",
-        poolIncome:"15%",
-        ryoaltyAchiverList:<Link className="btn-update header-btn" to="royalty-achiver-list">Achiver List</Link>,
-    },
+
+  const checkPoolIncome = (index: number) => {
+    if(index === 0) {
+      return "15%";
+    }else if(index === 1) {
+      return "15%";
+    }else if(index === 2) {
+      return "15%";
+    }else if(index === 3) {
+      return "10%";
+    }else if(index === 4) {
+      return "10%";
+    }else if(index === 5) {
+      return "10%";
+    }else if(index === 6) {
+      return "10%";
+    }else if(index === 7) {
+      return "15%";
+    }
+  }
+
+  const data = pools.map((pool,index) => ({
+    royaltyPool: formatPoolName(pool.pool),
+    totalMembers: pool.total_users,
+    poolIncome: checkPoolIncome(index),
+    ryoaltyAchiverList: (
+      <Link
+        className="btn-update header-btn"
+        to="royalty-achiver-list"
+        state={{ pool: pool.pool }}
+      >
+        Achiver List
+      </Link>
+    ),
+  }));
 
 
-  ]
   return (
     <>
       <div className="content-wrapper">
@@ -69,7 +65,14 @@ const RoyaltyAchiver = () => {
               <i className="fa-solid fa-crown"></i> Royalty Achiver
             </h3>
           </div>
-          <AdminTable columns={columns} data={data} />
+          <AdminTable
+            columns={columns}
+            data={data}
+            isLoading={isLoading}
+            error={error}
+            emptyMessage="No royalty pools found."
+            pagination={{ enabled: true, pageSize: 10 }}
+          />
         </div>
       </div>
     </>

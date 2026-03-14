@@ -594,7 +594,7 @@ const Dashboard = () => {
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total Combined Staked</span>
                 <span className="x3-stat-value">
-                  {formatAmount(dashboardSummary?.totalCompound)}
+                  { formatAmount(Number(dashboardSummary?.totalStaked ?? 0) + Number(dashboardSummary?.totalCompound ?? 0))}
                 </span>
               </div>
             </div>
