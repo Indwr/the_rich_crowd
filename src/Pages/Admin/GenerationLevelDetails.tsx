@@ -27,16 +27,22 @@ const GenerationLevelDetails = () => {
     { header: "Created At", accessor: "createdAt" },
   ];
 
-  const data = useMemo(
-    () =>
-      users.map((user, index) => ({
-        index: index + 1,
-        nodeId: user.node_id,
-        totalPackage: user.total_package,
-        createdAt: formatDate(user.created_at),
-      })),
-    [users]
-  );
+  const data = useMemo(() => {
+    const sortedUsers = [...users].sort((a, b) => {
+      const aTime = new Date(a.created_at).getTime();
+      const bTime = new Date(b.created_at).getTime();
+      const safeATime = Number.isNaN(aTime) ? 0 : aTime;
+      const safeBTime = Number.isNaN(bTime) ? 0 : bTime;
+      return safeBTime - safeATime;
+    });
+
+    return sortedUsers.map((user, index) => ({
+      index: index + 1,
+      nodeId: user.node_id,
+      totalPackage: user.total_package,
+      createdAt: formatDate(user.created_at),
+    }));
+  }, [users]);
 
   return (
     <div className="content-wrapper">
