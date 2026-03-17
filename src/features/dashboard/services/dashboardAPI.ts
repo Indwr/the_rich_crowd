@@ -55,6 +55,7 @@ export interface DashboardProfileResponse {
     user: DashboardUser;
     x3_summary: X3Summary;
     dashboard_summary: DashboardSummary;
+    total_users: number;
   };
 }
 

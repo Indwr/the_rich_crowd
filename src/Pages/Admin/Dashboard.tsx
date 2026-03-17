@@ -24,6 +24,7 @@ const Dashboard = () => {
   const [previewId, setPreviewId] = useState("");
   const user = dashboardResponse?.data?.user;
   const dashboardSummary = dashboardResponse?.data?.dashboard_summary;
+  const totalUsers = dashboardResponse?.data?.total_users;
   // const x3Summary = dashboardResponse?.data?.x3_summary;
   const walletAddress = user?.wallet_address ?? "0x81f7...77C7";
 
@@ -617,7 +618,7 @@ const Dashboard = () => {
           </div>
           <div className="metric-card">
             <div className="metric-title">Total Members</div>
-            <div className="metric-value">25856</div>
+            <div className="metric-value">{totalUsers}</div>
           </div>
         </div>
       </div>
