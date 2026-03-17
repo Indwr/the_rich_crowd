@@ -86,6 +86,8 @@ const Dashboard = () => {
     }
   };
 
+  const totalIncome = (dashboardSummary?.total_income ?? 0) + (dashboardSummary?.total_income_x3 ?? 0);
+
   if (showSkeleton) {
     return (
       <SkeletonTheme
@@ -295,8 +297,7 @@ const Dashboard = () => {
               <i className="fas fa-chart-line metric-icon-bg" />
             </div>
             <div className="metric-value">
-              ${formatAmount(dashboardSummary?.total_income) +
-                formatAmount(dashboardSummary?.total_income_x3)}{" "}
+              ${formatAmount(totalIncome)}
             
             </div>
           </div>
