@@ -38,6 +38,9 @@ export interface DashboardSummary {
   right_team: number;
   totalStaked: number;
   totalCompound: number;
+  x3DirectBusiness: number;
+  autoCompoundDirectBusiness: number;
+  trainer_income: number;
 }
 
 export interface X3Summary {
