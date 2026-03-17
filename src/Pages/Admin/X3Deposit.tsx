@@ -1,37 +1,59 @@
 import { useMemo, useState } from "react";
 import { useDashboardData } from "src/features/dashboard/hooks/useDashboardData";
 import { useLegacyX3Deposit } from "src/hooks/useLegacyX3Deposit";
+import { useTokenPrice } from "src/hooks/useTokenPrice";
 
 const X3Deposit = () => {
   const [amount, setAmount] = useState("");
   const { dashboardResponse } = useDashboardData();
-  const { selectedAccount, connectWallet, depositX3 } = useLegacyX3Deposit();
+  const { selectedAccount, ksnBalance, connectWallet, depositX3 } = useLegacyX3Deposit();
 
   const userId = dashboardResponse?.data?.user?.user_id ?? "";
-  const rate = Number(import.meta.env.VITE_X3_TOKEN_PRICE ?? "1");
+  const profileEthAddress =
+    dashboardResponse?.data?.user?.eth_address ??
+    dashboardResponse?.data?.user?.wallet_address ??
+    "";
+  const fallbackRate = Number(import.meta.env.VITE_X3_TOKEN_PRICE ?? "1");
+  const { tokenPrice: rate } = useTokenPrice(fallbackRate);
   const ksnValue = useMemo(() => {
     const value = Number(amount || 0) / (rate || 1);
     return Number.isFinite(value) ? value : 0;
   }, [amount, rate]);
+  const isWalletConnected = Boolean(selectedAccount);
 
   return (
     <>
       <div className="content-wrapper">
         <div className="deposit-container">
           <div className="deposit-card">
-            <div className="card-icon">
-              <i className="fas fa-wallet" />
+            <div className="deposit-header-row">
+              <div className="card-icon">
+                <i className="fas fa-wallet" />
+              </div>
+              <span className="deposit-plan-badge">X3 Matrix</span>
             </div>
             <h2 className="card-title">X3 Deposit</h2>
             <p className="card-subtitle">
               Pay with KSN value equivalent to USDT
             </p>
+            <div className="deposit-meta">
+              <div className="deposit-meta-item">
+                <span>Token Rate</span>
+                <strong>${rate.toFixed(6)}</strong>
+              </div>
+              <div className="deposit-meta-item">
+                <span>Wallet</span>
+                <strong className={isWalletConnected ? "wallet-on" : "wallet-off"}>
+                  {isWalletConnected ? "Connected" : "Not Connected"}
+                </strong>
+              </div>
+            </div>
             <div className="steps-indicator">
-              <div className="step-dot active" id="step1" />{" "}
-              <div className="step-dot" id="step2" />{" "}
+              <div className="step-dot active" id="step1" />
+              <div className="step-dot" id="step2" />
               <div className="step-dot" id="step3" />
             </div>
-            <div id="connectSection" style={{ display: "block" }}>
+            <div id="connectSection" style={{ display: isWalletConnected ? "none" : "block" }}>
               <button className="action-btn btn-connect" onClick={connectWallet}>
                 <i className="fas fa-link" /> Connect Wallet
               </button>
@@ -39,6 +61,7 @@ const X3Deposit = () => {
             <div id="actionSection" style={{ display: "block" }}>
               <form id="x3DepositForm">
                 <input type="hidden" id="user_id" value={userId} />
+                <input type="hidden" id="eth_address" value={profileEthAddress} />
                 <div className="amount-group">
                   <label className="amount-label">Enter Amount (USDT)</label>
                   <div className="input-wrapper">
@@ -68,12 +91,20 @@ const X3Deposit = () => {
                       {selectedAccount || "Not connected"}
                     </span>
                   </div>
+                  <div className="balance-info">
+                    <span>Available KSN:</span>
+                    <span className="balance-val">
+                      {isWalletConnected && ksnBalance !== null
+                        ? `${ksnBalance.toFixed(4)} KSN`
+                        : "--"}
+                    </span>
+                  </div>
                 </div>
-                <div id="btnContainer">
+                <div id="btnContainer" className="btn-stack">
                   <button
                     className="action-btn btn-gold"
                     id="btnApprove"
-                    onClick={(evt) => void depositX3(evt, "x3DepositForm")}
+                    onClick={(evt) => void depositX3(evt, "x3DepositForm", rate)}
                     style={{ display: "flex" }}
                   >
                     <i className="fas fa-check-circle" /> Approve KSN
@@ -81,16 +112,13 @@ const X3Deposit = () => {
                   <button
                     className="action-btn btn-gold"
                     id="btnDeposit"
-                    onClick={(evt) => void depositX3(evt, "x3DepositForm")}
+                    onClick={(evt) => void depositX3(evt, "x3DepositForm", rate)}
                     style={{ display: "none" }}
                   >
                     <i className="fas fa-arrow-down" /> Deposit KSN
                   </button>
                 </div>
-                <div
-                  id="statusMsg"
-                  style={{ marginTop: 15, color: "#888", fontSize: "0.9rem" }}
-                >
+                <div id="statusMsg" className="deposit-status-msg">
                   Approval Required.
                 </div>
               </form>

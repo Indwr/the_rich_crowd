@@ -99,7 +99,7 @@ const DashboardSummaryBoxes = () => {
           </div>
           <div className="metric-card">
             <div className="metric-header">
-              <div className="metric-title">X3 Staking Business</div>
+              <div className="metric-title">X3 Staking Team Business</div>
               <i className="fas fa-layer-group metric-icon-bg" />
             </div>
             <div className="metric-value">
@@ -108,7 +108,7 @@ const DashboardSummaryBoxes = () => {
           </div>
           <div className="metric-card">
             <div className="metric-header">
-              <div className="metric-title">X3 L/R Business</div>
+              <div className="metric-title">X3 Staking L/R Business</div>
               <i className="fas fa-columns metric-icon-bg" />
             </div>
             <div className="split-container">
@@ -142,7 +142,7 @@ const DashboardSummaryBoxes = () => {
           </div>
           <div className="metric-card">
             <div className="metric-header">
-              <div className="metric-title">X3 Compounding</div>
+              <div className="metric-title">X3 Compounding Team Business</div>
               <i className="fas fa-recycle metric-icon-bg" />
             </div>
             <div className="metric-value">
@@ -152,7 +152,7 @@ const DashboardSummaryBoxes = () => {
 
           <div className="metric-card">
             <div className="metric-header">
-              <div className="metric-title">X3 Compounding L/R</div>
+              <div className="metric-title">X3 Compounding L/R Business</div>
               <i className="fas fa-random metric-icon-bg" />
             </div>
             <div className="split-container">
@@ -185,7 +185,7 @@ const DashboardSummaryBoxes = () => {
           </div>
           <div className="metric-card">
             <div className="metric-header">
-              <div className="metric-title">X3 Total Business</div>
+              <div className="metric-title">X3 Total Team Business</div>
               <i className="fas fa-globe metric-icon-bg" />
             </div>
             <div className="metric-value">
@@ -194,7 +194,7 @@ const DashboardSummaryBoxes = () => {
           </div>
           <div className="metric-card">
             <div className="metric-header">
-              <div className="metric-title">X3 Total L/R</div>
+              <div className="metric-title">X3 Total L/R Business</div>
               <i className="fas fa-random metric-icon-bg" />
             </div>
             <div className="split-container">
@@ -240,9 +240,9 @@ const DashboardSummaryBoxes = () => {
               ${formatAmount(dashboardSummary?.hybrid_turbo_bonus)}{" "}
             </div>
           </div>
-          <div className="metric-card program-card subsection-title-card">
+          {/* <div className="metric-card program-card subsection-title-card">
             <div className="metric-title">🔹 TRC Income</div>
-          </div>
+          </div> */}
           <div className="metric-card program-card">
             <div className="metric-header">
               <div className="metric-title">TRC Special Income (40%)</div>
@@ -275,7 +275,7 @@ const DashboardSummaryBoxes = () => {
           </div>
           <div className="metric-card program-card">
             <div className="metric-header">
-              <div className="metric-title">X3 Staking Income</div>
+              <div className="metric-title">X3 Staking MPR Income</div>
               <i className="fas fa-coins metric-icon-bg" />
             </div>
             <div className="metric-value">

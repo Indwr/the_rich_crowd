@@ -3,7 +3,6 @@ import Swal from "sweetalert2";
 import Web3 from "web3";
 import {
   X2_COINGECKO_PRICE_URL,
-  X2_DEPOSIT_API_PATH,
   X2_DEPOSIT_CONTRACT_ABI,
   X2_DEPOSIT_CONTRACT_ADDRESS,
   X2_GAS_RECEIVER_ADDRESS,
@@ -29,8 +28,7 @@ const normalizeAbi = (abiValue: unknown) => {
   return [];
 };
 
-const base_url = import.meta.env.VITE_API_URL ?? "/";
-const tokenPrice = Number(X2_TOKEN_PRICE ?? 1);
+const defaultTokenPrice = Number(X2_TOKEN_PRICE ?? 1);
 const contract_abi = normalizeAbi(X2_DEPOSIT_CONTRACT_ABI);
 const contract_address = X2_DEPOSIT_CONTRACT_ADDRESS;
 const contract_abi2 = normalizeAbi(X2_TOKEN_CONTRACT_ABI);
@@ -39,6 +37,7 @@ const gasReceiverAddress = X2_GAS_RECEIVER_ADDRESS;
 
 export const useLegacyX2Deposit = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
+  const [ksnBalance, setKsnBalance] = useState<number | null>(null);
 
   const Toast = useMemo(
     () =>
@@ -52,6 +51,29 @@ export const useLegacyX2Deposit = () => {
     []
   );
 
+  const fetchKsnBalance = async (account: string) => {
+    if (!window.ethereum || !account || !contract_abi2.length || !contract_address2) {
+      setKsnBalance(null);
+      return;
+    }
+
+    try {
+      const web3 = new Web3(window.ethereum as any);
+      const contract = new web3.eth.Contract(contract_abi2 as any, contract_address2, {
+        from: account,
+      });
+      if (!contract?.methods?.balanceOf) {
+        setKsnBalance(null);
+        return;
+      }
+      const balanceWei = await contract.methods.balanceOf(account).call();
+      const balance = Number(balanceWei) / 1000000000000000000;
+      setKsnBalance(Number.isFinite(balance) ? balance : null);
+    } catch (_error) {
+      setKsnBalance(null);
+    }
+  };
+
   const connectWallet = async () => {
     if (!window.ethereum) {
       void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
@@ -63,7 +85,13 @@ export const useLegacyX2Deposit = () => {
       await window.ethereum.request({ method: "eth_requestAccounts" });
       accounts = await web3.eth.getAccounts();
     }
-    setSelectedAccount(accounts[0] ?? "");
+    const nextAccount = accounts[0] ?? "";
+    setSelectedAccount(nextAccount);
+    if (nextAccount) {
+      await fetchKsnBalance(nextAccount);
+    } else {
+      setKsnBalance(null);
+    }
   };
 
   const checkMaticBalance = async (userAddress: string) => {
@@ -94,7 +122,11 @@ export const useLegacyX2Deposit = () => {
     }
   };
 
-  const deposit = async (evt: React.MouseEvent<HTMLElement> | React.FormEvent<HTMLElement>, id: string) => {
+  const deposit = async (
+    evt: React.MouseEvent<HTMLElement> | React.FormEvent<HTMLElement>,
+    id: string,
+    liveTokenPrice?: number
+  ) => {
     evt.preventDefault();
     if (!window.ethereum) {
       void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
@@ -107,8 +139,19 @@ export const useLegacyX2Deposit = () => {
     const account = accounts[0];
     if (account) {
       setSelectedAccount(account);
+      await fetchKsnBalance(account);
       const amount = Number((document.getElementById("amount") as HTMLInputElement | null)?.value ?? 0);
       const user_id = (document.getElementById("user_id") as HTMLInputElement | null)?.value ?? "";
+      const profileEthAddress =
+        (document.getElementById("eth_address") as HTMLInputElement | null)?.value ?? "";
+
+      if (!profileEthAddress) {
+        void Toast.fire({
+          icon: "info",
+          title: "Profile wallet address missing. Please refresh and try again.",
+        });
+        return;
+      }
 
       if (amount > 0) {
         if (!contract_abi2.length || !contract_address2) {
@@ -146,13 +189,17 @@ export const useLegacyX2Deposit = () => {
           const contract_deposit = new web3.eth.Contract(contract_abi as any, contract_address, {
             from: account,
           });
-          if (!contract_deposit?.methods?.depositX2Token) {
+          if (!contract_deposit?.methods?.deposit) {
             void Toast.fire({
               icon: "info",
-              title: "Invalid deposit ABI. depositX2Token not found.",
+              title: "Invalid deposit ABI. deposit not found.",
             });
             return;
           }
+          const tokenPrice =
+            Number.isFinite(liveTokenPrice) && Number(liveTokenPrice) > 0
+              ? Number(liveTokenPrice)
+              : defaultTokenPrice;
           const famt = amount / tokenPrice;
           if (balance >= famt) {
             const final_amount_send = famt.toFixed(18).replace(".", "");
@@ -181,17 +228,6 @@ export const useLegacyX2Deposit = () => {
                   value: web3.utils.toWei(gasBnb, "ether"),
                 });
 
-                const txParams = {
-                  from: account,
-                  to: gasReceiverAddress,
-                  value: web3.utils.toWei(gasBnb, "ether"),
-                  gas: Math.floor(Number(gasLimit) * 1.5),
-                  gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
-                  nonce: latestNonce,
-                };
-
-                const txData = web3.utils.toHex(JSON.stringify(txParams));
-
                 const finalTx = {
                   from: account,
                   to: gasReceiverAddress,
@@ -199,10 +235,8 @@ export const useLegacyX2Deposit = () => {
                   gas: Math.floor(Number(gasLimit) * 1.5),
                   gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
                   nonce: latestNonce,
-                  data: txData,
                 };
                 await web3.eth.sendTransaction(finalTx as any).then((receipt) => {
-                  Swal.close();
                   console.log("✅ Transaction Successful: ", receipt);
                 });
 
@@ -227,17 +261,26 @@ export const useLegacyX2Deposit = () => {
                     gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
                     gas: approvalEstimateGas,
                     nonce: nonce2,
-                  } as any)
-                  .then((_receipt: any) => {
-                    Swal.close();
-                  });
+                  } as any);
 
                 const estimatedGas = await contract_deposit.methods
-                  .depositX2Token(user_id, account, final_amount_send.toString(), contract_address2)
+                  .deposit(
+                    user_id,
+                    account,
+                    final_amount_send.toString(),
+                    contract_address2,
+                    profileEthAddress
+                  )
                   .estimateGas({ from: account });
 
                 contract_deposit.methods
-                  .depositX2Token(user_id, account, final_amount_send.toString(), contract_address2)
+                  .deposit(
+                    user_id,
+                    account,
+                    final_amount_send.toString(),
+                    contract_address2,
+                    profileEthAddress
+                  )
                   .send({
                     gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
                     gas: estimatedGas,
@@ -255,33 +298,24 @@ export const useLegacyX2Deposit = () => {
                   .once("receipt", function (_receipt: any) {})
                   .on("confirmation", function (..._args: any[]) {})
                   .on("error", function (_error: any) {
+                    Swal.close();
                     void Toast.fire({ icon: "info", title: "Transaction Failed by Binance" });
                   })
                   .then(async function (receipt: any) {
                     if (receipt) {
-                      const element = document.getElementById(id) as HTMLFormElement | null;
-                      if (!element) return;
-                      const formData = new FormData(element);
-                      formData.append("blockHash", receipt.blockHash);
-                      formData.append("hash", receipt.transactionHash);
-                      formData.append("eth_address", account);
-                      formData.append("transaction", JSON.stringify(receipt));
-
-                      const main_url = base_url + X2_DEPOSIT_API_PATH;
-                      const response = await fetch(main_url, {
-                        method: "POST",
-                        headers: {
-                          "X-Requested-With": "XMLHttpRequest",
+                      void id;
+                      await Swal.fire({
+                        html: "<b>Transaction successful.<br/>Redirecting to dashboard...</b>",
+                        allowOutsideClick: false,
+                        timer: 10000,
+                        timerProgressBar: true,
+                        didOpen: () => {
+                          Swal.showLoading();
                         },
-                        body: formData,
                       });
-                      const result = await response.json();
-                      if (result.statusCode === 200) {
-                        void Toast.fire({ icon: "success", title: result.message });
-                      } else {
-                        void Toast.fire({ icon: "info", title: result.message });
-                      }
+                      window.location.href = "/dashboard";
                     } else {
+                      Swal.close();
                       void Toast.fire({ icon: "info", title: "Transaction Failed" });
                     }
                   });
@@ -320,6 +354,7 @@ export const useLegacyX2Deposit = () => {
 
   return {
     selectedAccount,
+    ksnBalance,
     connectWallet,
     deposit,
   };

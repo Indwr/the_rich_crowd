@@ -14,7 +14,7 @@ const Generation = () => {
   ];
 
   const data = rows.map((row) => ({
-    level: `Level ${row.level}`,
+    level: `Level ${row.level-1}`,
     teamRequired: row.teamRequired,
     team: row.team/2,
     action:
