@@ -15,10 +15,11 @@ const DashboardSummaryBoxes = () => {
   const x3CompoundingBusiness =
     (x3Summary?.x3_compound_left_business ?? 0) +
     (x3Summary?.x3_compound_right_business ?? 0);
-  const x3CommonBusiness = Math.min(
-    x3Summary?.x3_left_business ?? 0,
-    x3Summary?.x3_right_business ?? 0,
-  );
+  const x3CommonLeftBusiness = (x3Summary?.x3_left_business ?? 0) + (x3Summary?.x3_compound_left_business ?? 0);
+  const x3CommonRightBusiness = (x3Summary?.x3_right_business ?? 0) + (x3Summary?.x3_compound_right_business ?? 0);
+  
+  const x3DirectCombinedBusiness = (dashboardSummary?.x3DirectBusiness ?? 0) + (dashboardSummary?.autoCompoundDirectBusiness ?? 0);
+  const x3TeamCombinedBusiness = (x3StakingBusiness ?? 0) + (x3CompoundingBusiness ?? 0);
   return (
     <div className="content-wrapper">
       <div className="tree-page-header">
@@ -94,7 +95,7 @@ const DashboardSummaryBoxes = () => {
               <i className="fa-solid fa-diamond-turn-right metric-icon-bg"></i>
             </div>
             <div className="metric-value">
-              ${formatAmount(x3StakingBusiness)}
+              ${formatAmount(dashboardSummary?.x3DirectBusiness)}
             </div>
           </div>
           <div className="metric-card">
@@ -137,7 +138,7 @@ const DashboardSummaryBoxes = () => {
               <i className="fa-solid fa-diamond-turn-right metric-icon-bg"></i>
             </div>
             <div className="metric-value">
-              ${formatAmount(x3CompoundingBusiness)}
+              ${formatAmount(dashboardSummary?.autoCompoundDirectBusiness)}
             </div>
           </div>
           <div className="metric-card">
@@ -180,7 +181,7 @@ const DashboardSummaryBoxes = () => {
               <i className="fa-solid fa-diamond-turn-right metric-icon-bg"></i>
             </div>
             <div className="metric-value">
-             ${formatAmount(x3CommonBusiness)}
+             ${formatAmount(x3DirectCombinedBusiness)}
             </div>
           </div>
           <div className="metric-card">
@@ -189,7 +190,7 @@ const DashboardSummaryBoxes = () => {
               <i className="fas fa-globe metric-icon-bg" />
             </div>
             <div className="metric-value">
-              ${formatAmount(x3CommonBusiness)}
+              ${formatAmount(x3TeamCombinedBusiness)}
             </div>
           </div>
           <div className="metric-card">
@@ -200,14 +201,14 @@ const DashboardSummaryBoxes = () => {
             <div className="split-container">
               <div className="split-item">
                 <div className="split-value">
-                  {formatAmount(x3Summary?.x3_compound_left_business)}
+                  {x3CommonLeftBusiness}
                 </div>
                 <span className="split-label">Left</span>
               </div>
               <div className="split-divider" />
               <div className="split-item right">
                 <div className="split-value">
-                  {formatAmount(x3Summary?.x3_compound_right_business)}
+                  {x3CommonRightBusiness}
                 </div>
                 <span className="split-label">Right</span>
               </div>
@@ -267,7 +268,7 @@ const DashboardSummaryBoxes = () => {
               <i className="fa-solid fa-person-chalkboard metric-icon-bg" />
             </div>
             <div className="metric-value">
-              ${formatAmount(dashboardSummary?.royalty)}
+              ${formatAmount(dashboardSummary?.trainer_income)}
             </div>
           </div>
           <div className="metric-card program-card subsection-title-card">
