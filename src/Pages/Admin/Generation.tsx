@@ -8,8 +8,8 @@ const Generation = () => {
 
   const columns = [
     { header: "Level", accessor: "level" },
-    { header: "Team Required", accessor: "teamRequired" },
-    { header: "Team", accessor: "team" },
+    { header: "Team", accessor: "teamRequired" },
+    { header: "Team Required", accessor: "team" },
     { header: "Action", accessor: "action" },
   ];
 
