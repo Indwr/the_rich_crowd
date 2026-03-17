@@ -140,15 +140,15 @@ const TeamTreeNodeCard = ({ node, depth, maxDepth, onNodeClick }: TeamTreeNodePr
           <div className="tooltip-row">
             <span>Total Biz:</span> <strong>${totalBusiness}</strong>
           </div>
-          <div className="tooltip-row">
+          {/* <div className="tooltip-row">
             <span>Left Biz:</span> <strong>${leftBusiness}</strong>
           </div>
           <div className="tooltip-row">
             <span>Right Biz:</span> <strong>${rightBusiness}</strong>
-          </div>
-          <div className="tooltip-row">
+          </div> */}
+          {/* <div className="tooltip-row">
             <span>Position:</span> <span>{node.position ?? "-"}</span>
-          </div>
+          </div> */}
           <div className="tooltip-row">
             <span>Joined:</span> <span>{formatDate(node.created_at)}</span>
           </div>

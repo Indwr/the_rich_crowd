@@ -100,65 +100,49 @@ const AppRoutes = () => {
               <Route
                 path="x2-deposit"
                 element={
-                  <PreviewProtectedRoute>
                     <X2Deposit />
-                  </PreviewProtectedRoute>
                 }
               />
               <Route
                 path="x2-deposit-history"
                 element={
-                  <PreviewProtectedRoute>
                     <X2DepositHistory />
-                  </PreviewProtectedRoute>
                 }
               />
               <Route
                 path="holding-history"
                 element={
-                  <PreviewProtectedRoute>
                     <HoldingHistory />
-                  </PreviewProtectedRoute>
                 }
               />
               <Route
                 path="activate-upgrade-history"
                 element={
-                  <PreviewProtectedRoute>
                     <UpgradeActivations />
-                  </PreviewProtectedRoute>
                 }
               />
               <Route
                 path="x3-deposit"
                 element={
-                  <PreviewProtectedRoute>
                     <X3Deposit />
-                  </PreviewProtectedRoute>
                 }
               />
               <Route
                 path="x3-deposit-history"
                 element={
-                  <PreviewProtectedRoute>
                     <X3DepositHistory />
-                  </PreviewProtectedRoute>
                 }
               />
               <Route
                 path="x3-staking-history"
                 element={
-                  <PreviewProtectedRoute>
                     <X3StakingHistory />
-                  </PreviewProtectedRoute>
                 }
               />
               <Route
                 path="auto-compounding-history"
                 element={
-                  <PreviewProtectedRoute>
                     <X3CompoundingHistory />
-                  </PreviewProtectedRoute>
                 }
               />
               <Route path="income-x2">

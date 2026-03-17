@@ -100,7 +100,7 @@ const ProfileForm = () => {
                 <input
                   type="text"
                   className="custom-input"
-                  value={form.country_code}
+                  value={form.country_code ?? "+91"} 
                   onChange={(e) => onFieldChange("country_code", e.target.value)}
                   placeholder="Enter Country Code (e.g. +91)"
                 />

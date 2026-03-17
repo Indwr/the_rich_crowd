@@ -582,19 +582,19 @@ const Dashboard = () => {
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total X3 Staked</span>
                 <span className="x3-stat-value">
-                  {formatAmount(dashboardSummary?.totalStaked)}
+                  ${formatAmount(dashboardSummary?.totalStaked)}
                 </span>
               </div>
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total X3 Auto Compounded</span>
                 <span className="x3-stat-value">
-                  {formatAmount(dashboardSummary?.totalCompound)}
+                  ${formatAmount(dashboardSummary?.totalCompound)}
                 </span>
               </div>
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total Combined Staked</span>
                 <span className="x3-stat-value">
-                  { formatAmount(Number(dashboardSummary?.totalStaked ?? 0) + Number(dashboardSummary?.totalCompound ?? 0))}
+                  ${ formatAmount(Number(dashboardSummary?.totalStaked ?? 0) + Number(dashboardSummary?.totalCompound ?? 0))}
                 </span>
               </div>
             </div>
@@ -602,7 +602,7 @@ const Dashboard = () => {
               <div className="x3-stat-item">
                 <span className="x3-stat-label">3X Max</span>
                 <span className="x3-stat-value">
-                  {formatAmount(dashboardSummary?.totalStaked)}%
+                  ${formatAmount(dashboardSummary?.totalStaked)}
                 </span>
               </div>
               <div className="progress-bar-dashboard">
@@ -613,10 +613,10 @@ const Dashboard = () => {
         </div>
         <div className="active-user">
           <div className="grid-section-title">
-            <i className="fa-solid fa-chart-line"></i> Platform recent activity
+            <i className="fa-solid fa-chart-line"></i> Platform activity
           </div>
           <div className="metric-card">
-            <div className="metric-title">Members total</div>
+            <div className="metric-title">Total Members</div>
             <div className="metric-value">25856</div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type MouseEvent } from "react";
 import { NavLink, useLocation, Link } from "react-router-dom";
 import { Logo } from "../../assets/Images/image";
 import { useAppSelector } from "../../store/redux";
@@ -19,6 +19,23 @@ const AdminSidebar = ({
 
   const toggleDropdown = (menu: string) => {
     setOpenDropdown(openDropdown === menu ? null : menu);
+  };
+
+  const closeSidebarOnMobile = () => {
+    if (window.matchMedia("(max-width: 992px)").matches) {
+      setSidebarActive(false);
+    }
+  };
+
+  const handleSidebarNavigation = (event: MouseEvent<HTMLDivElement>) => {
+    const target = event.target as HTMLElement;
+    const anchor = target.closest("a");
+
+    if (!anchor || anchor.classList.contains("dropdown-trigger")) {
+      return;
+    }
+
+    closeSidebarOnMobile();
   };
 
   // ✅ Auto open dropdown when child route is active
@@ -76,12 +93,12 @@ const AdminSidebar = ({
       </button>
 
       <div className="brand-logo">
-        <Link to="/dashboard">
+        <Link to="/dashboard" onClick={closeSidebarOnMobile}>
           <img src={Logo} style={{ width: 160 }} alt="The Rich Crowd" />
         </Link>
       </div>
 
-      <div className="nav-menu">
+      <div className="nav-menu" onClick={handleSidebarNavigation}>
 
         {/* Dashboard */}
         <NavLink
@@ -156,7 +173,6 @@ const AdminSidebar = ({
         </div>
 
         {/* X2 Deposit */}
-        {!isPreview && (
         <div
           className={`nav-dropdown ${
             openDropdown === "x2" ? "dropdown-open active" : ""
@@ -190,10 +206,8 @@ const AdminSidebar = ({
             </NavLink>
           </div>
         </div>
-        )}
 
         {/* X3 Deposit */}
-        {!isPreview && (
         <div
           className={`nav-dropdown ${
             openDropdown === "x3" ? "dropdown-open active" : ""
@@ -227,7 +241,6 @@ const AdminSidebar = ({
             </NavLink>
           </div>
         </div>
-        )}
 
         {/* Income X2 */}
         <div
@@ -261,9 +274,9 @@ const AdminSidebar = ({
             <NavLink to="/income-x2/royalty-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Royalty Income</span>
             </NavLink>
-            <NavLink to="/income-x2/reward-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+            {/* <NavLink to="/income-x2/reward-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Reward Income</span>
-            </NavLink>
+            </NavLink> */}
             <NavLink to="/income-x2/income-ledger" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Income Ledger</span>
             </NavLink>
