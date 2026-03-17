@@ -36,7 +36,7 @@ const Directs = () => {
   ];
 
   const data = directs.map((item, index) => ({
-    id: index + 1,
+    id: (currentPage - 1) * pageSize + index + 1,
     memberId: item.user_id,
     wallet: item.eth_address,
     directs: item.directs,
@@ -71,14 +71,17 @@ const Directs = () => {
               applySearch("userId", "");
             }}
           />
-          <div style={{ marginBottom: 12, color: "#ccc", fontSize: "0.9rem" }}>
-            Active userId param: {selectedUserId || "(empty)"}
+          <div className="directs-toolbar-row">
+            <span className="directs-toolbar-text">
+              Active userId param: <strong>{selectedUserId || "(empty)"}</strong>
+            </span>
             {selectedUserId && (
               <button
                 type="button"
                 onClick={resetToRoot}
-                style={{ marginLeft: 10, cursor: "pointer" }}
+                className="directs-reset-btn"
               >
+                <i className="fa-solid fa-rotate-left" />
                 Reset
               </button>
             )}
