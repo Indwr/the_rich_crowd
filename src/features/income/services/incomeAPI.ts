@@ -24,6 +24,7 @@ export interface IncomeListResponse {
   message: string;
   data: IncomeRecord[];
   totalCount: number;
+  totalSum: number;
 }
 
 interface FetchIncomeListParams {
@@ -96,6 +97,7 @@ export const fetchIncomeList = async (
         message,
         data: [],
         totalCount: 0,
+        totalSum: 0,
       };
     }
     throw new Error(message);
@@ -107,5 +109,6 @@ export const fetchIncomeList = async (
     message: payload.message ?? "Success",
     data: Array.isArray(payload.data) ? payload.data : [],
     totalCount: Number(payload.totalCount ?? 0),
+    totalSum: Number(payload.totalSum ?? 0),
   };
 };

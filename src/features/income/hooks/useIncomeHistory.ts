@@ -42,7 +42,7 @@ export const useIncomeHistory = ({
 
   const rows: IncomeRecord[] = query.data?.data ?? [];
   const totalCount = query.data?.totalCount ?? 0;
-  const totalAmount = rows.reduce((sum, item) => sum + Number(item.amount ?? 0), 0);
+  const totalAmount = query.data?.totalSum ?? 0;
 
   return {
     rows,
