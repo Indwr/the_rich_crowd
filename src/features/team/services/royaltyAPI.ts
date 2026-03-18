@@ -20,6 +20,11 @@ export interface RoyaltyResponse {
   data: RoyaltyPool[];
 }
 
+interface FetchRoyaltyParams {
+  year?: string;
+  month?: string;
+}
+
 const ROYALTY_ENDPOINT = "team/royalty";
 
 const getBaseApiUrl = () => {
@@ -45,8 +50,22 @@ const extractErrorMessage = async (response: Response) => {
   }
 };
 
-export const fetchRoyalty = async (): Promise<RoyaltyResponse> => {
-  const response = await fetch(`${getBaseApiUrl()}${ROYALTY_ENDPOINT}`, {
+export const fetchRoyalty = async (
+  params: FetchRoyaltyParams = {}
+): Promise<RoyaltyResponse> => {
+  const query = new URLSearchParams();
+  if (params.year) {
+    query.set("year", params.year);
+  }
+  if (params.month) {
+    query.set("month", params.month);
+  }
+
+  const url = `${getBaseApiUrl()}${ROYALTY_ENDPOINT}${
+    query.toString() ? `?${query.toString()}` : ""
+  }`;
+
+  const response = await fetch(url, {
     method: "GET",
     headers: getAuthHeaders(),
   });

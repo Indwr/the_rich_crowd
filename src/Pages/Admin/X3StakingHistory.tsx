@@ -6,7 +6,7 @@ import { formatDateToLongString } from "src/utils";
 const X3StakingHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
-  const { rows, totalCount, isLoading, isFetching, error } = useHistoryList({
+  const { rows, totalCount, totalSum, isLoading, isFetching, error } = useHistoryList({
     endpoint: "user/x3/staking/history",
     currentPage,
     pageSize,
@@ -40,6 +40,12 @@ const X3StakingHistory = () => {
             <h3 className="history-title">
               <i className="fas fa-history" /> X3 Staking History
             </h3>
+            <div>
+              <span className="total-pill">
+                <i className="fas fa-coins"></i>
+                Total Used Limit: ${Number(totalSum ?? 0).toFixed(2)}
+              </span>
+            </div>
           </div>
           <AdminTable
             columns={columns}

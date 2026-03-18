@@ -13,8 +13,13 @@ const formatPoolName = (pool: string) =>
 
 const RoyaltyAchiverList = () => {
   const location = useLocation();
-  const { pools, isLoading, error, message } = useRoyalty();
   const selectedPool = (location.state as { pool?: string } | null)?.pool;
+  const selectedMonth = (location.state as { month?: string } | null)?.month;
+  const selectedYear = (location.state as { year?: string } | null)?.year;
+  const { pools, isLoading, error, message } = useRoyalty({
+    month: selectedMonth,
+    year: selectedYear,
+  });
 
   const columns = useMemo(
     () => [

@@ -1,12 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchRoyalty } from "../services/royaltyAPI";
 
-export const royaltyQueryKey = ["team-royalty"] as const;
+interface UseRoyaltyParams {
+  year?: string;
+  month?: string;
+}
 
-export const useRoyalty = () => {
+export const useRoyalty = (params: UseRoyaltyParams = {}) => {
+  const { year = "", month = "" } = params;
   const query = useQuery({
-    queryKey: royaltyQueryKey,
-    queryFn: fetchRoyalty,
+    queryKey: ["team-royalty", year, month],
+    queryFn: () => fetchRoyalty({ year, month }),
   });
 
   return {

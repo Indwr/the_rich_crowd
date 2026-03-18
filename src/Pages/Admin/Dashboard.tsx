@@ -1,5 +1,5 @@
-import { type FormEvent, useState } from "react";
-import { Link } from "react-router-dom";
+import { type FormEvent, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import "animate.css";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
@@ -10,9 +10,18 @@ import { useDashboardData } from "../../features/dashboard/hooks/useDashboardDat
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 import { shortenAddress } from "../../utils";
 import MultiColorProgress from "src/Components/AdminComponent/MultiColorProgress";
+import { useTokenPrice } from "src/hooks/useTokenPrice";
+import { getTokenCirculatingSupply } from "src/utils/web3";
+import { useAppSelector } from "src/store/redux";
+
+interface TokenSupplySnapshot {
+  totalSupply: string;
+  burned: string;
+  circulating: string;
+}
 
 const Dashboard = () => {
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const { authenticatePreview, isAuthenticating } = useAuth();
   const {
     dashboardResponse,
@@ -22,6 +31,9 @@ const Dashboard = () => {
   } = useDashboardData();
   const { copyText } = useCopyToClipboard();
   const [previewId, setPreviewId] = useState("");
+  const [tokenSupply, setTokenSupply] = useState<TokenSupplySnapshot | null>(null);
+  const { tokenPrice } = useTokenPrice(0.02004);
+  const loginMode = useAppSelector((state) => state.auth.loginMode);
   const user = dashboardResponse?.data?.user;
   const dashboardSummary = dashboardResponse?.data?.dashboard_summary;
   const totalUsers = dashboardResponse?.data?.total_users;
@@ -29,6 +41,43 @@ const Dashboard = () => {
   const walletAddress = user?.wallet_address ?? "0x81f7...77C7";
 
   const formatAmount = (value?: number) => Number(value ?? 0).toFixed(2);
+  const formatTokenUnits = (rawValue?: string, fractionDigits = 2) => {
+    if (!rawValue) return "--";
+    try {
+      const decimals = 18n;
+      const base = 10n ** decimals;
+      const amount = BigInt(rawValue);
+      const whole = amount / base;
+      const fraction = amount % base;
+      const fractionText = fraction
+        .toString()
+        .padStart(Number(decimals), "0")
+        .slice(0, fractionDigits);
+      return `${whole.toLocaleString()}${fractionDigits ? `.${fractionText}` : ""}`;
+    } catch (_error) {
+      return "--";
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadTokenSupply = async () => {
+      try {
+        const snapshot = await getTokenCirculatingSupply();
+        if (!isMounted) return;
+        setTokenSupply(snapshot);
+      } catch (_error) {
+        if (!isMounted) return;
+        setTokenSupply(null);
+      }
+    };
+
+    void loadTokenSupply();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handlePreviewLogin = async (event: FormEvent) => {
     event.preventDefault();
@@ -87,6 +136,14 @@ const Dashboard = () => {
   };
 
   const totalIncome = (dashboardSummary?.total_income ?? 0) + (dashboardSummary?.total_income_x3 ?? 0);
+
+  const handleProtectedNavigation = (path: string) => {
+    if (loginMode === "preview") {
+      toast.error("Access denied: This feature is not available in Preview Mode.");
+      return;
+    }
+    navigate(path);
+  };
 
   if (showSkeleton) {
     return (
@@ -162,55 +219,57 @@ const Dashboard = () => {
         </div>
         <div className="profile-hero-section animate__animated animate__fadeInUp">
           <div className="hero-card user-info">
-            <div className="user-header">
-              <div className="user-avatar-circle">
-                <img src={Logo} alt="User" />
-                <div className="avatar-badge">
-                  <img src={Logo} alt="badge" />
+            <div className="profile-main">
+              <div className="user-header">
+                <div className="user-avatar-circle">
+                  <img src={Logo} alt="User" />
+                  <div className="avatar-badge">
+                    <img src={Logo} alt="badge" />
+                  </div>
+                </div>
+                <div className="user-text">
+                  <h3>
+                    User ID <span>{user?.user_id ?? "--"}</span>
+                  </h3>
+                  <p>
+                    Sponsor ID <span>{user?.sponser_id ?? "--"}</span>
+                  </p>
+                      <p>
+                        Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
+                      </p>
+                      <p>
+                        Trainer ID <span>{user?.trainer_id ?? "--"}</span>
+                      </p>
                 </div>
               </div>
-              <div className="user-text">
-                <h3>
-                  User ID <span>{user?.user_id ?? "--"}</span>
-                </h3>
-                <p>
-                  Sponsor ID <span>{user?.sponser_id ?? "--"}</span>
-                </p>
-                    <p>
-                      Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
-                    </p>
-                    <p>
-                      Trainer ID <span>{user?.trainer_id ?? "--"}</span>
-                    </p>
+              <div className="rank-section">
+                <span className="rank-label">Rank</span>
+                <div className="stars">
+                  <i className="fas fa-star active" />
+                  <i className="fas fa-star active" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                  <i className="fas fa-star" />
+                </div>
               </div>
-            </div>
-            <div className="rank-section">
-              <span className="rank-label">Rank</span>
-              <div className="stars">
-                <i className="fas fa-star active" />
-                <i className="fas fa-star active" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
-                <i className="fas fa-star" />
+              <div className="wallet-pill">
+                <span id="walletAddressDisplay">
+                  {shortenAddress(walletAddress)}
+                </span>
+                <i
+                  className="fas fa-copy"
+                  onClick={() =>
+                    copyText(walletAddress, {
+                      successMessage: "Wallet address copied.",
+                    })
+                  }
+                />
               </div>
-            </div>
-            <div className="wallet-pill">
-              <span id="walletAddressDisplay">
-                {shortenAddress(walletAddress)}
-              </span>
-              <i
-                className="fas fa-copy"
-                onClick={() =>
-                  copyText(walletAddress, {
-                    successMessage: "Wallet address copied.",
-                  })
-                }
-              />
             </div>
           </div>
           <div className="right-column">
@@ -253,11 +312,25 @@ const Dashboard = () => {
                 </button>
               </form>
             </div>
-            <div className="hero-card ksn-card">
-              <div className="ksn-info">
-                <h4>KSN/USDT</h4>
-                <div className="ksn-pill" id="ksnPriceDisplay">
-                  0.02004 USDT
+          </div>
+          <div className="hero-card ksn-card ksn-card-full">
+            <div className="ksn-info">
+              <h4>KSN/USDT</h4>
+              <div className="ksn-pill" id="ksnPriceDisplay">
+                {tokenPrice.toFixed(5)} USDT
+              </div>
+              <div className="ksn-details">
+                <div className="ksn-detail-row">
+                  <span>Total Supply</span>
+                  <strong>{formatTokenUnits(tokenSupply?.totalSupply)} KSN</strong>
+                </div>
+                <div className="ksn-detail-row">
+                  <span>Burned</span>
+                  <strong>{formatTokenUnits(tokenSupply?.burned)} KSN</strong>
+                </div>
+                <div className="ksn-detail-row">
+                  <span>Circulating</span>
+                  <strong>{formatTokenUnits(tokenSupply?.circulating)} KSN</strong>
                 </div>
               </div>
             </div>
@@ -568,16 +641,20 @@ const Dashboard = () => {
                 <p>The Rich Crowd are wealthy trendsetters.</p>
               </div>
               <div className="x3-actions">
-                <Link to="/x3-staking" style={{ textDecoration: "none" }}>
-                  <button className="x3-action-btn">
-                    Start X3 Staking <i className="fas fa-arrow-right" />
-                  </button>
-                </Link>
-                <Link to="/auto-compounding">
-                  <button className="x3-action-btn">
-                    Start Auto Compounding <i className="fas fa-arrow-right" />
-                  </button>
-                </Link>
+                <button
+                  className="x3-action-btn"
+                  type="button"
+                  onClick={() => handleProtectedNavigation("/x3-staking")}
+                >
+                  Start X3 Staking <i className="fas fa-arrow-right" />
+                </button>
+                <button
+                  className="x3-action-btn"
+                  type="button"
+                  onClick={() => handleProtectedNavigation("/auto-compounding")}
+                >
+                  Start Auto Compounding <i className="fas fa-arrow-right" />
+                </button>
               </div>
             </div>
             <div className="x3-stats-bar">
