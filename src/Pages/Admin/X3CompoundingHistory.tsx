@@ -6,7 +6,7 @@ import { formatDateToLongString } from "src/utils";
 const X3CompoundingHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
-  const { rows, totalCount, isLoading, isFetching, error } = useHistoryList({
+  const { rows, totalCount, totalSum, isLoading, isFetching, error } = useHistoryList({
     endpoint: "user/x3/compounding/history",
     currentPage,
     pageSize,
@@ -34,8 +34,6 @@ const X3CompoundingHistory = () => {
     createdAt: item.created_at ? formatDateToLongString(item.created_at) : "-",
   }));
 
-  const totalAmount = rows.reduce((sum, item) => sum + Number(item.amount ?? 0), 0);
-
   return (
     <>
       <div className="content-wrapper">
@@ -47,7 +45,8 @@ const X3CompoundingHistory = () => {
             <div>
                 <span className="total-pill">
                     <i className="fas fa-coins"></i>
-                    Total: ${totalAmount.toFixed(2)}                </span>
+                    Total Used Limit: ${Number(totalSum ?? 0).toFixed(2)}
+                </span>
             </div>
           </div>
           <AdminTable
