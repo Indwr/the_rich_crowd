@@ -12,7 +12,6 @@ import { shortenAddress } from "../../utils";
 import MultiColorProgress from "src/Components/AdminComponent/MultiColorProgress";
 import { useTokenPrice } from "src/hooks/useTokenPrice";
 import { getTokenCirculatingSupply } from "src/utils/web3";
-import { useAppSelector } from "src/store/redux";
 
 interface TokenSupplySnapshot {
   totalSupply: string;
@@ -33,7 +32,6 @@ const Dashboard = () => {
   const [previewId, setPreviewId] = useState("");
   const [tokenSupply, setTokenSupply] = useState<TokenSupplySnapshot | null>(null);
   const { tokenPrice } = useTokenPrice(0.02004);
-  const loginMode = useAppSelector((state) => state.auth.loginMode);
   const user = dashboardResponse?.data?.user;
   const dashboardSummary = dashboardResponse?.data?.dashboard_summary;
   const totalUsers = dashboardResponse?.data?.total_users;
@@ -138,10 +136,7 @@ const Dashboard = () => {
   const totalIncome = (dashboardSummary?.total_income ?? 0) + (dashboardSummary?.total_income_x3 ?? 0);
 
   const handleProtectedNavigation = (path: string) => {
-    if (loginMode === "preview") {
-      toast.error("Access denied: This feature is not available in Preview Mode.");
-      return;
-    }
+    // Temporary: preview restrictions are disabled for testing.
     navigate(path);
   };
 

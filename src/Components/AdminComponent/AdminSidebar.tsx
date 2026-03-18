@@ -1,7 +1,6 @@
 import { useState, useEffect, type MouseEvent } from "react";
 import { NavLink, useLocation, Link } from "react-router-dom";
 import { Logo } from "../../assets/Images/image";
-import { useAppSelector } from "../../store/redux";
 
 interface AdminSidebarProps {
   sidebarActive: boolean;
@@ -12,8 +11,8 @@ const AdminSidebar = ({
   sidebarActive,
   setSidebarActive,
 }: AdminSidebarProps) => {
-  const loginMode = useAppSelector((state) => state.auth.loginMode);
-  const isPreview = loginMode === "preview";
+  // Temporary: preview restrictions are disabled for testing.
+  const isPreview = false;
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
 
