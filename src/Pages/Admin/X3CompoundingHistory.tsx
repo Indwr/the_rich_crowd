@@ -27,7 +27,7 @@ const X3CompoundingHistory = () => {
     srNo: (currentPage - 1) * pageSize + index + 1,
     userId: item.user_id ?? "-",
     amount: item.amount ?? "-",
-    withCompound: item.withCompound ? "Yes" : "No",
+    withCompound: item.withCompound,
     holdingTime: item.holding_time ?? "-",
     percent: item.percent ?? "-",
     status: item.status ?? "-",
