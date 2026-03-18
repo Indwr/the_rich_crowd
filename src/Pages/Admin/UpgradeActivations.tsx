@@ -1,6 +1,7 @@
 import AdminTable from "../../Components/AdminComponent/AdminTable";
 import { useState } from "react";
 import { useHistoryList } from "src/features/history/hooks/useHistoryList";
+import { formatDateToLongString } from "src/utils";
 
 const UpgradeActivations = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,7 +23,7 @@ const UpgradeActivations = () => {
     srNo: (currentPage - 1) * pageSize + index + 1,
     amount: item.amount ?? "-",
     type: item.type ?? "-",
-    createdAt: item.created_at ?? "-",
+    createdAt: item.created_at ? formatDateToLongString(item.created_at) : "-",
   }));
   return (
     <>

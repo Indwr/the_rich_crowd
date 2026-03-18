@@ -32,6 +32,7 @@ export interface HistoryApiResponse {
   message: string;
   data: HistoryRecord[];
   totalCount: number;
+  totalSum?: number | string;
 }
 
 const getBaseApiUrl = () => {

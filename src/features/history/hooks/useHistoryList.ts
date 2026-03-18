@@ -38,6 +38,7 @@ export const useHistoryList = ({
   return {
     rows: (query.data?.data ?? []) as HistoryRecord[],
     totalCount: query.data?.totalCount ?? 0,
+    totalSum: query.data?.totalSum ?? 0,
     isLoading: query.isLoading,
     isFetching: query.isFetching,
     error: (query.error as Error | null)?.message ?? null,

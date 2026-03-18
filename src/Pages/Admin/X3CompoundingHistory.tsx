@@ -1,6 +1,7 @@
 import AdminTable from "../../Components/AdminComponent/AdminTable";
 import { useState } from "react";
 import { useHistoryList } from "src/features/history/hooks/useHistoryList";
+import { formatDateToLongString } from "src/utils";
 
 const X3CompoundingHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,7 +31,7 @@ const X3CompoundingHistory = () => {
     holdingTime: item.holding_time ?? "-",
     percent: item.percent ?? "-",
     status: item.status ?? "-",
-    createdAt: item.created_at ?? "-",
+    createdAt: item.created_at ? formatDateToLongString(item.created_at) : "-",
   }));
 
   const totalAmount = rows.reduce((sum, item) => sum + Number(item.amount ?? 0), 0);
