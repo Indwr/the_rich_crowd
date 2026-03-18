@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import AdminTable from "src/Components/AdminComponent/AdminTable";
 import { useIncomeHistory } from "../hooks/useIncomeHistory";
 import { type IncomeId } from "../services/incomeAPI";
+import { formatDateToLongString, shortenAddress } from "src/utils";
+import { useCopyToClipboard } from "src/hooks/useCopyToClipboard";
 
 interface IncomeHistoryTableProps {
   title: string;
@@ -12,13 +14,6 @@ interface IncomeHistoryTableProps {
 }
 
 const PAGE_SIZE = 10;
-
-const formatDate = (dateValue?: string) => {
-  if (!dateValue) return "-";
-  const parsed = new Date(dateValue);
-  if (Number.isNaN(parsed.getTime())) return dateValue;
-  return parsed.toLocaleString("en-GB");
-};
 
 const formatAmount = (value?: string | number) => {
   return Number(value ?? 0).toFixed(2);
@@ -32,7 +27,7 @@ const IncomeHistoryTable = ({
   totalLabel = "Total",
 }: IncomeHistoryTableProps) => {
   const [currentPage, setCurrentPage] = useState(1);
-
+  const { copyText } = useCopyToClipboard();
   const { rows, totalCount, totalAmount, isLoading, isFetching, error } = useIncomeHistory({
     incomeId,
     incomeType,
@@ -43,10 +38,10 @@ const IncomeHistoryTable = ({
   const columns = [
     { header: "#", accessor: "index" },
     { header: "Date & Time", accessor: "dateTime" },
-    { header: "User Id", accessor: "user_id" },
+    // { header: "User Id", accessor: "user_id" },
     { header: "Slot", accessor: "slot" },
     { header: "Amount", accessor: "amount" },
-    { header: "Hash Id", accessor: "hashId" },
+    { header: "Hash Id", accessor: "hash" },
     { header: "Description", accessor: "description" },
   ];
 
@@ -54,9 +49,15 @@ const IncomeHistoryTable = ({
     () =>
       rows.map((item, index) => ({
         index: (currentPage - 1) * PAGE_SIZE + index + 1,
-        dateTime: formatDate(item.created_at),
-        user_id: item.user_id || "-",
+        dateTime: item.created_at ? formatDateToLongString(item.created_at) : "-",
+        // user_id: item.user_id || "-",
         slot: item.type || "-",
+        hash: item.hash ? (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+            <span>{shortenAddress(item.hash)}</span>
+            <i className="fas fa-copy" style={{ cursor: "pointer" }} onClick={() => copyText(`https://bscscan.com/tx/${item.hash}`, { successMessage: "Hash copied." })} />
+          </span>
+        ) : "-",
         amount: `USDT ${formatAmount(item.amount)}`,
         description: item.description || item.type || "-",
       })),
