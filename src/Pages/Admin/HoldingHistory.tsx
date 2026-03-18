@@ -1,14 +1,19 @@
 import AdminTable from "../../Components/AdminComponent/AdminTable";
 import { useState } from "react";
 import { useHistoryList } from "src/features/history/hooks/useHistoryList";
+import { formatDateToLongString } from "src/utils";
 
 const HoldingHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
-  const { rows, totalCount, isLoading, isFetching, error } = useHistoryList({
+  const { rows, totalCount, totalSum, isLoading, isFetching, error } = useHistoryList({
     endpoint: "user/x2/holding/history",
     currentPage,
     pageSize,
+  });
+  const formattedTotalSum = Number(totalSum ?? 0).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   });
 
   const columns = [
@@ -22,7 +27,7 @@ const HoldingHistory = () => {
     srNo: (currentPage - 1) * pageSize + index + 1,
     amount: item.amount ?? "-",
     type: item.type ?? "-",
-    createdAt: item.created_at ?? "-",
+    createdAt: item.created_at ? formatDateToLongString(item.created_at) : "-",
   }));
   return (
     <>
@@ -32,6 +37,12 @@ const HoldingHistory = () => {
             <h3 className="history-title">
               <i className="fas fa-history" /> X2 Holding history
             </h3>
+            <div>
+              <span className="total-pill">
+                <i className="fas fa-coins"></i>
+                Total Sum: ${formattedTotalSum}
+              </span>
+            </div>
           </div>
           <AdminTable
             columns={columns}

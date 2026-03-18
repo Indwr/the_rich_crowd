@@ -1,6 +1,7 @@
 import AdminTable from "../../Components/AdminComponent/AdminTable";
 import { useState } from "react";
 import { useHistoryList } from "src/features/history/hooks/useHistoryList";
+import { formatDateToLongString } from "src/utils";
 
 const X3StakingHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -28,7 +29,7 @@ const X3StakingHistory = () => {
     holdingTime: item.holding_time ?? "-",
     percent: item.percent ?? "-",
     status: item.status ?? "-",
-    createdAt: item.created_at ?? "-",
+    createdAt: item.created_at ? formatDateToLongString(item.created_at) : "-",
   }));
 
   return (
