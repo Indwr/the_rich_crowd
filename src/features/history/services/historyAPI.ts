@@ -44,6 +44,7 @@ export interface HistoryRecord {
   withCompound?: boolean;
   hash?: string;
   description?: string;
+  converted?: number;
 }
 
 export interface HistoryApiResponse extends ApiEnvelope<HistoryRecord[]> {

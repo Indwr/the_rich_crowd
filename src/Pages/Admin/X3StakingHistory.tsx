@@ -8,6 +8,7 @@ import { HISTORY_ENDPOINT_X3_STAKING } from "src/features/history/services/histo
 import { useHistoryList } from "src/features/history/hooks/useHistoryList";
 import { formatDateToLongString } from "src/utils";
 import { tokenKey } from "src/utils/constants";
+import { stakingPendingIncomeCalculator } from "src/utils/constants/convertAutoCompound";
 
 const YEAR_OPTIONS = [3, 5, 10] as const;
 
@@ -40,6 +41,7 @@ const X3StakingHistory = () => {
   const [convertModal, setConvertModal] = useState<{
     stakeId: number;
     amount: number;
+    createdAt: string;
   } | null>(null);
   const [convertYear, setConvertYear] = useState<(typeof YEAR_OPTIONS)[number]>(3);
 
@@ -57,6 +59,7 @@ const X3StakingHistory = () => {
   const data = rows.map((item, index) => {
     const stakeId = Number(item.id);
     const amountNum = Number(item.amount ?? 0);
+    const createdAt = item.created_at ?? "";
     const isRunning = Number(item.isActive) === 1;
 
     return {
@@ -73,7 +76,7 @@ const X3StakingHistory = () => {
           style={{ padding: "0.35rem 0.75rem", fontSize: "0.85rem" }}
           onClick={() => {
             setConvertYear(3);
-            setConvertModal({ stakeId, amount: amountNum });
+            setConvertModal({ stakeId, amount: amountNum, createdAt: createdAt });
           }}
         >
           Convert
@@ -188,7 +191,7 @@ const X3StakingHistory = () => {
                 <div className="x3-convert-modal__metric">
                   <span className="x3-convert-modal__metric-label">Amount</span>
                   <span className="x3-convert-modal__metric-value x3-convert-modal__metric-value--gold">
-                    ${formatMoney(convertModal.amount)}
+                    ${formatMoney(Number(convertModal.amount)-Number(stakingPendingIncomeCalculator(convertModal.createdAt, convertModal.amount).income/3))}
                     <span className="x3-convert-modal__metric-suffix">USDT</span>
                   </span>
                 </div>
