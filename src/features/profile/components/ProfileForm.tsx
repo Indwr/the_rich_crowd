@@ -1,5 +1,8 @@
 import { type FormEvent } from "react";
 import { useProfile } from "../hooks/useProfile";
+import ProfileDobField from "./ProfileDobField";
+import ProfileGeoCascade from "./ProfileGeoCascade";
+import ProfilePhoneField from "./ProfilePhoneField";
 
 const ProfileForm = () => {
   const {
@@ -95,67 +98,27 @@ const ProfileForm = () => {
                   placeholder="Enter Last Name"
                 />
               </div>
-              <div className="form-group">
-                <label className="form-label">Country Code</label>
-                <input
-                  type="text"
-                  className="custom-input"
-                  value={form.country_code ?? "+91"} 
-                  onChange={(e) => onFieldChange("country_code", e.target.value)}
-                  placeholder="Enter Country Code (e.g. +91)"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Phone Number</label>
-                <input
-                  type="text"
-                  className="custom-input"
-                  value={form.phone}
-                  onChange={(e) => onFieldChange("phone", e.target.value)}
-                  placeholder="Enter Phone Number"
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Date of Birth</label>
-                <input
-                  type="text"
-                  className="custom-input"
-                  value={form.dob}
-                  onChange={(e) => onFieldChange("dob", e.target.value)}
-                  placeholder="DD-MM-YYYY"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Country</label>
-                <input
-                  type="text"
-                  className="custom-input"
-                  value={form.country}
-                  onChange={(e) => onFieldChange("country", e.target.value)}
-                  placeholder="Enter Country"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">City</label>
-                <input
-                  type="text"
-                  className="custom-input"
-                  value={form.city}
-                  onChange={(e) => onFieldChange("city", e.target.value)}
-                  placeholder="Enter City"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">State</label>
-                <input
-                  type="text"
-                  className="custom-input"
-                  value={form.state}
-                  onChange={(e) => onFieldChange("state", e.target.value)}
-                  placeholder="Enter State"
-                />
-              </div>
+              <ProfilePhoneField
+                countryCode={form.country_code}
+                phone={form.phone}
+                disabled={isUpdating}
+                onFieldChange={(field, value) => onFieldChange(field, value)}
+              />
+              <ProfileDobField
+                value={form.dob}
+                disabled={isUpdating}
+                onChange={(v) => onFieldChange("dob", v)}
+              />
+              <ProfileGeoCascade
+                form={{
+                  country: form.country,
+                  state: form.state,
+                  city: form.city,
+                  district: form.district,
+                }}
+                disabled={isUpdating}
+                onFieldChange={(field, value) => onFieldChange(field, value)}
+              />
               <div className="form-group">
                 <label className="form-label">Pin Code</label>
                 <input
@@ -164,16 +127,6 @@ const ProfileForm = () => {
                   value={form.pin_code}
                   onChange={(e) => onFieldChange("pin_code", e.target.value)}
                   placeholder="Enter Pin Code"
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">District</label>
-                <input
-                  type="text"
-                  className="custom-input"
-                  value={form.district}
-                  onChange={(e) => onFieldChange("district", e.target.value)}
-                  placeholder="Enter District"
                 />
               </div>
             </div>

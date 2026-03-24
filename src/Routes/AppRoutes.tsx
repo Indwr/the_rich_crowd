@@ -40,6 +40,7 @@ const BonanzaBusiness = lazy(() => import("../Pages/Admin/BonanzaBusiness"));
 const BonanzaBusinessMonthaly = lazy(() => import("../Pages/Admin/BonanzaBusinessMonthaly"));
 const RoyaltyAchiver = lazy(() => import("../Pages/Admin/RoyaltyAchiver"));
 const RoyaltyAchiverList = lazy(() => import("../Pages/Admin/RoyaltyAchiverList"));
+const Notifications = lazy(() => import("../Pages/Admin/Notifications"));
 
 const AppRoutes = () => {
   return (
@@ -92,6 +93,7 @@ const AppRoutes = () => {
                     <DashboardSummary />
                 }
               />
+              <Route path="notifications" element={<Notifications />} />
               <Route path="mytree" element={<Mytree />} />
               <Route path="directs" element={<Directs />} />
               <Route path="generation" element={<Generation />} />

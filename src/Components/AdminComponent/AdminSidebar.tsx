@@ -98,6 +98,7 @@ const AdminSidebar = ({
       </div>
 
       <div className="nav-menu" onClick={handleSidebarNavigation}>
+        <div className="nav-menu-scroll">
 
         {/* Dashboard */}
         <NavLink
@@ -352,6 +353,20 @@ const AdminSidebar = ({
             <span>Preview Mode Active</span>
           </div>
         )}
+
+        </div>
+
+        <div className="nav-menu-bottom">
+          <NavLink
+            to="/notifications"
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <i className="fas fa-bell" />
+            <span>Notifications</span>
+          </NavLink>
+        </div>
 
       </div>
     </nav>

@@ -13,6 +13,9 @@ export interface DashboardUser {
   total_package: number;
   parent_id: number;
   trainer_id: string;
+  incomeLimit2: number;
+  incomeLimit: number;
+  isProfileUpdated: 0 | 1;
 }
 
 export interface DashboardSummary {

@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useNotificationUnread } from "src/features/history/hooks/useNotificationUnread";
 
 interface AdminHeaderProps {
   toggleSidebar: () => void;
@@ -6,6 +7,8 @@ interface AdminHeaderProps {
 }
 
 const AdminHeader = ({ toggleSidebar, onLogout }: AdminHeaderProps) => {
+  const { hasUnread } = useNotificationUnread();
+
   return (
     <>
       <header className="dashboard-header">
@@ -15,11 +18,15 @@ const AdminHeader = ({ toggleSidebar, onLogout }: AdminHeaderProps) => {
 
         <div style={{ flexGrow: 1 }} />
         <div className="notification-box">
-          <span className="fa-layers fa-fw active">
-            <i className="fas fa-bell bell"></i>
+          <span className={`fa-layers fa-fw${hasUnread ? " active" : ""}`}>
+            <Link to="/notifications" className="notification-header-link">
+              <i className="fas fa-bell bell"></i>
+            </Link>
             <span className="fa-layers-counter notification-bubble"></span>
           </span>
-          <span className="notification-text">Notification</span>
+          <Link to="/notifications" className="notification-header-link">
+            <span className="notification-text">Notification</span>
+          </Link>
         </div>
         <Link
           to="https://linktr.ee/KSN_Token"

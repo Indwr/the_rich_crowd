@@ -676,11 +676,11 @@ const Dashboard = () => {
               <div className="x3-stat-item">
                 <span className="x3-stat-label">3X Max</span>
                 <span className="x3-stat-value">
-                  ${formatAmount(dashboardSummary?.totalStaked)}
+                  ${formatAmount(user?.incomeLimit2)}
                 </span>
               </div>
               <div className="progress-bar-dashboard">
-                <MultiColorProgress />
+                <MultiColorProgress progress={{totalLimit:Number(user?.incomeLimit2),usedLimit:Number(user?.incomeLimit)}} />
               </div>
             </div>
           </div>
