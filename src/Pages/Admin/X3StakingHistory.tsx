@@ -3,16 +3,14 @@ import { useState } from "react";
 import type { ReactNode } from "react";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+import { useDashboardData } from "src/features/dashboard/hooks/useDashboardData";
 import { useConvertAutoCompounding } from "src/features/history/hooks/useConvertAutoCompounding";
 import { HISTORY_ENDPOINT_X3_STAKING } from "src/features/history/services/historyAPI";
 import { useHistoryList } from "src/features/history/hooks/useHistoryList";
 import { formatDateToLongString } from "src/utils";
 import { tokenKey } from "src/utils/constants";
-import { stakingPendingIncomeCalculator } from "src/utils/constants/convertAutoCompound";
 
 const YEAR_OPTIONS = [3, 5, 10] as const;
-
-const formatMoney = (value: number) => Number(value ?? 0).toFixed(2);
 
 function x3StakingStatusLabel(isActive: unknown): ReactNode {
   const n = Number(isActive);
@@ -34,76 +32,82 @@ const X3StakingHistory = () => {
     currentPage,
     pageSize,
   });
+  const { dashboardResponse } = useDashboardData();
 
   const convertMutation = useConvertAutoCompounding();
   const isConverting = convertMutation.isPending;
 
-  const [convertModal, setConvertModal] = useState<{
-    stakeId: number;
-    amount: number;
-    createdAt: string;
-  } | null>(null);
+  const [convertModalOpen, setConvertModalOpen] = useState(false);
   const [convertYear, setConvertYear] = useState<(typeof YEAR_OPTIONS)[number]>(3);
+  const [convertAmount, setConvertAmount] = useState("");
+  const dashboardUser = dashboardResponse?.data?.user;
+  const usedIncome = Number(dashboardUser?.incomeLimit ?? 0);
+  const totalIncomeLimit = Number(dashboardUser?.incomeLimit2 ?? 0);
+  const totalStaked = Number(totalSum ?? 0);
+  const availableToConvert = Math.max(0, totalStaked - usedIncome / 3);
 
   const columns = [
     { header: "#", accessor: "srNo" },
     { header: "User ID", accessor: "userId" },
     { header: "Amount", accessor: "amount" },
-    // { header: "Holding Time", accessor: "holdingTime" },
     { header: "Percent", accessor: "percent" },
     { header: "Status", accessor: "status" },
     { header: "Date", accessor: "createdAt" },
-    { header: "Action", accessor: "action" },
   ];
 
-  const data = rows.map((item, index) => {
-    const stakeId = Number(item.id);
-    const amountNum = Number(item.amount ?? 0);
-    const createdAt = item.created_at ?? "";
-    const isRunning = Number(item.isActive) === 1;
+  const data = rows.map((item, index) => ({
+    srNo: (currentPage - 1) * pageSize + index + 1,
+    userId: item.user_id ?? "-",
+    amount: item.amount ?? "-",
+    percent: item.percent ?? "-",
+    status: x3StakingStatusLabel(item.isActive),
+    createdAt: item.created_at ? formatDateToLongString(item.created_at) : "-",
+  }));
 
-    return {
-      srNo: (currentPage - 1) * pageSize + index + 1,
-      userId: item.user_id ?? "-",
-      amount: item.amount ?? "-",
-      percent: item.percent ?? "-",
-      status: x3StakingStatusLabel(item.isActive),
-      createdAt: item.created_at ? formatDateToLongString(item.created_at) : "-",
-      action: isRunning ? (
-        <button
-          type="button"
-          className="btn-update header-btn"
-          style={{ padding: "0.35rem 0.75rem", fontSize: "0.85rem" }}
-          onClick={() => {
-            setConvertYear(3);
-            setConvertModal({ stakeId, amount: amountNum, createdAt: createdAt });
-          }}
-        >
-          Convert
-        </button>
-      ) : (
-        "—"
-      ),
-    };
-  });
+  const openConvertModal = () => {
+    setConvertYear(3);
+    setConvertAmount("");
+    setConvertModalOpen(true);
+  };
 
   const closeConvertModal = () => {
-    if (!isConverting) setConvertModal(null);
+    if (!isConverting) setConvertModalOpen(false);
   };
 
   const handleConvertSubmit = () => {
-    if (!convertModal) return;
     if (!Cookies.get(tokenKey)) {
       toast.error("Session expired. Please login again.");
       return;
     }
 
+    const raw = convertAmount.trim();
+    const amountNum = Number(raw);
+    if (!raw || Number.isNaN(amountNum) || amountNum <= 0) {
+      toast.error("Enter a valid amount.");
+      return;
+    }
+    if (amountNum < 100) {
+      toast.error("Minimum amount is 100 USDT.");
+      return;
+    }
+    if (amountNum % 100 !== 0) {
+      toast.error("Amount must be a multiple of 100.");
+      return;
+    }
+    if (amountNum > availableToConvert) {
+      toast.error(
+        `Maximum convertible amount is ${availableToConvert.toFixed(2)} USDT.`
+      );
+      return;
+    }
+
     convertMutation.mutate(
-      { year: convertYear, stakeId: convertModal.stakeId },
+      { year: convertYear, amount: amountNum },
       {
         onSuccess: (envelope) => {
           toast.success(envelope.message);
-          setConvertModal(null);
+          setConvertModalOpen(false);
+          setConvertAmount("");
         },
         onError: (err) => {
           toast.error(err instanceof Error ? err.message : "Conversion failed.");
@@ -116,15 +120,23 @@ const X3StakingHistory = () => {
     <>
       <div className="content-wrapper">
         <div className="history-card">
-            <div className="history-header">
+          <div className="history-header">
             <h3 className="history-title">
               <i className="fas fa-history" /> X3 Staking History
             </h3>
-            <div>
+            <div className="history-header-actions">
               <span className="total-pill">
                 <i className="fas fa-coins"></i>
                 Total Used Limit: ${Number(totalSum ?? 0).toFixed(2)}
               </span>
+              <button
+                type="button"
+                className="btn-update header-btn x3-staking-convert-open"
+                onClick={openConvertModal}
+              >
+                <i className="fas fa-exchange-alt" aria-hidden />
+                Convert to auto compounding
+              </button>
             </div>
           </div>
           <AdminTable
@@ -145,7 +157,7 @@ const X3StakingHistory = () => {
         </div>
       </div>
 
-      {convertModal && (
+      {convertModalOpen && (
         <div
           className="x3-convert-modal-overlay"
           role="presentation"
@@ -176,25 +188,58 @@ const X3StakingHistory = () => {
                 </div>
                 <h2 id="convert-modal-title">Convert to auto compounding</h2>
                 <p className="x3-convert-modal__subtitle">
-                  Confirm your stake details and choose a lock-in period. This will move
-                  this position into auto compounding.
+                  Enter the amount to convert and choose a lock-in period.
                 </p>
               </div>
 
               <div className="x3-convert-modal__metrics">
                 <div className="x3-convert-modal__metric">
-                  <span className="x3-convert-modal__metric-label">Stake ID</span>
+                  <span className="x3-convert-modal__metric-label">Total Received Income</span>
                   <span className="x3-convert-modal__metric-value">
-                    #{convertModal.stakeId}
+                    ${usedIncome.toFixed(2)}
                   </span>
                 </div>
                 <div className="x3-convert-modal__metric">
-                  <span className="x3-convert-modal__metric-label">Amount</span>
-                  <span className="x3-convert-modal__metric-value x3-convert-modal__metric-value--gold">
-                    ${formatMoney(Number(convertModal.amount)-Number(stakingPendingIncomeCalculator(convertModal.createdAt, convertModal.amount).income/3))}
-                    <span className="x3-convert-modal__metric-suffix">USDT</span>
+                  <span className="x3-convert-modal__metric-label">Total Max Limit</span>
+                  <span className="x3-convert-modal__metric-value">
+                    ${totalIncomeLimit.toFixed(2)}
                   </span>
                 </div>
+                <div className="x3-convert-modal__metric">
+                  <span className="x3-convert-modal__metric-label">Total Staked</span>
+                  <span className="x3-convert-modal__metric-value">
+                    ${totalStaked.toFixed(2)}
+                  </span>
+                </div>
+                <div className="x3-convert-modal__metric">
+                  <span className="x3-convert-modal__metric-label">Available to convert</span>
+                  <span className="x3-convert-modal__metric-value x3-convert-modal__metric-value--gold">
+                    ${availableToConvert.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="x3-convert-modal__amount-wrap">
+                <label className="x3-convert-modal__section-label" htmlFor="convert-amount">
+                  Amount (USDT)
+                </label>
+                <input
+                  id="convert-amount"
+                  type="number"
+                  inputMode="decimal"
+                  min={100}
+                  step={100}
+                  className="x3-convert-modal__amount-input"
+                  placeholder="e.g. 500"
+                  value={convertAmount}
+                  onChange={(e) => setConvertAmount(e.target.value)}
+                  disabled={isConverting}
+                  autoComplete="off"
+                />
+                <p className="x3-convert-modal__amount-hint">
+                  Total Staked Available: $
+                  {availableToConvert.toFixed(2)}.
+                </p>
               </div>
 
               <div>
@@ -227,7 +272,7 @@ const X3StakingHistory = () => {
                   type="button"
                   className="x3-convert-modal__btn-confirm"
                   onClick={handleConvertSubmit}
-                  disabled={isConverting}
+                  disabled={isConverting || availableToConvert < 100}
                 >
                   {isConverting ? (
                     <>

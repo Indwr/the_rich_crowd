@@ -28,7 +28,8 @@ export interface IncomeListResponse {
 }
 
 interface FetchIncomeListParams {
-  incomeId: IncomeId;
+  incomeId?: IncomeId;
+  endpointPath?: string;
   incomeType?: string;
   skip?: number;
   limit?: number;
@@ -52,6 +53,7 @@ const getAuthHeaders = () => {
 
 const buildIncomeUrl = ({
   incomeId,
+  endpointPath,
   incomeType,
   skip = 0,
   limit = 10,
@@ -67,7 +69,13 @@ const buildIncomeUrl = ({
     query.set("type", incomeType);
   }
 
-  return `${getBaseApiUrl()}${INCOME_ENDPOINT}/${incomeId}?${query.toString()}`;
+  const resolvedEndpointPath = endpointPath ?? (incomeId ? `${INCOME_ENDPOINT}/${incomeId}` : "");
+
+  if (!resolvedEndpointPath) {
+    throw new Error("Income endpoint is required.");
+  }
+
+  return `${getBaseApiUrl()}${resolvedEndpointPath}?${query.toString()}`;
 };
 
 export const fetchIncomeList = async (

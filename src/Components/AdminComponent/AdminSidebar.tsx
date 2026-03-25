@@ -77,6 +77,9 @@ const AdminSidebar = ({
     ) {
       setOpenDropdown("incomeX3");
     } 
+    else if (path.startsWith("/auto-compounding-income")) {
+      setOpenDropdown("autoCompoundingIncome");
+    } 
     else {
       setOpenDropdown(null);
     }
@@ -314,6 +317,35 @@ const AdminSidebar = ({
             </NavLink>
             <NavLink to="/x3-income-ledger" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Income Ledger</span>
+            </NavLink>
+          </div>
+        </div>
+
+        {/* Auto Compounding Income */}
+        <div
+          className={`nav-dropdown ${
+            openDropdown === "autoCompoundingIncome" ? "dropdown-open active" : ""
+          }`}
+        >
+          <a
+            href="#"
+            className="nav-item dropdown-trigger"
+            onClick={(e) => {
+              e.preventDefault();
+              toggleDropdown("autoCompoundingIncome");
+            }}
+          >
+            <i className="fas fa-sync-alt" />
+            <span>Auto Compounding Income</span>
+            <i className="fas fa-chevron-down dropdown-icon" />
+          </a>
+
+          <div className="dropdown-menu">
+            <NavLink to="/auto-compounding-income/level-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Level Income</span>
+            </NavLink>
+            <NavLink to="/auto-compounding-income/direct-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Direct Income</span>
             </NavLink>
           </div>
         </div>

@@ -8,7 +8,8 @@ import { useCopyToClipboard } from "src/hooks/useCopyToClipboard";
 interface IncomeHistoryTableProps {
   title: string;
   iconClassName: string;
-  incomeId: IncomeId;
+  incomeId?: IncomeId;
+  endpointPath?: string;
   incomeType?: string;
   totalLabel?: string;
 }
@@ -23,6 +24,7 @@ const IncomeHistoryTable = ({
   title,
   iconClassName,
   incomeId,
+  endpointPath,
   incomeType,
   totalLabel = "Total",
 }: IncomeHistoryTableProps) => {
@@ -30,6 +32,7 @@ const IncomeHistoryTable = ({
   const { copyText } = useCopyToClipboard();
   const { rows, totalCount, totalAmount, isLoading, isFetching, error } = useIncomeHistory({
     incomeId,
+    endpointPath,
     incomeType,
     currentPage,
     pageSize: PAGE_SIZE,

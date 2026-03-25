@@ -35,6 +35,8 @@ const X2IncomeLedger = lazy(() => import("../Pages/Admin/X2IncomeLedger"));
 const BiMonthly = lazy(() => import("../Pages/Admin/BiMonthly"));
 const X3DirectIncome = lazy(() => import("../Pages/Admin/X3DirectIncome"));
 const X3HybridLevelIncome = lazy(() => import("../Pages/Admin/X3HybridLevelIncome"));
+const AutoCompoundingIncome = lazy(() => import("../Pages/Admin/AutoCompoundingIncome"));
+const AutoCompoundingDirectIncome = lazy(() => import("../Pages/Admin/AutoCompoundingDirectIncome"));
 const X3IncomeLedger = lazy(() => import("../Pages/Admin/X3IncomeLedger"));
 const BonanzaBusiness = lazy(() => import("../Pages/Admin/BonanzaBusiness"));
 const BonanzaBusinessMonthaly = lazy(() => import("../Pages/Admin/BonanzaBusinessMonthaly"));
@@ -157,6 +159,14 @@ const AppRoutes = () => {
               </Route>
               <Route path="mpr-income" element={<BiMonthly />} />
               <Route path="x3-hybrid-level-income" element={<X3HybridLevelIncome />} />
+              <Route
+                path="auto-compounding-income/level-income"
+                element={<AutoCompoundingIncome />}
+              />
+              <Route
+                path="auto-compounding-income/direct-income"
+                element={<AutoCompoundingDirectIncome />}
+              />
               <Route path="x3-income-ledger" element={<X3IncomeLedger />} />
               <Route path="bonanza-business" element={<BonanzaBusiness />} />
               <Route path="bonanza-business-monthly" element={<BonanzaBusinessMonthaly />} />

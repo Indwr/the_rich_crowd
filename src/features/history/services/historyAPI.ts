@@ -222,14 +222,14 @@ export const markNotificationsSeen = async (): Promise<void> => {
 
 export const postConvertAutoCompounding = async (body: {
   year: number;
-  stakeId: number;
+  amount: number;
 }): Promise<ApiEnvelope<unknown[]>> => {
   const response = await fetch(`${getBaseApiUrl()}user/convert-auto-compounding`, {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify({
       year: body.year,
-      stakeId: body.stakeId,
+      amount: body.amount,
     }),
   });
 
