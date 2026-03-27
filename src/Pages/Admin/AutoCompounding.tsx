@@ -26,7 +26,7 @@ const AutoCompounding = () => {
   const [showCalculator, setShowCalculator] = useState(false);
   const [calculatorAmount, setCalculatorAmount] = useState<number>();
   const [calculatorYears, setCalculatorYears] = useState<number>(0);
-  const [totalAmount, setTotalAmount] = useState<number | null>(null);
+  // const [totalAmount, setTotalAmount] = useState<number | null>(null);
   const [interest, setInterest] = useState<number | null>(null);
   const [calculatorRate, setCalculatorRate] = useState<number | null>(null);
 
@@ -56,7 +56,7 @@ const AutoCompounding = () => {
     const total = calculatorAmount * Math.pow(1 + CALCULATOR_MONTHLY_RATE, totalMonths);
     const result = total - calculatorAmount;
     setInterest(result);
-    setTotalAmount(total);
+    // setTotalAmount(total);
     setCalculatorRate(CALCULATOR_MONTHLY_RATE * 12);
   };
 
