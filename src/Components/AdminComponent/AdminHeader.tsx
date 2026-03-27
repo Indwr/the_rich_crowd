@@ -39,11 +39,13 @@ const AdminHeader = ({ toggleSidebar, onLogout }: AdminHeaderProps) => {
         </Link>
         <Link
           to="https://keysystem.in"
-          className="btn-update header-btn"
+          className="btn-update header-btn header-btn-key"
           target="_blank"
           style={{ padding: "0.6rem 1.2rem", fontSize: "0.8rem" }}
         >
-          <i className="fa-solid fa-key"></i>
+          <span className="header-key-logo-wrap">
+            <img src="/logo.png" alt="Key" className="header-key-logo" />
+          </span>
           Key
         </Link>
 

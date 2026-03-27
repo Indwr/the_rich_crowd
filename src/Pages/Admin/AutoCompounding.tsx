@@ -49,7 +49,7 @@ const AutoCompounding = () => {
   const maxCompoundByConditions = Math.max(0, Math.min(x3WalletBalance, remainingLimit));
   const canCompound = isFirstSlotActive && remainingLimit >= MIN_COMPOUND_AMOUNT;
 
-  const getRateByCombinedAmount = (amount: number) => (usedLimit + amount > 5000 ? 0.06 : 0.05);
+  const getRateByCombinedAmount = (amount: number) => (usedLimit + amount > 5000 ? 0.05 : 0.05);
   const calculateInterest = () => {
     if (!calculatorYears || !calculatorAmount) return;
     const totalMonths = calculatorYears * 12;
@@ -357,8 +357,8 @@ const AutoCompounding = () => {
                     {" "}({((calculatorRate ?? 0) * 100).toFixed(0)}% yearly) for{" "}
                     {calculatorYears * 12} months
                   </h3>
-                  <h3><small>Interest Amount: </small> ${interest.toFixed(2)}</h3>
-                  <h3><small>Total Amount: </small> ${totalAmount?.toFixed(2)}</h3>
+                  <h3><small>Total Auto-Compounded Bonus: </small> ${interest.toFixed(2)}</h3>
+                  {/* <h3><small>Total Amount: </small> ${totalAmount?.toFixed(2)}</h3> */}
                 </div>
               )}
             </div>

@@ -5,6 +5,7 @@ import PublicLayout from "../layouts/PublicLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
 import PreviewProtectedRoute from "../features/auth/components/PreviewProtectedRoute";
 import DashboardSummary from "src/Pages/Admin/DashboardSummary";
+import AutoCompoundingIncomeLedger from "src/Pages/Admin/AutoCompoundingIncomeLedger";
 
 const Home = lazy(() => import("../Pages/Home"));
 const Login = lazy(() => import("../Pages/Login"));
@@ -37,6 +38,7 @@ const X3DirectIncome = lazy(() => import("../Pages/Admin/X3DirectIncome"));
 const X3HybridLevelIncome = lazy(() => import("../Pages/Admin/X3HybridLevelIncome"));
 const AutoCompoundingIncome = lazy(() => import("../Pages/Admin/AutoCompoundingIncome"));
 const AutoCompoundingDirectIncome = lazy(() => import("../Pages/Admin/AutoCompoundingDirectIncome"));
+const AutoCompoundingMprIncome = lazy(() => import("../Pages/Admin/AutoCompoundingMprIncome"));
 const X3IncomeLedger = lazy(() => import("../Pages/Admin/X3IncomeLedger"));
 const BonanzaBusiness = lazy(() => import("../Pages/Admin/BonanzaBusiness"));
 const BonanzaBusinessMonthaly = lazy(() => import("../Pages/Admin/BonanzaBusinessMonthaly"));
@@ -164,8 +166,17 @@ const AppRoutes = () => {
                 element={<AutoCompoundingIncome />}
               />
               <Route
+                path="auto-compounding-income/mpr-income"
+                element={<AutoCompoundingMprIncome />}
+              />
+              <Route
                 path="auto-compounding-income/direct-income"
                 element={<AutoCompoundingDirectIncome />}
+              />
+
+              <Route
+                path="auto-compounding-income/income-ledger"
+                element={<AutoCompoundingIncomeLedger />}
               />
               <Route path="x3-income-ledger" element={<X3IncomeLedger />} />
               <Route path="bonanza-business" element={<BonanzaBusiness />} />

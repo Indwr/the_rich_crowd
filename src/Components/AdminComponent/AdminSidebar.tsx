@@ -341,12 +341,23 @@ const AdminSidebar = ({
           </a>
 
           <div className="dropdown-menu">
-            <NavLink to="/auto-compounding-income/level-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
-              <span>Level Income</span>
+
+          <NavLink to="/auto-compounding-income/mpr-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>MPR (Monthly Return) Income</span>
             </NavLink>
-            <NavLink to="/auto-compounding-income/direct-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+
+          <NavLink to="/auto-compounding-income/direct-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Direct Income</span>
             </NavLink>
+
+            <NavLink to="/auto-compounding-income/level-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Hybrid level income</span>
+            </NavLink>
+
+            <NavLink to="/auto-compounding-income/income-ledger" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Income Ledger</span>
+            </NavLink>
+        
           </div>
         </div>
 

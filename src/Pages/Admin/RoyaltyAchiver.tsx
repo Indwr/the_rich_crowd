@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import AdminTable from "src/Components/AdminComponent/AdminTable";
 import { useRoyalty } from "src/features/team/hooks/useRoyalty";
+import { calculatePercentage } from "src/utils";
 
 const formatPoolName = (pool: string) =>
   pool
@@ -15,7 +16,8 @@ const RoyaltyAchiver = () => {
   const now = new Date();
   const [month, setMonth] = useState("");
   const [year, setYear] = useState("");
-  const { pools, isLoading, error } = useRoyalty({ month, year });
+  const { pools, totalIncome, isLoading, error } = useRoyalty({ month, year });
+
 
   const yearOptions = Array.from({ length: 6 }, (_, index) =>
     String(now.getFullYear() - index)
@@ -26,33 +28,38 @@ const RoyaltyAchiver = () => {
     { header: "Royalty Pool", accessor: "royaltyPool" },
     { header: "Total Members", accessor: "totalMembers" },
     { header: "Pool Income", accessor: "poolIncome" },
+    { header: "Pool Amount", accessor: "poolAmount" },
     { header: "Ryoalty Achiver List", accessor: "ryoaltyAchiverList" },
   ];
 
-  const checkPoolIncome = (index: number) => {
-    if(index === 0) {
-      return "15%";
-    }else if(index === 1) {
-      return "15%";
-    }else if(index === 2) {
-      return "15%";
-    }else if(index === 3) {
-      return "10%";
-    }else if(index === 4) {
-      return "10%";
-    }else if(index === 5) {
-      return "10%";
-    }else if(index === 6) {
-      return "10%";
-    }else if(index === 7) {
-      return "15%";
-    }
-  }
+  const checkPoolIncome = (index: number): string => {
+    const poolIncomeByIndex = ["15%", "15%", "15%", "10%", "10%", "10%", "10%", "15%"];
+    return poolIncomeByIndex[index] ?? "0%";
+  };
+
+  const checkPoolAmount = (index: number) => {
+    return (
+      calculatePercentage(
+        parseFloat(checkPoolIncome(index).replace("%", "")),
+        Number(totalIncome[0]?.total_amount ?? 0)
+      ) ?? 0
+    );
+  };
+
+  const selectedYear = Number(year);
+  const selectedMonth = Number(month);
+  const hasValidYear = Number.isInteger(selectedYear) && selectedYear > 0;
+  const hasValidMonth = Number.isInteger(selectedMonth) && selectedMonth >= 1 && selectedMonth <= 12;
+
+  const shouldShowPoolAmount =
+    hasValidYear &&
+    (selectedYear > 2026 || (selectedYear === 2026 && hasValidMonth && selectedMonth >= 3));
 
   const data = pools.map((pool,index) => ({
     royaltyPool: formatPoolName(pool.pool),
     totalMembers: pool.total_users,
     poolIncome: checkPoolIncome(index),
+    poolAmount: shouldShowPoolAmount ? checkPoolAmount(index) : 0,
     ryoaltyAchiverList: (
       <Link
         className="btn-update header-btn"

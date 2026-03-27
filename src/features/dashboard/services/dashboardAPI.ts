@@ -16,6 +16,8 @@ export interface DashboardUser {
   incomeLimit2: number;
   incomeLimit: number;
   isProfileUpdated: 0 | 1;
+  rank: number;
+  royalty_users_count: number;
 }
 
 export interface DashboardSummary {
