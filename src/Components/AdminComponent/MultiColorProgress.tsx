@@ -4,9 +4,7 @@ import {
 } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 
-const value = 100;
-
-const getGradientStops = (value:number) => {
+const getGradientStops = (value: number) => {
   if (value <= 33) {
     return (
       <>
@@ -35,20 +33,27 @@ const getGradientStops = (value:number) => {
   );
 };
 
-export default function MultiColorProgress() {
+export default function MultiColorProgress({ progress }: { progress: { totalLimit: number, usedLimit: number } }) {
+  const { totalLimit, usedLimit } = progress;
+  const remainingPercent =
+    totalLimit > 0
+      ? Math.max(0, Math.min(100, ((totalLimit - usedLimit) / totalLimit) * 100))
+      : 0;
+  const displayPercent = Math.round(remainingPercent);
+
   return (
     <div style={{ width: 140, height: 140 }}>
       <svg style={{ height: 0 }}>
         <defs>
           <linearGradient id="progressGradient">
-            {getGradientStops(value)}
+            {getGradientStops(remainingPercent)}
           </linearGradient>
         </defs>
       </svg>
 
       <CircularProgressbarWithChildren
-        value={value}
-        text={`${value}%`}
+        value={remainingPercent}
+        text={`${displayPercent}%`}
         strokeWidth={10}
         styles={buildStyles({
           pathColor: "url(#progressGradient)",

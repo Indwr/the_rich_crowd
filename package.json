@@ -1,7 +1,7 @@
 {
   "name": "the-rich-crowd",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "@reduxjs/toolkit": "^2.11.2",
     "@tanstack/react-query": "^5.90.21",
     "animate.css": "^4.1.1",
+    "country-state-city": "^3.2.1",
     "dotenv": "^17.3.1",
     "js-cookie": "^3.0.5",
     "react": "^19.2.0",

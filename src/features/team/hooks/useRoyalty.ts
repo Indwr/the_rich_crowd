@@ -14,7 +14,8 @@ export const useRoyalty = (params: UseRoyaltyParams = {}) => {
   });
 
   return {
-    pools: query.data?.data ?? [],
+    pools: query.data?.data?.royaltyUsers ?? [],
+    totalIncome: query.data?.data?.totalIncome ?? [],
     message: query.data?.message ?? "",
     isLoading: query.isLoading,
     isFetching: query.isFetching,

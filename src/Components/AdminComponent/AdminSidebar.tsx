@@ -1,6 +1,8 @@
 import { useState, useEffect, type MouseEvent } from "react";
 import { NavLink, useLocation, Link } from "react-router-dom";
+import Cookies from "js-cookie";
 import { Logo } from "../../assets/Images/image";
+import { userKey } from "src/utils/constants";
 
 interface AdminSidebarProps {
   sidebarActive: boolean;
@@ -11,8 +13,16 @@ const AdminSidebar = ({
   sidebarActive,
   setSidebarActive,
 }: AdminSidebarProps) => {
-  // Temporary: preview restrictions are disabled for testing.
-  const isPreview = false;
+  const profileRaw = Cookies.get(userKey);
+  let isPreview = false;
+  if (profileRaw) {
+    try {
+      const profile = JSON.parse(profileRaw) as { previewUserId?: string };
+      isPreview = Boolean(profile?.previewUserId);
+    } catch (_error) {
+      isPreview = false;
+    }
+  }
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
 
@@ -77,6 +87,9 @@ const AdminSidebar = ({
     ) {
       setOpenDropdown("incomeX3");
     } 
+    else if (path.startsWith("/auto-compounding-income")) {
+      setOpenDropdown("autoCompoundingIncome");
+    } 
     else {
       setOpenDropdown(null);
     }
@@ -98,6 +111,7 @@ const AdminSidebar = ({
       </div>
 
       <div className="nav-menu" onClick={handleSidebarNavigation}>
+        <div className="nav-menu-scroll">
 
         {/* Dashboard */}
         <NavLink
@@ -273,6 +287,9 @@ const AdminSidebar = ({
             <NavLink to="/income-x2/royalty-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Royalty Income</span>
             </NavLink>
+            <NavLink to="/income-x2/trainer-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Trainer Income</span>
+            </NavLink>
             {/* <NavLink to="/income-x2/reward-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Reward Income</span>
             </NavLink> */}
@@ -317,8 +334,48 @@ const AdminSidebar = ({
           </div>
         </div>
 
+        {/* Auto Compounding Income */}
+        <div
+          className={`nav-dropdown ${
+            openDropdown === "autoCompoundingIncome" ? "dropdown-open active" : ""
+          }`}
+        >
+          <a
+            href="#"
+            className="nav-item dropdown-trigger"
+            onClick={(e) => {
+              e.preventDefault();
+              toggleDropdown("autoCompoundingIncome");
+            }}
+          >
+            <i className="fas fa-sync-alt" />
+            <span>Auto Compounding Income</span>
+            <i className="fas fa-chevron-down dropdown-icon" />
+          </a>
+
+          <div className="dropdown-menu">
+
+          <NavLink to="/auto-compounding-income/mpr-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>MPR (Monthly Return) Income</span>
+            </NavLink>
+
+          <NavLink to="/auto-compounding-income/direct-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Direct Income</span>
+            </NavLink>
+
+            <NavLink to="/auto-compounding-income/level-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Hybrid level income</span>
+            </NavLink>
+
+            <NavLink to="/auto-compounding-income/income-ledger" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Income Ledger</span>
+            </NavLink>
+        
+          </div>
+        </div>
+
         {/* Bonanza */}
-        <NavLink
+        {/* <NavLink
           to="/bonanza-business"
           className={({ isActive }) =>
             isActive ? "nav-item active" : "nav-item"
@@ -335,7 +392,7 @@ const AdminSidebar = ({
         >
           <i className="fas fa-gift" />
           <span>Bonanza Business Monthly</span>
-        </NavLink>
+        </NavLink> */}
         <NavLink
           to="/royalty-achiver"
           className={({ isActive }) =>
@@ -352,6 +409,20 @@ const AdminSidebar = ({
             <span>Preview Mode Active</span>
           </div>
         )}
+
+        </div>
+
+        <div className="nav-menu-bottom">
+          <NavLink
+            to="/notifications"
+            className={({ isActive }) =>
+              isActive ? "nav-item active" : "nav-item"
+            }
+          >
+            <i className="fas fa-bell" />
+            <span>Notifications</span>
+          </NavLink>
+        </div>
 
       </div>
     </nav>

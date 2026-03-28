@@ -5,6 +5,7 @@ import "animate.css";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Logo } from "../../assets/Images/image";
+import Cookies from "js-cookie";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useDashboardData } from "../../features/dashboard/hooks/useDashboardData";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
@@ -12,6 +13,7 @@ import { shortenAddress } from "../../utils";
 import MultiColorProgress from "src/Components/AdminComponent/MultiColorProgress";
 import { useTokenPrice } from "src/hooks/useTokenPrice";
 import { getTokenCirculatingSupply } from "src/utils/web3";
+import { userKey } from "src/utils/constants";
 
 interface TokenSupplySnapshot {
   totalSupply: string;
@@ -92,22 +94,7 @@ const Dashboard = () => {
   };
 
   const referralLink = `${import.meta.env.VITE_SITE_URL}register?ref=${user?.user_id ?? ""}`;
-  // const totalBusiness =
-  // (dashboardSummary?.left_business ?? 0) +
-  // (dashboardSummary?.right_business ?? 0);
-  // const totalx2Team =
-  // (dashboardSummary?.left_team ?? 0) +
-  // (dashboardSummary?.right_team ?? 0);
-  // const x3StakingBusiness =
-  // (x3Summary?.x3_left_business ?? 0) +
-  // (x3Summary?.x3_right_business ?? 0);
-  // const x3CompoundingBusiness =
-  // (x3Summary?.x3_compound_left_business ?? 0) +
-  // (x3Summary?.x3_compound_right_business ?? 0);
-  // const x3CommonBusiness = Math.min(
-  //   x3Summary?.x3_left_business ?? 0,
-  //   x3Summary?.x3_right_business ?? 0,
-  // );
+
   const showSkeleton = isDashboardLoading && !dashboardResponse;
 
   const getSlotCardClass = (status: number) => {
@@ -136,10 +123,61 @@ const Dashboard = () => {
   const totalIncome = (dashboardSummary?.total_income ?? 0) + (dashboardSummary?.total_income_x3 ?? 0);
 
   const handleProtectedNavigation = (path: string) => {
-    // Temporary: preview restrictions are disabled for testing.
+    const profileRaw = Cookies.get(userKey);
+    if (profileRaw) {
+      try {
+        const profile = JSON.parse(profileRaw) as { previewUserId?: string };
+        if (profile?.previewUserId) {
+          toast.error("This feature is not available in preview mode.");
+          return;
+        }
+      } catch (_error) {
+        // Ignore invalid cookie and allow normal navigation.
+      }
+    }
     navigate(path);
   };
 
+  const rank = Number(user?.rank ?? 0);
+  const royaltyUsersCount = Number(user?.royalty_users_count ?? 0);
+  const normalizedRoyaltyUsersCount = Math.max(0, Math.min(royaltyUsersCount, 8));
+
+  const rankTitles = ["1 Star", "2 Star"];
+  const poolTitles = [
+    "First Pool",
+    "Second Pool",
+    "Third Pool",
+    "Silver Star",
+    "Gold Star",
+    "Platinum Star",
+    "Emerald Star",
+    "Diamond Star",
+  ];
+  const rankStars = rankTitles.map((title, index) => {
+    console.log('title',title)
+    console.log('index',index)
+    const isActive = index === 0 && rank === 1 ? true : index === 1 && rank === 2 ? true : false;
+    return (
+      <span className="star-with-tooltip" data-tooltip={title} key={`rank-${index}`}>
+        <i
+          className={`fas fa-star ${isActive ? "active" : ""}`}
+          aria-label={title}
+        />
+      </span>
+    );
+  });
+
+  const poolStars = poolTitles.map((title, index) => {
+    const isActive = index < normalizedRoyaltyUsersCount;
+    return (
+      <span className="star-with-tooltip" data-tooltip={title} key={`pool-${index}`}>
+        <i
+          className={`fas fa-star ${isActive ? "active" : ""}`}
+          aria-label={title}
+        />
+      </span>
+    );
+  });
   if (showSkeleton) {
     return (
       <SkeletonTheme
@@ -229,29 +267,32 @@ const Dashboard = () => {
                   <p>
                     Sponsor ID <span>{user?.sponser_id ?? "--"}</span>
                   </p>
-                      <p>
-                        Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
-                      </p>
-                      <p>
-                        Trainer ID <span>{user?.trainer_id ?? "--"}</span>
-                      </p>
+                  <p>
+                    Tree Sponsor ID <span>{user?.parent_id ?? "--"}</span>
+                  </p>
+                  <p>
+                    Trainer ID <span>{user?.trainer_id ?? "--"}</span>
+                  </p>
                 </div>
               </div>
-              <div className="rank-section">
-                <span className="rank-label">Rank</span>
-                <div className="stars">
-                  <i className="fas fa-star active" />
-                  <i className="fas fa-star active" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
-                  <i className="fas fa-star" />
+                <div className="rank-section">
+                  <div className="rank-header-row">
+                    <span className="rank-label">Rank Progress</span>
+                    <span className="rank-badge">Rank {rank}</span>
+                  </div>
+                  <div className="rank-progress-meta">
+                    <span>Stars: {rank}/2</span>
+                    <span>Pools: {normalizedRoyaltyUsersCount}/8</span>
+                  </div>
+                  <div className="rank-stars-row">
+                    <span className="rank-row-label">Stars</span>
+                    <div className="stars rank-stars">{rankStars}</div>
+                  </div>
+                  <div className="rank-stars-row">
+                    <span className="rank-row-label">Pools</span>
+                    <div className="stars pool-stars">{poolStars}</div>
+                  </div>
                 </div>
-              </div>
               <div className="wallet-pill">
                 <span id="walletAddressDisplay">
                   {shortenAddress(walletAddress)}
@@ -316,15 +357,15 @@ const Dashboard = () => {
               </div>
               <div className="ksn-details">
                 <div className="ksn-detail-row">
-                  <span>Total Supply</span>
+                  <span>Total Max Supply</span>
                   <strong>{formatTokenUnits(tokenSupply?.totalSupply)} KSN</strong>
                 </div>
                 <div className="ksn-detail-row">
-                  <span>Burned</span>
+                  <span>Real time Burned</span>
                   <strong>{formatTokenUnits(tokenSupply?.burned)} KSN</strong>
                 </div>
                 <div className="ksn-detail-row">
-                  <span>Circulating</span>
+                  <span>Real time Circulating Supply</span>
                   <strong>{formatTokenUnits(tokenSupply?.circulating)} KSN</strong>
                 </div>
               </div>
@@ -366,7 +407,7 @@ const Dashboard = () => {
             </div>
             <div className="metric-value">
               ${formatAmount(totalIncome)}
-            
+
             </div>
           </div>
           <div className="metric-card metric-card2 metric-card-partner">
@@ -637,14 +678,14 @@ const Dashboard = () => {
               </div>
               <div className="x3-actions">
                 <button
-                  className="x3-action-btn"
+                  className="x3-action-btn x3-action-btn-staking"
                   type="button"
                   onClick={() => handleProtectedNavigation("/x3-staking")}
                 >
                   Start X3 Staking <i className="fas fa-arrow-right" />
                 </button>
                 <button
-                  className="x3-action-btn"
+                  className="x3-action-btn x3-action-btn-compounding"
                   type="button"
                   onClick={() => handleProtectedNavigation("/auto-compounding")}
                 >
@@ -668,7 +709,7 @@ const Dashboard = () => {
               <div className="x3-stat-item">
                 <span className="x3-stat-label">Total Combined Staked</span>
                 <span className="x3-stat-value">
-                  ${ formatAmount(Number(dashboardSummary?.totalStaked ?? 0) + Number(dashboardSummary?.totalCompound ?? 0))}
+                  ${formatAmount(Number(dashboardSummary?.totalStaked ?? 0) + Number(dashboardSummary?.totalCompound ?? 0))}
                 </span>
               </div>
             </div>
@@ -676,11 +717,17 @@ const Dashboard = () => {
               <div className="x3-stat-item">
                 <span className="x3-stat-label">3X Max</span>
                 <span className="x3-stat-value">
-                  ${formatAmount(dashboardSummary?.totalStaked)}
+                  ${formatAmount(user?.incomeLimit2)}
+                </span>
+              </div>
+              <div className="x3-stat-item">
+                <span className="x3-stat-label">3X Used Limit</span>
+                <span className="x3-stat-value">
+                  ${formatAmount(user?.incomeLimit)}
                 </span>
               </div>
               <div className="progress-bar-dashboard">
-                <MultiColorProgress />
+                <MultiColorProgress progress={{ totalLimit: Number(user?.incomeLimit2), usedLimit: Number(user?.incomeLimit) }} />
               </div>
             </div>
           </div>
@@ -691,7 +738,7 @@ const Dashboard = () => {
           </div>
           <div className="metric-card">
             <div className="metric-title">Total Members</div>
-            <div className="metric-value">{totalUsers}</div>
+            <div className="metric-value">{(totalUsers ?? 0) + 50}</div>
           </div>
         </div>
       </div>

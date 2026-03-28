@@ -30,7 +30,7 @@ const X3CompoundingHistory = () => {
     withCompound: item.withCompound,
     holdingTime: item.holding_time ?? "-",
     percent: item.percent ?? "-",
-    status: item.status ?? "-",
+    status: item.converted === 1 ? "Converted to Auto Compounding" : "Payable",
     createdAt: item.created_at ? formatDateToLongString(item.created_at) : "-",
   }));
 

@@ -17,7 +17,12 @@ export interface RoyaltyResponse {
   statusCode: number;
   status: boolean;
   message: string;
-  data: RoyaltyPool[];
+  data: {
+    royaltyUsers: RoyaltyPool[];
+    totalIncome: Array<{
+      total_amount: number;
+    }>;
+  };
 }
 
 interface FetchRoyaltyParams {

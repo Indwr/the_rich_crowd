@@ -9,7 +9,8 @@ const INCOME_STALE_TIME_MS = 30 * 1000;
 const INCOME_GC_TIME_MS = 10 * 60 * 1000;
 
 interface UseIncomeHistoryOptions {
-  incomeId: IncomeId;
+  incomeId?: IncomeId;
+  endpointPath?: string;
   incomeType?: string;
   currentPage: number;
   pageSize: number;
@@ -17,6 +18,7 @@ interface UseIncomeHistoryOptions {
 
 export const useIncomeHistory = ({
   incomeId,
+  endpointPath,
   incomeType,
   currentPage,
   pageSize,
@@ -26,10 +28,17 @@ export const useIncomeHistory = ({
   const skip = (safePage - 1) * safePageSize;
 
   const query = useQuery({
-    queryKey: ["income-history", incomeId, incomeType ?? "", safePage, safePageSize],
+    queryKey: [
+      "income-history",
+      endpointPath ?? incomeId ?? "",
+      incomeType ?? "",
+      safePage,
+      safePageSize,
+    ],
     queryFn: () =>
       fetchIncomeList({
         incomeId,
+        endpointPath,
         incomeType,
         skip,
         limit: safePageSize,
