@@ -154,9 +154,7 @@ const Dashboard = () => {
     "Diamond Star",
   ];
   const rankStars = rankTitles.map((title, index) => {
-    console.log('title',title)
-    console.log('index',index)
-    const isActive = index === 0 && rank === 1 ? true : index === 1 && rank === 2 ? true : false;
+    const isActive = index < rank;
     return (
       <span className="star-with-tooltip" data-tooltip={title} key={`rank-${index}`}>
         <i
