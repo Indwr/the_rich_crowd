@@ -362,7 +362,7 @@ const AdminSidebar = ({
         </div>
 
         {/* Bonanza */}
-        <NavLink
+        {/* <NavLink
           to="/bonanza-business"
           className={({ isActive }) =>
             isActive ? "nav-item active" : "nav-item"
@@ -379,7 +379,7 @@ const AdminSidebar = ({
         >
           <i className="fas fa-gift" />
           <span>Bonanza Business Monthly</span>
-        </NavLink>
+        </NavLink> */}
         <NavLink
           to="/royalty-achiver"
           className={({ isActive }) =>

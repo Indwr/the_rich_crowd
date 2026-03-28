@@ -127,7 +127,6 @@ const Dashboard = () => {
 
   const rank = Number(user?.rank ?? 0);
   const royaltyUsersCount = Number(user?.royalty_users_count ?? 0);
-  const normalizedRank = Math.max(0, Math.min(rank, 2));
   const normalizedRoyaltyUsersCount = Math.max(0, Math.min(royaltyUsersCount, 8));
 
   const rankTitles = ["1 Star", "2 Star"];
@@ -141,9 +140,10 @@ const Dashboard = () => {
     "Emerald Star",
     "Diamond Star",
   ];
-
   const rankStars = rankTitles.map((title, index) => {
-    const isActive = index === 0 || normalizedRank >= 2;
+    console.log('title',title)
+    console.log('index',index)
+    const isActive = index === 0 && rank === 1 ? true : index === 1 && rank === 2 ? true : false;
     return (
       <span className="star-with-tooltip" data-tooltip={title} key={`rank-${index}`}>
         <i
@@ -265,10 +265,10 @@ const Dashboard = () => {
                 <div className="rank-section">
                   <div className="rank-header-row">
                     <span className="rank-label">Rank Progress</span>
-                    <span className="rank-badge">Rank {normalizedRank}</span>
+                    <span className="rank-badge">Rank {rank}</span>
                   </div>
                   <div className="rank-progress-meta">
-                    <span>Stars: {Math.max(1, normalizedRank)}/2</span>
+                    <span>Stars: {rank}/2</span>
                     <span>Pools: {normalizedRoyaltyUsersCount}/8</span>
                   </div>
                   <div className="rank-stars-row">
