@@ -5,6 +5,7 @@ import "animate.css";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Logo } from "../../assets/Images/image";
+import Cookies from "js-cookie";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useDashboardData } from "../../features/dashboard/hooks/useDashboardData";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
@@ -12,6 +13,7 @@ import { shortenAddress } from "../../utils";
 import MultiColorProgress from "src/Components/AdminComponent/MultiColorProgress";
 import { useTokenPrice } from "src/hooks/useTokenPrice";
 import { getTokenCirculatingSupply } from "src/utils/web3";
+import { userKey } from "src/utils/constants";
 
 interface TokenSupplySnapshot {
   totalSupply: string;
@@ -121,7 +123,18 @@ const Dashboard = () => {
   const totalIncome = (dashboardSummary?.total_income ?? 0) + (dashboardSummary?.total_income_x3 ?? 0);
 
   const handleProtectedNavigation = (path: string) => {
-    // Temporary: preview restrictions are disabled for testing.
+    const profileRaw = Cookies.get(userKey);
+    if (profileRaw) {
+      try {
+        const profile = JSON.parse(profileRaw) as { previewUserId?: string };
+        if (profile?.previewUserId) {
+          toast.error("This feature is not available in preview mode.");
+          return;
+        }
+      } catch (_error) {
+        // Ignore invalid cookie and allow normal navigation.
+      }
+    }
     navigate(path);
   };
 

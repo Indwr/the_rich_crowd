@@ -1,6 +1,8 @@
 import { useState, useEffect, type MouseEvent } from "react";
 import { NavLink, useLocation, Link } from "react-router-dom";
+import Cookies from "js-cookie";
 import { Logo } from "../../assets/Images/image";
+import { userKey } from "src/utils/constants";
 
 interface AdminSidebarProps {
   sidebarActive: boolean;
@@ -11,8 +13,16 @@ const AdminSidebar = ({
   sidebarActive,
   setSidebarActive,
 }: AdminSidebarProps) => {
-  // Temporary: preview restrictions are disabled for testing.
-  const isPreview = false;
+  const profileRaw = Cookies.get(userKey);
+  let isPreview = false;
+  if (profileRaw) {
+    try {
+      const profile = JSON.parse(profileRaw) as { previewUserId?: string };
+      isPreview = Boolean(profile?.previewUserId);
+    } catch (_error) {
+      isPreview = false;
+    }
+  }
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const location = useLocation();
 
@@ -276,6 +286,9 @@ const AdminSidebar = ({
             </NavLink>
             <NavLink to="/income-x2/royalty-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Royalty Income</span>
+            </NavLink>
+            <NavLink to="/income-x2/trainer-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
+              <span>Trainer Income</span>
             </NavLink>
             {/* <NavLink to="/income-x2/reward-income" className={({ isActive }) => isActive ? "nav-item active" : "nav-item"}>
               <span>Reward Income</span>

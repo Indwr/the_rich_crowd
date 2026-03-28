@@ -8,7 +8,7 @@ import { useConvertAutoCompounding } from "src/features/history/hooks/useConvert
 import { HISTORY_ENDPOINT_X3_STAKING } from "src/features/history/services/historyAPI";
 import { useHistoryList } from "src/features/history/hooks/useHistoryList";
 import { formatDateToLongString } from "src/utils";
-import { tokenKey } from "src/utils/constants";
+import { tokenKey, userKey } from "src/utils/constants";
 
 const YEAR_OPTIONS = [3, 5, 10] as const;
 
@@ -65,6 +65,19 @@ const X3StakingHistory = () => {
   }));
 
   const openConvertModal = () => {
+    const profileRaw = Cookies.get(userKey);
+    if (profileRaw) {
+      try {
+        const profile = JSON.parse(profileRaw) as { previewUserId?: string };
+        if (profile?.previewUserId) {
+          toast.error("This feature is not available in preview mode.");
+          return;
+        }
+      } catch (_error) {
+        // Ignore invalid cookie and continue normal behavior.
+      }
+    }
+
     setConvertYear(3);
     setConvertAmount("");
     setConvertModalOpen(true);

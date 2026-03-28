@@ -1,11 +1,28 @@
-import { type ReactElement } from 'react';
+import { type ReactElement } from "react";
+import { Navigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import { userKey } from "src/utils/constants";
 
 interface PreviewProtectedRouteProps {
   children: ReactElement;
 }
 
 const PreviewProtectedRoute = ({ children }: PreviewProtectedRouteProps) => {
-  // Temporary: preview restrictions are disabled for testing.
+  const profileRaw = Cookies.get(userKey);
+  let isPreview = false;
+  if (profileRaw) {
+    try {
+      const profile = JSON.parse(profileRaw) as { previewUserId?: string };
+      isPreview = Boolean(profile?.previewUserId);
+    } catch (_error) {
+      isPreview = false;
+    }
+  }
+
+  if (isPreview) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return children;
 };
 

@@ -31,6 +31,7 @@ const X2DirectIncome = lazy(() => import("../Pages/Admin/X2DirectIncome"));
 const HybridLevelIncome = lazy(() => import("../Pages/Admin/HybridLevelIncome"));
 const TRCSpecialIncome = lazy(() => import("../Pages/Admin/TRCSpecialIncome"));
 const RoyaltyIncome = lazy(() => import("../Pages/Admin/RoyaltyIncome"));
+const X2TrainerIncome = lazy(() => import("../Pages/Admin/X2TrainerIncome"));
 const RewardIncome = lazy(() => import("../Pages/Admin/RewardIncome"));
 const X2IncomeLedger = lazy(() => import("../Pages/Admin/X2IncomeLedger"));
 const BiMonthly = lazy(() => import("../Pages/Admin/BiMonthly"));
@@ -156,6 +157,7 @@ const AppRoutes = () => {
                 <Route path="hybrid-level-income" element={<HybridLevelIncome />} />
                 <Route path="trc-special-income" element={<TRCSpecialIncome />} />
                 <Route path="royalty-income" element={<RoyaltyIncome />} />
+                <Route path="trainer-income" element={<X2TrainerIncome />} />
                 <Route path="reward-income" element={<RewardIncome />} />
                 <Route path="income-ledger" element={<X2IncomeLedger />} />
               </Route>
