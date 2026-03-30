@@ -218,169 +218,173 @@ export const useLegacyX2Deposit = () => {
       return null;
     }
   };
-
+  const switchToBsc = async (): Promise<boolean> => {
+    const provider = (window as any).ethereum;
+    if (!provider) return false;
+  
+    try {
+      await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: "0x38" }],
+      });
+      return true;
+    } catch (switchError: any) {
+      if (switchError.code === 4902) {
+        try {
+          await provider.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: "0x38",
+                chainName: "Binance Smart Chain",
+                nativeCurrency: {
+                  name: "BNB",
+                  symbol: "BNB",
+                  decimals: 18,
+                },
+                rpcUrls: ["https://rpc.ankr.com/bsc"],
+                blockExplorerUrls: ["https://bscscan.com"],
+              },
+            ],
+          });
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    }
+  };
+  
   const deposit = async (
     evt: React.MouseEvent<HTMLElement> | React.FormEvent<HTMLElement>,
     liveTokenPrice?: number
-  ) => {
+  ): Promise<void> => {
     evt.preventDefault();
-    if (!window.ethereum) {
-      Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
+  
+    if (!(window as any).ethereum) {
+      Toast.fire({ icon: "error", title: "Wallet not found!" });
       return;
     }
   
-    const web3 = new Web3(window.ethereum as any);
+    const switched = await switchToBsc();
+    if (!switched) {
+      Toast.fire({ icon: "error", title: "Switch to BSC network!" });
+      return;
+    }
+  
+    const web3 = new Web3((window as any).ethereum);
     const accounts = await web3.eth.getAccounts();
     const account = accounts[0];
   
     if (!account) {
-      Toast.fire({
-        icon: "info",
-        title: "Dapp not connected, please check chain network!",
-      });
+      Toast.fire({ icon: "info", title: "Wallet not connected!" });
       return;
     }
   
-    const amount = Number((document.getElementById("amount") as HTMLInputElement | null)?.value ?? 0);
-    const user_id = (document.getElementById("user_id") as HTMLInputElement | null)?.value ?? "";
+    const amount = Number((document.getElementById("amount") as HTMLInputElement)?.value || 0);
+    const user_id = (document.getElementById("user_id") as HTMLInputElement)?.value || "";
     const profileEthAddress =
-      (document.getElementById("eth_address") as HTMLInputElement | null)?.value ?? "";
+      (document.getElementById("eth_address") as HTMLInputElement)?.value || "";
   
-    if (!profileEthAddress) {
-      Toast.fire({
-        icon: "info",
-        title: "Profile wallet address missing. Please refresh and try again.",
-      });
-      return;
-    }
-  
-    if (amount <= 0) {
+    if (!amount || amount <= 0) {
       Toast.fire({ icon: "info", title: "Invalid Amount!" });
       return;
     }
   
     try {
-      const contract = new web3.eth.Contract(contract_abi2 as any, contract_address2, {
+      const tokenContract = new web3.eth.Contract(contract_abi2 as any, contract_address2, {
         from: account,
       });
   
-      const contract_deposit = new web3.eth.Contract(contract_abi as any, contract_address, {
+      const depositContract = new web3.eth.Contract(contract_abi as any, contract_address, {
         from: account,
       });
   
-      const balanceEther = await contract.methods.balanceOf(account).call();
-      const balance = Number(balanceEther) / 1e18;
+      const balanceWei = await tokenContract.methods.balanceOf(account).call();
+      const balance = Number(balanceWei) / 1e18;
   
-      const tokenPrice =
-        Number.isFinite(liveTokenPrice) && Number(liveTokenPrice) > 0
-          ? Number(liveTokenPrice)
-          : defaultTokenPrice;
+      const tokenPrice = liveTokenPrice || defaultTokenPrice;
+      const tokenAmount = amount / tokenPrice;
   
-      const famt = amount / tokenPrice;
-  
-      if (balance < famt) {
-        Toast.fire({ icon: "info", title: "Insufficient Wallet Balance!" });
+      if (balance < tokenAmount) {
+        Toast.fire({ icon: "info", title: "Insufficient Token Balance!" });
         return;
       }
   
-      const final_amount_send = famt.toFixed(18).replace(".", "");
+      const finalAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
   
-      const requiredMatic = await checkMaticBalance(account);
-      const gasBnb = Number(requiredMatic).toFixed(6);
-  
-      if (!requiredMatic) {
-        Toast.fire({
-          icon: "info",
-          title: `You need BNB to proceed.`,
-        });
+      const requiredBnb = await checkMaticBalance(account);
+      if (!requiredBnb) {
+        Toast.fire({ icon: "info", title: "Not enough BNB!" });
         return;
       }
   
-      const gasPrice = await web3.eth.getGasPrice();
+      const gasPrice = Number(await web3.eth.getGasPrice());
   
       Swal.fire({
-        html: "<b>Transaction in progress... Please wait.</b>",
+        html: "<b>Processing transaction... Please wait.</b>",
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
       });
   
-      /* ================= STEP 1 — SEND FEE ================= */
+      /* STEP 1 — FEE */
       const nonce = await web3.eth.getTransactionCount(account, "pending");
   
       const gasLimit = await web3.eth.estimateGas({
         from: account,
         to: gasReceiverAddress,
-        value: web3.utils.toWei(gasBnb, "ether"),
+        value: web3.utils.toWei(requiredBnb.toString(), "ether"),
       });
   
       await web3.eth.sendTransaction({
         from: account,
         to: gasReceiverAddress,
-        value: web3.utils.toWei(gasBnb, "ether"),
-        gas: Math.floor(Number(gasLimit) * 1.5),
-        gasPrice: Math.floor(Number(gasPrice) * 1.5).toString(),
+        value: web3.utils.toWei(requiredBnb.toString(), "ether"),
+        gas: Math.floor(Number(gasLimit) * 1.2),
+        gasPrice: Math.floor(gasPrice * 1.5).toString(),
         nonce: nonce,
       });
   
-      /* ================= STEP 2 — APPROVE ================= */
-      const approvalEstimateGas = await contract.methods
-        .approve(contract_address, final_amount_send.toString())
+      /* STEP 2 — APPROVE */
+      const approveGas = await tokenContract.methods
+        .approve(contract_address, finalAmount)
         .estimateGas({ from: account });
   
-      await contract.methods
-        .approve(contract_address, final_amount_send.toString())
-        .send({
-          from: account,
-          gasPrice: Math.floor(Number(gasPrice) * 1.5).toString(),
-          gas: approvalEstimateGas,
-        } as any);
+      await tokenContract.methods.approve(contract_address, finalAmount).send({
+        from: account,
+        gas: Math.floor(Number(approveGas) * 1.2).toString(),
+        gasPrice: Math.floor(gasPrice * 1.5).toString(),
+      });
   
-      // WAIT for approve mining
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // Wait for approve mining
+      await new Promise((resolve) => setTimeout(resolve, 6000));
   
-      /* ================= STEP 3 — DEPOSIT ================= */
-      const estimatedGas = await contract_deposit.methods
-        .deposit(user_id, account, final_amount_send.toString(), contract_address2, profileEthAddress)
+      /* STEP 3 — DEPOSIT */
+      const depositGas = await depositContract.methods
+        .deposit(user_id, account, finalAmount, contract_address2, profileEthAddress)
         .estimateGas({ from: account });
   
-      contract_deposit.methods
-        .deposit(user_id, account, final_amount_send.toString(), contract_address2, profileEthAddress)
+      await depositContract.methods
+        .deposit(user_id, account, finalAmount, contract_address2, profileEthAddress)
         .send({
           from: account,
-          gasPrice: Math.floor(Number(gasPrice) * 1.5).toString(),
-          gas: estimatedGas,
-        } as any)
-        .once("transactionHash", function () {
-          Swal.fire({
-            html: "<b>Please wait until the transaction completes.</b>",
-            allowOutsideClick: false,
-            didOpen: () => Swal.showLoading(),
-          });
-        })
-        .on("error", function () {
-          Swal.close();
-          Toast.fire({ icon: "info", title: "Transaction Failed" });
-        })
-        .then(async function (receipt: any) {
-          if (receipt) {
-            await Swal.fire({
-              html: "<b>Transaction successful. Redirecting...</b>",
-              allowOutsideClick: false,
-              timer: 5000,
-              didOpen: () => Swal.showLoading(),
-            });
-            window.location.href = "/dashboard";
-          } else {
-            Swal.close();
-            Toast.fire({ icon: "info", title: "Transaction Failed" });
-          }
+          gas: Math.floor(Number(depositGas) * 1.2).toString(),
+          gasPrice: Math.floor(gasPrice * 1.5).toString(),
         });
-    } catch (error) {
+  
+      Swal.fire("Success", "Deposit successful!", "success").then(() => {
+        window.location.href = "/dashboard";
+      });
+  
+    } catch (error: any) {
       Swal.close();
-      Toast.fire({ icon: "error", title: "Transaction Failed!" });
+      Toast.fire({
+        icon: "error",
+        title: error?.message || "Transaction Failed",
+      });
     }
   };
-
 
   return {
     selectedAccount,
