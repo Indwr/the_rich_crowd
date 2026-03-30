@@ -84,7 +84,6 @@ const isTrustWalletProvider = (provider: any) => {
         .includes("trust")
   );
 };
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const useLegacyX3Deposit = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
