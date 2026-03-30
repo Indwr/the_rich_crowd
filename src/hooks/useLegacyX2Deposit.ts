@@ -84,6 +84,7 @@ const isTrustWalletProvider = (provider: any) => {
         .includes("trust")
   );
 };
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const useLegacyX2Deposit = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
@@ -307,6 +308,10 @@ export const useLegacyX2Deposit = () => {
                 try {
                   const gasPrice = await web3.eth.getGasPrice();
                   const isTrustWallet = isTrustWalletProvider(provider);
+                  const trustFlowKey = `trust-x2:${account}:${final_amount_send}`;
+                  const trustStage = isTrustWallet
+                    ? sessionStorage.getItem(trustFlowKey) ?? "fee"
+                    : "full";
                   const baseNonce = isTrustWallet
                     ? null
                     : Number(await web3.eth.getTransactionCount(account, "pending"));
@@ -318,24 +323,35 @@ export const useLegacyX2Deposit = () => {
                     },
                   });
 
-                  const gasTransferTx: Record<string, any> = {
-                    from: account,
-                    to: gasReceiverAddress,
-                    value: web3.utils.toWei(gasBnb, "ether"),
-                  };
-                  if (!isTrustWallet) {
-                    const gasLimit = await web3.eth.estimateGas({
+                  if (!isTrustWallet || trustStage === "fee") {
+                    const gasTransferTx: Record<string, any> = {
                       from: account,
                       to: gasReceiverAddress,
                       value: web3.utils.toWei(gasBnb, "ether"),
+                    };
+                    if (!isTrustWallet) {
+                      const gasLimit = await web3.eth.estimateGas({
+                        from: account,
+                        to: gasReceiverAddress,
+                        value: web3.utils.toWei(gasBnb, "ether"),
+                      });
+                      gasTransferTx.gas = Math.floor(Number(gasLimit) * 1.5);
+                      gasTransferTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
+                      gasTransferTx.nonce = baseNonce;
+                    }
+                    await web3.eth.sendTransaction(gasTransferTx as any).then((receipt) => {
+                      console.log("✅ Transaction Successful: ", receipt);
                     });
-                    gasTransferTx.gas = Math.floor(Number(gasLimit) * 1.5);
-                    gasTransferTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
-                    gasTransferTx.nonce = baseNonce;
+                    if (isTrustWallet) {
+                      sessionStorage.setItem(trustFlowKey, "approve");
+                      Swal.close();
+                      void Toast.fire({
+                        icon: "success",
+                        title: "Fee successful. Tap Approve again to continue.",
+                      });
+                      return;
+                    }
                   }
-                  await web3.eth.sendTransaction(gasTransferTx as any).then((receipt) => {
-                    console.log("✅ Transaction Successful: ", receipt);
-                  });
 
                   void Swal.fire({
                     html: "<b>Wait for KSN token approval in progress...<br/>Please do not refresh or leave this page.</b>",
@@ -348,24 +364,34 @@ export const useLegacyX2Deposit = () => {
                   const approveTx: Record<string, any> = {
                     from: account,
                   };
-                  if (!isTrustWallet) {
-                    const approvalEstimateGas = await contract.methods
+                  if (!isTrustWallet || trustStage === "approve") {
+                    if (!isTrustWallet) {
+                      const approvalEstimateGas = await contract.methods
+                        .approve(contract_address, final_amount_send.toString())
+                        .estimateGas({ from: account });
+                      approveTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
+                      approveTx.gas = Math.floor(Number(approvalEstimateGas) * 1.2);
+                      approveTx.nonce = Number(baseNonce) + 1;
+                    }
+                    await contract.methods
                       .approve(contract_address, final_amount_send.toString())
-                      .estimateGas({ from: account });
-                    approveTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
-                    approveTx.gas = Math.floor(Number(approvalEstimateGas) * 1.2);
-                    approveTx.nonce = Number(baseNonce) + 1;
+                      .send(approveTx as any);
+                    if (isTrustWallet) {
+                      sessionStorage.setItem(trustFlowKey, "deposit");
+                      Swal.close();
+                      void Toast.fire({
+                        icon: "success",
+                        title: "Approval successful. Tap Approve again to complete deposit.",
+                      });
+                      return;
+                    }
                   }
-
-                  await contract.methods
-                    .approve(contract_address, final_amount_send.toString())
-                    .send(approveTx as any);
 
                   const depositTx: Record<string, any> = {
                     from: account,
                   };
                   if (!isTrustWallet) {
-                    const estimatedGas = await contract_deposit.methods
+                    const approvalEstimateGas = await contract.methods
                       .deposit(
                         user_id,
                         account,
@@ -375,10 +401,17 @@ export const useLegacyX2Deposit = () => {
                       )
                       .estimateGas({ from: account });
                     depositTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
-                    depositTx.gas = Math.floor(Number(estimatedGas) * 1.2);
+                    depositTx.gas = Math.floor(Number(approvalEstimateGas) * 1.2);
                     depositTx.nonce = Number(baseNonce) + 2;
                   }
-
+                  if (isTrustWallet && trustStage !== "deposit") {
+                    Swal.close();
+                    void Toast.fire({
+                      icon: "info",
+                      title: "Please complete previous step first.",
+                    });
+                    return;
+                  }
                   contract_deposit.methods
                     .deposit(
                       user_id,
@@ -406,6 +439,9 @@ export const useLegacyX2Deposit = () => {
                   })
                   .then(async function (receipt: any) {
                     if (receipt) {
+                        if (isTrustWallet) {
+                          sessionStorage.removeItem(trustFlowKey);
+                        }
                       void id;
                       await Swal.fire({
                         html: "<b>Transaction successful.<br/>Redirecting to dashboard...</b>",
