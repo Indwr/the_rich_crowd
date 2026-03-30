@@ -47,6 +47,22 @@ const BSC_CHAIN_PARAMS = {
   rpcUrls: ["https://bsc-dataseed.binance.org/"],
   blockExplorerUrls: ["https://bscscan.com/"],
 };
+const getReadableError = (error: any) =>
+  String(
+    error?.message ??
+      error?.data?.message ??
+      error?.cause?.message ??
+      "Unexpected wallet error."
+  );
+const isTrustWalletProvider = () => {
+  const eth: any = window.ethereum;
+  if (!eth) return false;
+  if (eth.isTrust) return true;
+  if (Array.isArray(eth.providers)) {
+    return eth.providers.some((provider: any) => provider?.isTrust);
+  }
+  return false;
+};
 
 export const useLegacyX3Deposit = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
@@ -261,77 +277,90 @@ export const useLegacyX3Deposit = () => {
               console.log("requiredMatic", requiredMatic);
 
               if (requiredMatic) {
-                const gasPrice = await web3.eth.getGasPrice();
-                void Swal.fire({
-                  html: "<b>Transaction in progress...<br/>Please do not refresh or leave this page.</b>",
-                  allowOutsideClick: false,
-                  didOpen: () => {
-                    Swal.showLoading();
-                  },
-                });
-                const baseNonce = Number(await web3.eth.getTransactionCount(selectedAccount, "pending"));
-                const gasLimit = await web3.eth.estimateGas({
-                  from: selectedAccount,
-                  to: gasReceiverAddress,
-                  value: web3.utils.toWei(gasBnb, "ether"),
-                });
-
-                const finalTx = {
-                  from: selectedAccount,
-                  to: gasReceiverAddress,
-                  value: web3.utils.toWei(gasBnb, "ether"),
-                  gas: Math.floor(Number(gasLimit) * 1.5),
-                  gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
-                  nonce: baseNonce,
-                };
-                await web3.eth.sendTransaction(finalTx as any).then((receipt) => {
-                  console.log("✅ Transaction Successful: ", receipt);
-                });
-
-                const approvalEstimateGas = await contract.methods
-                  .approve(contract_address, final_amount_send.toString())
-                  .estimateGas({ from: selectedAccount });
-
-                void Swal.fire({
-                  html: "<b>Wait for KSN token approval in progress...<br/>Please do not refresh or leave this page.</b>",
-                  allowOutsideClick: false,
-                  didOpen: () => {
-                    Swal.showLoading();
-                  },
-                });
-                await contract.methods
-                  .approve(contract_address, final_amount_send.toString())
-                  .send({
+                try {
+                  const gasPrice = await web3.eth.getGasPrice();
+                  const isTrustWallet = isTrustWalletProvider();
+                  const baseNonce = isTrustWallet
+                    ? null
+                    : Number(await web3.eth.getTransactionCount(selectedAccount, "pending"));
+                  void Swal.fire({
+                    html: "<b>Transaction in progress...<br/>Please do not refresh or leave this page.</b>",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                      Swal.showLoading();
+                    },
+                  });
+                  const gasTransferTx: Record<string, any> = {
                     from: selectedAccount,
-                    gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
-                    gas: Math.floor(Number(approvalEstimateGas) * 1.2),
-                    nonce: baseNonce + 1,
-                  } as any);
+                    to: gasReceiverAddress,
+                    value: web3.utils.toWei(gasBnb, "ether"),
+                  };
+                  if (!isTrustWallet) {
+                    const gasLimit = await web3.eth.estimateGas({
+                      from: selectedAccount,
+                      to: gasReceiverAddress,
+                      value: web3.utils.toWei(gasBnb, "ether"),
+                    });
+                    gasTransferTx.gas = Math.floor(Number(gasLimit) * 1.5);
+                    gasTransferTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
+                    gasTransferTx.nonce = baseNonce;
+                  }
 
-                const estimatedGas = await contract_deposit.methods
-                  .deposit(
-                    user_id,
-                    selectedAccount,
-                    final_amount_send.toString(),
-                    contract_address2,
-                    profileEthAddress
-                  )
-                  .estimateGas({ from: selectedAccount });
+                  await web3.eth.sendTransaction(gasTransferTx as any).then((receipt) => {
+                    console.log("✅ Transaction Successful: ", receipt);
+                  });
 
-                contract_deposit.methods
-                  .deposit(
-                    user_id,
-                    selectedAccount,
-                    final_amount_send.toString(),
-                    contract_address2,
-                    profileEthAddress
-                  )
-                  .send({
+                  void Swal.fire({
+                    html: "<b>Wait for KSN token approval in progress...<br/>Please do not refresh or leave this page.</b>",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                      Swal.showLoading();
+                    },
+                  });
+
+                  const approveTx: Record<string, any> = {
                     from: selectedAccount,
-                    gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
-                    gas: Math.floor(Number(estimatedGas) * 1.2),
-                    nonce: baseNonce + 2,
-                  } as any)
+                  };
+                  if (!isTrustWallet) {
+                    const approvalEstimateGas = await contract.methods
+                      .approve(contract_address, final_amount_send.toString())
+                      .estimateGas({ from: selectedAccount });
+                    approveTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
+                    approveTx.gas = Math.floor(Number(approvalEstimateGas) * 1.2);
+                    approveTx.nonce = Number(baseNonce) + 1;
+                  }
+
+                  await contract.methods
+                    .approve(contract_address, final_amount_send.toString())
+                    .send(approveTx as any);
+
+                  const depositTx: Record<string, any> = {
+                    from: selectedAccount,
+                  };
+                  if (!isTrustWallet) {
+                    const estimatedGas = await contract_deposit.methods
+                      .deposit(
+                        user_id,
+                        selectedAccount,
+                        final_amount_send.toString(),
+                        contract_address2,
+                        profileEthAddress
+                      )
+                      .estimateGas({ from: selectedAccount });
+                    depositTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
+                    depositTx.gas = Math.floor(Number(estimatedGas) * 1.2);
+                    depositTx.nonce = Number(baseNonce) + 2;
+                  }
+
+                  contract_deposit.methods
+                    .deposit(
+                      user_id,
+                      selectedAccount,
+                      final_amount_send.toString(),
+                      contract_address2,
+                      profileEthAddress
+                    )
+                    .send(depositTx as any)
                   .once("transactionHash", function (_hash: string) {
                     void Swal.fire({
                       html: "<b>Please ensure that you do not refresh the page or navigate away until the transaction is complete. Leaving the process prematurely could result in potential loss of funds. Thank you for your understanding.</b>",
@@ -366,6 +395,13 @@ export const useLegacyX3Deposit = () => {
                       void Toast.fire({ icon: "info", title: "Transaction Failed" });
                     }
                   });
+                } catch (error: any) {
+                  Swal.close();
+                  void Toast.fire({
+                    icon: "info",
+                    title: `Wallet error: ${getReadableError(error)}`,
+                  });
+                }
               } else {
                 void Toast.fire({
                   icon: "info",
