@@ -225,7 +225,6 @@ export const useLegacyX2Deposit = () => {
 
   const deposit = async (
     evt: React.MouseEvent<HTMLElement> | React.FormEvent<HTMLElement>,
-    id: string,
     liveTokenPrice?: number
   ) => {
     evt.preventDefault();
