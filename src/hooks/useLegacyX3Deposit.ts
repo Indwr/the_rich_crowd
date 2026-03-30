@@ -82,18 +82,10 @@ const getInjectedProvider = (): any => {
   }
   return eth;
 };
-const isTrustWalletProvider = (provider: any) => {
-  if (!provider) return false;
-  return Boolean(
-    provider?.isTrust ||
-      provider?.isTrustWallet ||
-      String(provider?.providerInfo?.rdns ?? "")
-        .toLowerCase()
-        .includes("trustwallet") ||
-      String(provider?.providerInfo?.name ?? "")
-        .toLowerCase()
-        .includes("trust")
-  );
+const isTrustWalletProvider = (_provider: any) => {
+  // Keep one consistent transaction flow across wallets.
+  // Trust-specific RPC branch was causing unreliable failures.
+  return false;
 };
 const waitForReceipt = async (web3: Web3, txHash: string, timeoutMs = 90000) => {
   const startedAt = Date.now();
