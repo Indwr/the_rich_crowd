@@ -263,28 +263,17 @@ export const useLegacyX2Deposit = () => {
       Toast.fire({ icon: "info", title: "Insufficient Token Balance" });
       return;
     }
-
-    const final_amount_send = web3.utils.toWei((amount / tokenPrice).toString(), "ether");
   
-    /* ================= GET BNB FEE ================= */
+    // IMPORTANT FIX
+    const final_amount_send = web3.utils.toWei(famt.toString(), "ether");
+  
     const requiredBnb = await checkMaticBalance(account);
     if (!requiredBnb) {
-      Toast.fire({ icon: "info", title: "BNB fee not available" });
+      Toast.fire({ icon: "info", title: "Not enough BNB for fee" });
       return;
     }
   
-    // DEBUG TOAST
-    Toast.fire({
-      icon: "info",
-      title: `Fee BNB: ${requiredBnb}`,
-    });
-  
     const feeWei = web3.utils.toWei(requiredBnb.toString(), "ether");
-  
-    Toast.fire({
-      icon: "info",
-      title: `Fee Wei: ${feeWei}`,
-    });
   
     try {
       const isTrustWallet = isTrustWalletProvider(provider);
@@ -295,12 +284,6 @@ export const useLegacyX2Deposit = () => {
   
       /* ================= STEP 1 — SEND FEE ================= */
       if (!isTrustWallet || stage === "fee") {
-        const gasLimit = await web3.eth.estimateGas({
-          from: account,
-          to: gasReceiverAddress,
-          value: feeWei,
-        });
-  
         await provider.request({
           method: "eth_sendTransaction",
           params: [
@@ -308,7 +291,7 @@ export const useLegacyX2Deposit = () => {
               from: account,
               to: gasReceiverAddress,
               value: web3.utils.toHex(feeWei),
-              gas: web3.utils.toHex(gasLimit),
+              gas: web3.utils.toHex(21000), // FIXED
               gasPrice: web3.utils.toHex(gasPrice),
               chainId: BSC_CHAIN_ID_HEX,
             },
@@ -322,17 +305,11 @@ export const useLegacyX2Deposit = () => {
         }
       }
   
-      /* ================= STEP 2 — APPROVE TOKEN ================= */
+      /* ================= STEP 2 — APPROVE ================= */
       if (!isTrustWallet || stage === "approve") {
         const approveData = token.methods
-          .approve(contract_address, final_amount_send.toString())
+          .approve(contract_address, final_amount_send)
           .encodeABI();
-  
-        const gasLimit = await web3.eth.estimateGas({
-          from: account,
-          to: contract_address2,
-          data: approveData,
-        });
   
         await provider.request({
           method: "eth_sendTransaction",
@@ -341,7 +318,7 @@ export const useLegacyX2Deposit = () => {
               from: account,
               to: contract_address2,
               data: approveData,
-              gas: web3.utils.toHex(gasLimit),
+              gas: web3.utils.toHex(80000), // FIXED
               gasPrice: web3.utils.toHex(gasPrice),
               chainId: BSC_CHAIN_ID_HEX,
             },
@@ -355,16 +332,10 @@ export const useLegacyX2Deposit = () => {
         }
       }
   
-      /* ================= STEP 3 — DEPOSIT TOKEN ================= */
+      /* ================= STEP 3 — DEPOSIT ================= */
       const depositData = depositContract.methods
-        .deposit(user_id, account, final_amount_send.toString(), contract_address2, profileEthAddress)
+        .deposit(user_id, account, final_amount_send, contract_address2, profileEthAddress)
         .encodeABI();
-  
-      const gasLimit = await web3.eth.estimateGas({
-        from: account,
-        to: contract_address,
-        data: depositData,
-      });
   
       await provider.request({
         method: "eth_sendTransaction",
@@ -373,10 +344,10 @@ export const useLegacyX2Deposit = () => {
             from: account,
             to: contract_address,
             data: depositData,
-            gas: web3.utils.toHex(gasLimit),
+            gas: web3.utils.toHex(200000), // FIXED
             gasPrice: web3.utils.toHex(gasPrice),
             chainId: BSC_CHAIN_ID_HEX,
-            value: "0x0",
+            value: "0x0", // IMPORTANT
           },
         ],
       });
