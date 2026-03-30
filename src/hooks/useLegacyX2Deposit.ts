@@ -47,24 +47,24 @@ const BSC_CHAIN_PARAMS = {
   rpcUrls: ["https://bsc-dataseed.binance.org/"],
   blockExplorerUrls: ["https://bscscan.com/"],
 };
-const getReadableError = (error: any) => {
-  const message =
-    error?.shortMessage ??
-    error?.message ??
-    error?.reason ??
-    error?.data?.message ??
-    error?.error?.message ??
-    error?.cause?.message ??
-    error?.originalError?.message;
-  if (message) return String(message);
-  if (typeof error?.code !== "undefined") return `Error code ${String(error.code)}`;
-  try {
-    const text = JSON.stringify(error);
-    return text && text !== "{}" ? text : "Unexpected wallet error.";
-  } catch (_error) {
-    return "Unexpected wallet error.";
-  }
-};
+// const getReadableError = (error: any) => {
+//   const message =
+//     error?.shortMessage ??
+//     error?.message ??
+//     error?.reason ??
+//     error?.data?.message ??
+//     error?.error?.message ??
+//     error?.cause?.message ??
+//     error?.originalError?.message;
+//   if (message) return String(message);
+//   if (typeof error?.code !== "undefined") return `Error code ${String(error.code)}`;
+//   try {
+//     const text = JSON.stringify(error);
+//     return text && text !== "{}" ? text : "Unexpected wallet error.";
+//   } catch (_error) {
+//     return "Unexpected wallet error.";
+//   }
+// };
 const getInjectedProvider = (): any => {
   const eth: any = window.ethereum;
   if (!eth) return null;
