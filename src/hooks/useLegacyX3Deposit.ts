@@ -54,14 +54,35 @@ const getReadableError = (error: any) =>
       error?.cause?.message ??
       "Unexpected wallet error."
   );
-const isTrustWalletProvider = () => {
+const getInjectedProvider = (): any => {
   const eth: any = window.ethereum;
-  if (!eth) return false;
-  if (eth.isTrust) return true;
+  if (!eth) return null;
   if (Array.isArray(eth.providers)) {
-    return eth.providers.some((provider: any) => provider?.isTrust);
+    return (
+      eth.providers.find(
+        (provider: any) =>
+          provider?.isTrust ||
+          provider?.isTrustWallet ||
+          String(provider?.providerInfo?.name ?? "")
+            .toLowerCase()
+            .includes("trust")
+      ) ?? eth.providers[0]
+    );
   }
-  return false;
+  return eth;
+};
+const isTrustWalletProvider = (provider: any) => {
+  if (!provider) return false;
+  return Boolean(
+    provider?.isTrust ||
+      provider?.isTrustWallet ||
+      String(provider?.providerInfo?.rdns ?? "")
+        .toLowerCase()
+        .includes("trustwallet") ||
+      String(provider?.providerInfo?.name ?? "")
+        .toLowerCase()
+        .includes("trust")
+  );
 };
 
 export const useLegacyX3Deposit = () => {
@@ -81,22 +102,23 @@ export const useLegacyX3Deposit = () => {
   );
 
   const ensureBscNetwork = async () => {
-    if (!window.ethereum?.request) return false;
+    const provider = getInjectedProvider();
+    if (!provider?.request) return false;
     try {
-      const currentChainId = String((await window.ethereum.request({ method: "eth_chainId" })) ?? "").toLowerCase();
+      const currentChainId = String((await provider.request({ method: "eth_chainId" })) ?? "").toLowerCase();
       if (currentChainId === BSC_CHAIN_ID_HEX || currentChainId === BSC_CHAIN_ID_DEC) {
         return true;
       }
 
       try {
-        await window.ethereum.request({
+        await provider.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId: BSC_CHAIN_ID_HEX }],
         });
         return true;
       } catch (switchError: any) {
         if (switchError?.code === 4902) {
-          await window.ethereum.request({
+          await provider.request({
             method: "wallet_addEthereumChain",
             params: [BSC_CHAIN_PARAMS],
           });
@@ -114,13 +136,14 @@ export const useLegacyX3Deposit = () => {
   };
 
   const fetchKsnBalance = async (account: string) => {
-    if (!window.ethereum || !account || !contract_abi2.length || !contract_address2) {
+    const provider = getInjectedProvider();
+    if (!provider || !account || !contract_abi2.length || !contract_address2) {
       setKsnBalance(null);
       return;
     }
 
     try {
-      const web3 = new Web3(window.ethereum as any);
+      const web3 = new Web3(provider as any);
       const contract = new web3.eth.Contract(contract_abi2 as any, contract_address2, {
         from: account,
       });
@@ -137,16 +160,17 @@ export const useLegacyX3Deposit = () => {
   };
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
+    const provider = getInjectedProvider();
+    if (!provider) {
       void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
       return;
     }
     const isBscReady = await ensureBscNetwork();
     if (!isBscReady) return;
-    const web3 = new Web3(window.ethereum as any);
+    const web3 = new Web3(provider as any);
     let accounts = await web3.eth.getAccounts();
-    if (!accounts.length && window.ethereum.request) {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
+    if (!accounts.length && provider.request) {
+      await provider.request({ method: "eth_requestAccounts" });
       accounts = await web3.eth.getAccounts();
     }
     const nextAccount = accounts[0] ?? "";
@@ -159,9 +183,10 @@ export const useLegacyX3Deposit = () => {
   };
 
   const checkMaticBalance = async (userAddress: string) => {
-    if (!window.ethereum) return null;
+    const provider = getInjectedProvider();
+    if (!provider) return null;
 
-    const web3 = new Web3(window.ethereum as any);
+    const web3 = new Web3(provider as any);
     const minRequiredUsd = X3_MIN_REQUIRED_USD;
 
     try {
@@ -192,14 +217,15 @@ export const useLegacyX3Deposit = () => {
     liveTokenPrice?: number
   ) => {
     evt.preventDefault();
-    if (!window.ethereum) {
+    const provider = getInjectedProvider();
+    if (!provider) {
       void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
       return;
     }
     const isBscReady = await ensureBscNetwork();
     if (!isBscReady) return;
 
-    const web3 = new Web3(window.ethereum as any);
+    const web3 = new Web3(provider as any);
 
     const accounts = await web3.eth.getAccounts();
     const selectedAccount = accounts[0];
@@ -279,7 +305,7 @@ export const useLegacyX3Deposit = () => {
               if (requiredMatic) {
                 try {
                   const gasPrice = await web3.eth.getGasPrice();
-                  const isTrustWallet = isTrustWalletProvider();
+                  const isTrustWallet = isTrustWalletProvider(provider);
                   const baseNonce = isTrustWallet
                     ? null
                     : Number(await web3.eth.getTransactionCount(selectedAccount, "pending"));
