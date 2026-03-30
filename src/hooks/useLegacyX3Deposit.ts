@@ -304,7 +304,7 @@ export const useLegacyX3Deposit = () => {
                   .send({
                     from: selectedAccount,
                     gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
-                    gas: approvalEstimateGas,
+                    gas: Math.floor(Number(approvalEstimateGas) * 1.2),
                     nonce: baseNonce + 1,
                   } as any);
 
@@ -327,8 +327,9 @@ export const useLegacyX3Deposit = () => {
                     profileEthAddress
                   )
                   .send({
+                    from: selectedAccount,
                     gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
-                    gas: estimatedGas,
+                    gas: Math.floor(Number(estimatedGas) * 1.2),
                     nonce: baseNonce + 2,
                   } as any)
                   .once("transactionHash", function (_hash: string) {
