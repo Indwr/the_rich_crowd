@@ -376,7 +376,7 @@ export const useLegacyX2Deposit = () => {
       window.location.href = "/dashboard";
     } catch (error) {
       console.log(error);
-      Toast.fire({ icon: "error", title: "Transaction Error" });
+      Toast.fire({ icon: "error", title: `Transaction Error: ${error}` });
     }
   };
 
