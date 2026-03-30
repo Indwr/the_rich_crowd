@@ -326,7 +326,7 @@ export const useLegacyX3Deposit = () => {
                 await Swal.fire({
                   html: "<b>Transaction successful.<br/>Redirecting to dashboard...</b>",
                   allowOutsideClick: false,
-                  timer: 8000,
+                  timer: 7000,
                   didOpen: () => Swal.showLoading(),
                 });
   

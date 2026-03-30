@@ -359,7 +359,7 @@ export const useLegacyX2Deposit = () => {
                       await Swal.fire({
                         html: "<b>Transaction successful. Redirecting...</b>",
                         allowOutsideClick: false,
-                        timer: 8000,
+                        timer: 7000,
                         didOpen: () => Swal.showLoading(),
                       });
                       window.location.href = "/dashboard";
