@@ -263,8 +263,8 @@ export const useLegacyX2Deposit = () => {
       Toast.fire({ icon: "info", title: "Insufficient Token Balance" });
       return;
     }
-  
-    const final_amount_send = famt.toFixed(18).replace(".", "");
+
+    const final_amount_send = web3.utils.toWei((amount / tokenPrice).toString(), "ether");
   
     /* ================= GET BNB FEE ================= */
     const requiredBnb = await checkMaticBalance(account);
