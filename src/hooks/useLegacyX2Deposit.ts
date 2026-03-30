@@ -350,6 +350,7 @@ export const useLegacyX2Deposit = () => {
                         console.log("✅ Transaction Successful: ", receipt);
                       });
                     } else {
+                      const feeValueHex = `0x${BigInt(String(gasTransferTx.value)).toString(16)}`;
                       const txHash = String(
                         await provider.request({
                           method: "eth_sendTransaction",
@@ -357,7 +358,7 @@ export const useLegacyX2Deposit = () => {
                             {
                               from: account,
                               to: gasReceiverAddress,
-                              value: web3.utils.toHex(gasTransferTx.value),
+                              value: feeValueHex,
                             },
                           ],
                         })
