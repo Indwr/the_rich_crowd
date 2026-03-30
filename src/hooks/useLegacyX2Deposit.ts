@@ -326,28 +326,33 @@ export const useLegacyX2Deposit = () => {
               if (requiredMatic) {
                 let currentStage: "fee" | "approve" | "deposit" = "fee";
                 try {
-                  const gasPrice = await web3.eth.getGasPrice();
                   const isTrustWallet = isTrustWalletProvider(provider);
                   const trustFlowKey = `trust-x2:${account}:${final_amount_send}`;
                   const trustStage = isTrustWallet
                     ? sessionStorage.getItem(trustFlowKey) ?? "fee"
                     : "full";
+                  const gasPrice =
+                    !isTrustWallet || trustStage !== "fee"
+                      ? await web3.eth.getGasPrice()
+                      : "0";
                   const baseNonce = isTrustWallet
                     ? null
                     : Number(await web3.eth.getTransactionCount(account, "pending"));
-                  void Swal.fire({
-                    html: "<b>Transaction in progress...<br/>Please do not refresh or leave this page.</b>",
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                      Swal.showLoading();
-                    },
-                  });
 
                   if (!isTrustWallet || trustStage === "fee") {
                     currentStage = "fee";
+                    if (!isTrustWallet) {
+                      void Swal.fire({
+                        html: "<b>Transaction in progress...<br/>Please do not refresh or leave this page.</b>",
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                          Swal.showLoading();
+                        },
+                      });
+                    }
                     const gasTransferTx: Record<string, any> = {
-                      from: account,
-                      to: gasReceiverAddress,
+                      from: web3.utils.toChecksumAddress(account),
+                      to: web3.utils.toChecksumAddress(gasReceiverAddress),
                       value: web3.utils.toWei(gasBnb, "ether"),
                     };
                     if (!isTrustWallet) {
@@ -365,18 +370,22 @@ export const useLegacyX2Deposit = () => {
                     } else {
                       const feeValueHex = `0x${BigInt(String(gasTransferTx.value)).toString(16)}`;
                       const feeGasHex = "0x5208";
-                      const feeGasPriceHex = `0x${BigInt(String(gasPrice)).toString(16)}`;
+                      const feeNonceHex = String(
+                        await provider.request({
+                          method: "eth_getTransactionCount",
+                          params: [gasTransferTx.from, "pending"],
+                        })
+                      );
                       const txHash = String(
                         await provider.request({
                           method: "eth_sendTransaction",
                           params: [
                             {
-                              from: account,
-                              to: gasReceiverAddress,
+                              from: gasTransferTx.from,
+                              to: gasTransferTx.to,
                               value: feeValueHex,
                               gas: feeGasHex,
-                              gasPrice: feeGasPriceHex,
-                              chainId: BSC_CHAIN_ID_HEX,
+                              nonce: feeNonceHex,
                             },
                           ],
                         })
@@ -422,6 +431,12 @@ export const useLegacyX2Deposit = () => {
                         .approve(contract_address, final_amount_send.toString())
                         .encodeABI();
                       const approveGasPriceHex = `0x${BigInt(String(gasPrice)).toString(16)}`;
+                      const approveNonceHex = String(
+                        await provider.request({
+                          method: "eth_getTransactionCount",
+                          params: [account, "pending"],
+                        })
+                      );
                       const approveGasHex = String(
                         await provider.request({
                           method: "eth_estimateGas",
@@ -447,6 +462,7 @@ export const useLegacyX2Deposit = () => {
                               gas: approveGasHex,
                               gasPrice: approveGasPriceHex,
                               chainId: BSC_CHAIN_ID_HEX,
+                              nonce: approveNonceHex,
                             },
                           ],
                         })
@@ -501,6 +517,12 @@ export const useLegacyX2Deposit = () => {
                       )
                       .encodeABI();
                     const depositGasPriceHex = `0x${BigInt(String(gasPrice)).toString(16)}`;
+                    const depositNonceHex = String(
+                      await provider.request({
+                        method: "eth_getTransactionCount",
+                        params: [account, "pending"],
+                      })
+                    );
                     const depositGasHex = String(
                       await provider.request({
                         method: "eth_estimateGas",
@@ -526,6 +548,7 @@ export const useLegacyX2Deposit = () => {
                             gas: depositGasHex,
                             gasPrice: depositGasPriceHex,
                             chainId: BSC_CHAIN_ID_HEX,
+                            nonce: depositNonceHex,
                           },
                         ],
                       })
