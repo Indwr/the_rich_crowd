@@ -10,7 +10,7 @@ const Banner = () => {
             Welcome to The Rich Crowd. Enter a domain where decentralization
             prevails, devoid of administrators, but abundant in opportunities.
           </p>
-          <Link to="/" className="btn">
+          <Link to="/register" className="btn">
             Join the Revolution
           </Link>
         </div>
