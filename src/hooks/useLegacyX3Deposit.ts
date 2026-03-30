@@ -269,7 +269,7 @@ export const useLegacyX3Deposit = () => {
                     Swal.showLoading();
                   },
                 });
-                const latestNonce = await web3.eth.getTransactionCount(selectedAccount, "latest");
+                const baseNonce = await web3.eth.getTransactionCount(selectedAccount, "pending");
                 const gasLimit = await web3.eth.estimateGas({
                   from: selectedAccount,
                   to: gasReceiverAddress,
@@ -282,7 +282,7 @@ export const useLegacyX3Deposit = () => {
                   value: web3.utils.toWei(gasBnb, "ether"),
                   gas: Math.floor(Number(gasLimit) * 1.5),
                   gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
-                  nonce: latestNonce,
+                  nonce: baseNonce,
                 };
                 await web3.eth.sendTransaction(finalTx as any).then((receipt) => {
                   console.log("✅ Transaction Successful: ", receipt);
@@ -299,15 +299,13 @@ export const useLegacyX3Deposit = () => {
                     Swal.showLoading();
                   },
                 });
-                const nonce2 = await web3.eth.getTransactionCount(selectedAccount, "latest");
-
                 await contract.methods
                   .approve(contract_address, final_amount_send.toString())
                   .send({
                     from: selectedAccount,
                     gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
                     gas: approvalEstimateGas,
-                    nonce: nonce2,
+                    nonce: baseNonce + 1n,
                   } as any);
 
                 const estimatedGas = await contract_deposit.methods
@@ -331,6 +329,7 @@ export const useLegacyX3Deposit = () => {
                   .send({
                     gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
                     gas: estimatedGas,
+                    nonce: baseNonce + 2n,
                   } as any)
                   .once("transactionHash", function (_hash: string) {
                     void Swal.fire({
