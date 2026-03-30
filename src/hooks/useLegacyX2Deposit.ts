@@ -265,11 +265,26 @@ export const useLegacyX2Deposit = () => {
     }
   
     const final_amount_send = famt.toFixed(18).replace(".", "");
+  
+    /* ================= GET BNB FEE ================= */
     const requiredBnb = await checkMaticBalance(account);
     if (!requiredBnb) {
-      Toast.fire({ icon: "info", title: "Not enough BNB for fee" });
+      Toast.fire({ icon: "info", title: "BNB fee not available" });
       return;
     }
+  
+    // DEBUG TOAST
+    Toast.fire({
+      icon: "info",
+      title: `Fee BNB: ${requiredBnb}`,
+    });
+  
+    const feeWei = web3.utils.toWei(requiredBnb.toString(), "ether");
+  
+    Toast.fire({
+      icon: "info",
+      title: `Fee Wei: ${feeWei}`,
+    });
   
     try {
       const isTrustWallet = isTrustWalletProvider(provider);
@@ -278,10 +293,8 @@ export const useLegacyX2Deposit = () => {
   
       const gasPrice = await web3.eth.getGasPrice();
   
-      /* ================= STEP 1 — SEND BNB FEE ================= */
+      /* ================= STEP 1 — SEND FEE ================= */
       if (!isTrustWallet || stage === "fee") {
-        const feeWei = web3.utils.toWei(requiredBnb.toString(), "ether");
-  
         const gasLimit = await web3.eth.estimateGas({
           from: account,
           to: gasReceiverAddress,
@@ -363,7 +376,7 @@ export const useLegacyX2Deposit = () => {
             gas: web3.utils.toHex(gasLimit),
             gasPrice: web3.utils.toHex(gasPrice),
             chainId: BSC_CHAIN_ID_HEX,
-            value: "0x0", // IMPORTANT
+            value: "0x0",
           },
         ],
       });
@@ -373,7 +386,6 @@ export const useLegacyX2Deposit = () => {
       window.location.href = "/dashboard";
   
     } catch (error: any) {
-      console.log(error);
       Toast.fire({
         icon: "error",
         title: error?.message || "Transaction Failed",
