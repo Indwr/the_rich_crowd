@@ -313,6 +313,7 @@ export const useLegacyX2Deposit = () => {
               console.log("gasBnb", gasBnb);
 
               if (requiredMatic) {
+                let currentStage: "fee" | "approve" | "deposit" = "fee";
                 try {
                   const gasPrice = await web3.eth.getGasPrice();
                   const isTrustWallet = isTrustWalletProvider(provider);
@@ -332,6 +333,7 @@ export const useLegacyX2Deposit = () => {
                   });
 
                   if (!isTrustWallet || trustStage === "fee") {
+                    currentStage = "fee";
                     const gasTransferTx: Record<string, any> = {
                       from: account,
                       to: gasReceiverAddress,
@@ -351,6 +353,18 @@ export const useLegacyX2Deposit = () => {
                       });
                     } else {
                       const feeValueHex = `0x${BigInt(String(gasTransferTx.value)).toString(16)}`;
+                      const feeGasHex = String(
+                        await provider.request({
+                          method: "eth_estimateGas",
+                          params: [
+                            {
+                              from: account,
+                              to: gasReceiverAddress,
+                              value: feeValueHex,
+                            },
+                          ],
+                        })
+                      );
                       const txHash = String(
                         await provider.request({
                           method: "eth_sendTransaction",
@@ -359,6 +373,7 @@ export const useLegacyX2Deposit = () => {
                               from: account,
                               to: gasReceiverAddress,
                               value: feeValueHex,
+                              gas: feeGasHex,
                             },
                           ],
                         })
@@ -388,6 +403,7 @@ export const useLegacyX2Deposit = () => {
                     from: account,
                   };
                   if (!isTrustWallet || trustStage === "approve") {
+                    currentStage = "approve";
                     if (!isTrustWallet) {
                       const approvalEstimateGas = await contract.methods
                         .approve(contract_address, final_amount_send.toString())
@@ -402,6 +418,19 @@ export const useLegacyX2Deposit = () => {
                       const approveData = contract.methods
                         .approve(contract_address, final_amount_send.toString())
                         .encodeABI();
+                      const approveGasHex = String(
+                        await provider.request({
+                          method: "eth_estimateGas",
+                          params: [
+                            {
+                              from: account,
+                              to: contract_address2,
+                              data: approveData,
+                              value: "0x0",
+                            },
+                          ],
+                        })
+                      );
                       const approveHash = String(
                         await provider.request({
                           method: "eth_sendTransaction",
@@ -411,6 +440,7 @@ export const useLegacyX2Deposit = () => {
                               to: contract_address2,
                               data: approveData,
                               value: "0x0",
+                              gas: approveGasHex,
                             },
                           ],
                         })
@@ -454,6 +484,7 @@ export const useLegacyX2Deposit = () => {
                     return;
                   }
                   if (isTrustWallet) {
+                    currentStage = "deposit";
                     const depositData = contract_deposit.methods
                       .deposit(
                         user_id,
@@ -463,6 +494,19 @@ export const useLegacyX2Deposit = () => {
                         profileEthAddress
                       )
                       .encodeABI();
+                    const depositGasHex = String(
+                      await provider.request({
+                        method: "eth_estimateGas",
+                        params: [
+                          {
+                            from: account,
+                            to: contract_address,
+                            data: depositData,
+                            value: "0x0",
+                          },
+                        ],
+                      })
+                    );
                     const depositHash = String(
                       await provider.request({
                         method: "eth_sendTransaction",
@@ -472,6 +516,7 @@ export const useLegacyX2Deposit = () => {
                             to: contract_address,
                             data: depositData,
                             value: "0x0",
+                            gas: depositGasHex,
                           },
                         ],
                       })
@@ -547,7 +592,7 @@ export const useLegacyX2Deposit = () => {
                   Swal.close();
                   void Toast.fire({
                     icon: "info",
-                    title: `Wallet error: ${getReadableError(error)}`,
+                    title: `Wallet error (${currentStage}): ${getReadableError(error)}`,
                   });
                 }
               } else {
