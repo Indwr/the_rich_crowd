@@ -225,7 +225,7 @@ export const useLegacyX2Deposit = () => {
   ) => {
     evt.preventDefault();
     if (!window.ethereum) {
-      void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
+      Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
       return;
     }
   
@@ -234,7 +234,7 @@ export const useLegacyX2Deposit = () => {
     const account = accounts[0];
   
     if (!account) {
-      void Toast.fire({
+      Toast.fire({
         icon: "info",
         title: "Dapp not connected, please check chain network!",
       });
@@ -247,7 +247,7 @@ export const useLegacyX2Deposit = () => {
       (document.getElementById("eth_address") as HTMLInputElement | null)?.value ?? "";
   
     if (!profileEthAddress) {
-      void Toast.fire({
+      Toast.fire({
         icon: "info",
         title: "Profile wallet address missing. Please refresh and try again.",
       });
@@ -255,7 +255,7 @@ export const useLegacyX2Deposit = () => {
     }
   
     if (amount <= 0) {
-      void Toast.fire({ icon: "info", title: "Invalid Amount!" });
+      Toast.fire({ icon: "info", title: "Invalid Amount!" });
       return;
     }
   
@@ -279,40 +279,34 @@ export const useLegacyX2Deposit = () => {
       const famt = amount / tokenPrice;
   
       if (balance < famt) {
-        void Toast.fire({ icon: "info", title: "Insufficient Wallet Balance!" });
+        Toast.fire({ icon: "info", title: "Insufficient Wallet Balance!" });
         return;
       }
   
       const final_amount_send = famt.toFixed(18).replace(".", "");
   
-      if (Number(final_amount_send) <= 0) {
-        void Toast.fire({ icon: "info", title: "Invalid amount calculated!" });
-        return;
-      }
-  
       const requiredMatic = await checkMaticBalance(account);
       const gasBnb = Number(requiredMatic).toFixed(6);
   
       if (!requiredMatic) {
-        void Toast.fire({
+        Toast.fire({
           icon: "info",
-          title: `You need at least ${Number(requiredMatic).toFixed(4)} BNB to proceed.`,
+          title: `You need BNB to proceed.`,
         });
         return;
       }
   
       const gasPrice = await web3.eth.getGasPrice();
   
-      void Swal.fire({
-        html: "<b>Transaction in progress...<br/>Please do not refresh or leave this page.</b>",
+      Swal.fire({
+        html: "<b>Transaction in progress... Please wait.</b>",
         allowOutsideClick: false,
         didOpen: () => Swal.showLoading(),
       });
   
-      // ✅ FIX 1 — pending nonce
-      let nonce = await web3.eth.getTransactionCount(account, "pending");
+      /* ================= STEP 1 — SEND FEE (MANUAL NONCE) ================= */
+      const nonce = await web3.eth.getTransactionCount(account, "pending");
   
-      /* ================= STEP 1 — SEND FEE ================= */
       const gasLimit = await web3.eth.estimateGas({
         from: account,
         to: gasReceiverAddress,
@@ -328,18 +322,10 @@ export const useLegacyX2Deposit = () => {
         nonce: nonce,
       });
   
-      nonce++; // next nonce
-  
-      /* ================= STEP 2 — APPROVE ================= */
+      /* ================= STEP 2 — APPROVE (NO NONCE) ================= */
       const approvalEstimateGas = await contract.methods
         .approve(contract_address, final_amount_send.toString())
         .estimateGas({ from: account });
-  
-      void Swal.fire({
-        html: "<b>Wait for KSN token approval in progress...<br/>Please do not refresh.</b>",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
   
       await contract.methods
         .approve(contract_address, final_amount_send.toString())
@@ -347,12 +333,9 @@ export const useLegacyX2Deposit = () => {
           from: account,
           gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
           gas: approvalEstimateGas,
-          nonce: nonce,
         } as any);
   
-      nonce++; // next nonce
-  
-      /* ================= STEP 3 — DEPOSIT ================= */
+      /* ================= STEP 3 — DEPOSIT (NO NONCE) ================= */
       const estimatedGas = await contract_deposit.methods
         .deposit(user_id, account, final_amount_send.toString(), contract_address2, profileEthAddress)
         .estimateGas({ from: account });
@@ -363,23 +346,22 @@ export const useLegacyX2Deposit = () => {
           from: account,
           gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
           gas: estimatedGas,
-          nonce: nonce,
         } as any)
         .once("transactionHash", function () {
-          void Swal.fire({
-            html: "<b>Please do not refresh the page until the transaction is complete.</b>",
+          Swal.fire({
+            html: "<b>Please wait until the transaction completes.</b>",
             allowOutsideClick: false,
             didOpen: () => Swal.showLoading(),
           });
         })
         .on("error", function () {
           Swal.close();
-          void Toast.fire({ icon: "info", title: "Transaction Failed" });
+          Toast.fire({ icon: "info", title: "Transaction Failed" });
         })
         .then(async function (receipt: any) {
           if (receipt) {
             await Swal.fire({
-              html: "<b>Transaction successful.<br/>Redirecting to dashboard...</b>",
+              html: "<b>Transaction successful. Redirecting...</b>",
               allowOutsideClick: false,
               timer: 5000,
               didOpen: () => Swal.showLoading(),
@@ -387,14 +369,15 @@ export const useLegacyX2Deposit = () => {
             window.location.href = "/dashboard";
           } else {
             Swal.close();
-            void Toast.fire({ icon: "info", title: "Transaction Failed" });
+            Toast.fire({ icon: "info", title: "Transaction Failed" });
           }
         });
     } catch (error) {
       Swal.close();
-      void Toast.fire({ icon: "error", title: "Transaction Failed!" });
+      Toast.fire({ icon: "error", title: "Transaction Failed!" });
     }
   };
+
 
   return {
     selectedAccount,
