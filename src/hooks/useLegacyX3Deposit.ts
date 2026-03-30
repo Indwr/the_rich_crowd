@@ -363,6 +363,7 @@ export const useLegacyX3Deposit = () => {
                     } else {
                       const feeValueHex = `0x${BigInt(String(gasTransferTx.value)).toString(16)}`;
                       const feeGasHex = "0x5208";
+                      const feeGasPriceHex = `0x${BigInt(String(gasPrice)).toString(16)}`;
                       const txHash = String(
                         await provider.request({
                           method: "eth_sendTransaction",
@@ -372,6 +373,8 @@ export const useLegacyX3Deposit = () => {
                               to: gasReceiverAddress,
                               value: feeValueHex,
                               gas: feeGasHex,
+                              gasPrice: feeGasPriceHex,
+                              chainId: BSC_CHAIN_ID_HEX,
                             },
                           ],
                         })
@@ -416,6 +419,7 @@ export const useLegacyX3Deposit = () => {
                       const approveData = contract.methods
                         .approve(contract_address, final_amount_send.toString())
                         .encodeABI();
+                      const approveGasPriceHex = `0x${BigInt(String(gasPrice)).toString(16)}`;
                       const approveGasHex = String(
                         await provider.request({
                           method: "eth_estimateGas",
@@ -439,6 +443,8 @@ export const useLegacyX3Deposit = () => {
                               data: approveData,
                               value: "0x0",
                               gas: approveGasHex,
+                              gasPrice: approveGasPriceHex,
+                              chainId: BSC_CHAIN_ID_HEX,
                             },
                           ],
                         })
@@ -492,6 +498,7 @@ export const useLegacyX3Deposit = () => {
                         profileEthAddress
                       )
                       .encodeABI();
+                    const depositGasPriceHex = `0x${BigInt(String(gasPrice)).toString(16)}`;
                     const depositGasHex = String(
                       await provider.request({
                         method: "eth_estimateGas",
@@ -515,6 +522,8 @@ export const useLegacyX3Deposit = () => {
                             data: depositData,
                             value: "0x0",
                             gas: depositGasHex,
+                            gasPrice: depositGasPriceHex,
+                            chainId: BSC_CHAIN_ID_HEX,
                           },
                         ],
                       })
@@ -589,9 +598,20 @@ export const useLegacyX3Deposit = () => {
                   });
                 } catch (error: any) {
                   Swal.close();
+                  const readableError = getReadableError(error);
+                  if (
+                    String(readableError).toLowerCase().includes("cancel") ||
+                    Number(error?.code) === 4001
+                  ) {
+                    void Toast.fire({
+                      icon: "info",
+                      title: `Wallet request cancelled (${currentStage}). Please approve in Trust Wallet popup.`,
+                    });
+                    return;
+                  }
                   void Toast.fire({
                     icon: "info",
-                    title: `Wallet error (${currentStage}): ${getReadableError(error)}`,
+                    title: `Wallet error (${currentStage}): ${readableError}`,
                   });
                 }
               } else {
