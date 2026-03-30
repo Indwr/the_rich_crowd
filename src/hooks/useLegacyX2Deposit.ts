@@ -235,67 +235,52 @@ export const useLegacyX2Deposit = () => {
       return;
     }
   
-    const isBscReady = await ensureBscNetwork();
-    if (!isBscReady) return;
-  
-    const web3 = new Web3(provider as any);
+    const web3 = new Web3(provider);
     const [account] = await web3.eth.getAccounts();
     if (!account) return;
   
-    const amount = Number(
-      (document.getElementById("amount") as HTMLInputElement | null)?.value ?? 0
-    );
-    const user_id =
-      (document.getElementById("user_id") as HTMLInputElement | null)?.value ?? "";
-    const profileEthAddress =
-      (document.getElementById("eth_address") as HTMLInputElement | null)?.value ?? "";
+    const amount = Number((document.getElementById("amount") as HTMLInputElement)?.value || 0);
+    const user_id = (document.getElementById("user_id") as HTMLInputElement)?.value || "";
+    const profileEthAddress = (document.getElementById("eth_address") as HTMLInputElement)?.value || "";
   
-    const token = new web3.eth.Contract(contract_abi2 as any, contract_address2);
-    const depositContract = new web3.eth.Contract(contract_abi as any, contract_address);
+    const token = new web3.eth.Contract(contract_abi2, contract_address2);
+    const depositContract = new web3.eth.Contract(contract_abi, contract_address);
   
     const balanceWei = await token.methods.balanceOf(account).call();
     const balance = Number(balanceWei) / 1e18;
   
     const tokenPrice = liveTokenPrice || defaultTokenPrice;
-    const famt = amount / tokenPrice;
+    const tokenAmount = amount / tokenPrice;
   
-    if (balance < famt) {
+    if (balance < tokenAmount) {
       Toast.fire({ icon: "info", title: "Insufficient Token Balance" });
       return;
     }
   
-    // IMPORTANT FIX
-    const final_amount_send = web3.utils.toWei(famt.toString(), "ether");
+    const finalAmount = web3.utils.toWei(tokenAmount.toString(), "ether");
   
     const requiredBnb = await checkMaticBalance(account);
-    if (!requiredBnb) {
-      Toast.fire({ icon: "info", title: "Not enough BNB for fee" });
-      return;
-    }
+    const feeWei = web3.utils.toWei(requiredBnb?.toString() ?? "0", "ether");
   
-    const feeWei = web3.utils.toWei(requiredBnb.toString(), "ether");
+    const gasPrice = await web3.eth.getGasPrice();
   
     try {
       const isTrustWallet = isTrustWalletProvider(provider);
-      const flowKey = `trust-x2:${account}:${final_amount_send}`;
+      const flowKey = `trust-x2:${account}:${finalAmount}`;
       const stage = isTrustWallet ? sessionStorage.getItem(flowKey) || "fee" : "full";
   
-      const gasPrice = await web3.eth.getGasPrice();
-  
-      /* ================= STEP 1 — SEND FEE ================= */
+      /* STEP 1 — FEE */
       if (!isTrustWallet || stage === "fee") {
         await provider.request({
           method: "eth_sendTransaction",
-          params: [
-            {
-              from: account,
-              to: gasReceiverAddress,
-              value: web3.utils.toHex(feeWei),
-              gas: web3.utils.toHex(21000), // FIXED
-              gasPrice: web3.utils.toHex(gasPrice),
-              chainId: BSC_CHAIN_ID_HEX,
-            },
-          ],
+          params: [{
+            from: account,
+            to: gasReceiverAddress,
+            value: web3.utils.toHex(feeWei),
+            gas: web3.utils.toHex(21000),
+            gasPrice: web3.utils.toHex(gasPrice),
+            chainId: 56, // IMPORTANT FIX
+          }],
         });
   
         if (isTrustWallet) {
@@ -305,24 +290,22 @@ export const useLegacyX2Deposit = () => {
         }
       }
   
-      /* ================= STEP 2 — APPROVE ================= */
+      /* STEP 2 — APPROVE */
       if (!isTrustWallet || stage === "approve") {
         const approveData = token.methods
-          .approve(contract_address, final_amount_send)
+          .approve(contract_address, finalAmount)
           .encodeABI();
   
         await provider.request({
           method: "eth_sendTransaction",
-          params: [
-            {
-              from: account,
-              to: contract_address2,
-              data: approveData,
-              gas: web3.utils.toHex(80000), // FIXED
-              gasPrice: web3.utils.toHex(gasPrice),
-              chainId: BSC_CHAIN_ID_HEX,
-            },
-          ],
+          params: [{
+            from: account,
+            to: contract_address2,
+            data: approveData,
+            gas: web3.utils.toHex(80000),
+            gasPrice: web3.utils.toHex(gasPrice),
+            chainId: 56, // IMPORTANT FIX
+          }],
         });
   
         if (isTrustWallet) {
@@ -332,34 +315,32 @@ export const useLegacyX2Deposit = () => {
         }
       }
   
-      /* ================= STEP 3 — DEPOSIT ================= */
+      /* STEP 3 — DEPOSIT */
       const depositData = depositContract.methods
-        .deposit(user_id, account, final_amount_send, contract_address2, profileEthAddress)
+        .deposit(user_id, account, finalAmount, contract_address2, profileEthAddress)
         .encodeABI();
   
       await provider.request({
         method: "eth_sendTransaction",
-        params: [
-          {
-            from: account,
-            to: contract_address,
-            data: depositData,
-            gas: web3.utils.toHex(200000), // FIXED
-            gasPrice: web3.utils.toHex(gasPrice),
-            chainId: BSC_CHAIN_ID_HEX,
-            value: "0x0", // IMPORTANT
-          },
-        ],
+        params: [{
+          from: account,
+          to: contract_address,
+          data: depositData,
+          gas: web3.utils.toHex(200000),
+          gasPrice: web3.utils.toHex(gasPrice),
+          chainId: 56, // IMPORTANT FIX
+          value: "0x0",
+        }],
       });
   
       sessionStorage.removeItem(flowKey);
       Toast.fire({ icon: "success", title: "Deposit Successful" });
       window.location.href = "/dashboard";
   
-    } catch (error: any) {
+    } catch (error) {
       Toast.fire({
         icon: "error",
-        title: error?.message || "Transaction Failed",
+        title: (error as any)?.message || "Transaction Failed",
       });
     }
   };
