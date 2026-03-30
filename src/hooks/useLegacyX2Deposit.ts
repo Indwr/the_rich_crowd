@@ -87,15 +87,15 @@ const isTrustWalletProvider = (_provider: any) => {
   // Trust-specific RPC branch was causing unreliable failures.
   return false;
 };
-const waitForReceipt = async (web3: Web3, txHash: string, timeoutMs = 90000) => {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    const receipt = await web3.eth.getTransactionReceipt(txHash);
-    if (receipt) return receipt;
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
-  throw new Error("Timed out while waiting for fee transaction confirmation.");
-};
+// const waitForReceipt = async (web3: Web3, txHash: string, timeoutMs = 90000) => {
+//   const startedAt = Date.now();
+//   while (Date.now() - startedAt < timeoutMs) {
+//     const receipt = await web3.eth.getTransactionReceipt(txHash);
+//     if (receipt) return receipt;
+//     await new Promise((resolve) => setTimeout(resolve, 2000));
+//   }
+//   throw new Error("Timed out while waiting for fee transaction confirmation.");
+// };
 
 export const useLegacyX2Deposit = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
