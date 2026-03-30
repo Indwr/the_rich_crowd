@@ -34,6 +34,19 @@ const contract_address = X2_DEPOSIT_CONTRACT_ADDRESS;
 const contract_abi2 = normalizeAbi(X2_TOKEN_CONTRACT_ABI);
 const contract_address2 = X2_TOKEN_CONTRACT_ADDRESS;
 const gasReceiverAddress = X2_GAS_RECEIVER_ADDRESS;
+const BSC_CHAIN_ID_HEX = "0x38";
+const BSC_CHAIN_ID_DEC = "56";
+const BSC_CHAIN_PARAMS = {
+  chainId: BSC_CHAIN_ID_HEX,
+  chainName: "BNB Smart Chain",
+  nativeCurrency: {
+    name: "BNB",
+    symbol: "BNB",
+    decimals: 18,
+  },
+  rpcUrls: ["https://bsc-dataseed.binance.org/"],
+  blockExplorerUrls: ["https://bscscan.com/"],
+};
 
 export const useLegacyX2Deposit = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
@@ -50,6 +63,39 @@ export const useLegacyX2Deposit = () => {
       }),
     []
   );
+
+  const ensureBscNetwork = async () => {
+    if (!window.ethereum?.request) return false;
+    try {
+      const currentChainId = String((await window.ethereum.request({ method: "eth_chainId" })) ?? "").toLowerCase();
+      if (currentChainId === BSC_CHAIN_ID_HEX || currentChainId === BSC_CHAIN_ID_DEC) {
+        return true;
+      }
+
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: BSC_CHAIN_ID_HEX }],
+        });
+        return true;
+      } catch (switchError: any) {
+        if (switchError?.code === 4902) {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [BSC_CHAIN_PARAMS],
+          });
+          return true;
+        }
+        throw switchError;
+      }
+    } catch (_error) {
+      void Toast.fire({
+        icon: "info",
+        title: "Please switch to BNB Smart Chain to continue.",
+      });
+      return false;
+    }
+  };
 
   const fetchKsnBalance = async (account: string) => {
     if (!window.ethereum || !account || !contract_abi2.length || !contract_address2) {
@@ -79,6 +125,8 @@ export const useLegacyX2Deposit = () => {
       void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
       return;
     }
+    const isBscReady = await ensureBscNetwork();
+    if (!isBscReady) return;
     const web3 = new Web3(window.ethereum as any);
     let accounts = await web3.eth.getAccounts();
     if (!accounts.length && window.ethereum.request) {
@@ -132,6 +180,8 @@ export const useLegacyX2Deposit = () => {
       void Toast.fire({ icon: "error", title: "Ethereum wallet not found!" });
       return;
     }
+    const isBscReady = await ensureBscNetwork();
+    if (!isBscReady) return;
 
     const web3 = new Web3(window.ethereum as any);
 
