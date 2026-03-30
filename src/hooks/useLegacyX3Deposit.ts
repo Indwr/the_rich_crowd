@@ -47,13 +47,24 @@ const BSC_CHAIN_PARAMS = {
   rpcUrls: ["https://bsc-dataseed.binance.org/"],
   blockExplorerUrls: ["https://bscscan.com/"],
 };
-const getReadableError = (error: any) =>
-  String(
+const getReadableError = (error: any) => {
+  const message =
+    error?.shortMessage ??
     error?.message ??
-      error?.data?.message ??
-      error?.cause?.message ??
-      "Unexpected wallet error."
-  );
+    error?.reason ??
+    error?.data?.message ??
+    error?.error?.message ??
+    error?.cause?.message ??
+    error?.originalError?.message;
+  if (message) return String(message);
+  if (typeof error?.code !== "undefined") return `Error code ${String(error.code)}`;
+  try {
+    const text = JSON.stringify(error);
+    return text && text !== "{}" ? text : "Unexpected wallet error.";
+  } catch (_error) {
+    return "Unexpected wallet error.";
+  }
+};
 const getInjectedProvider = (): any => {
   const eth: any = window.ethereum;
   if (!eth) return null;
@@ -351,18 +362,7 @@ export const useLegacyX3Deposit = () => {
                       });
                     } else {
                       const feeValueHex = `0x${BigInt(String(gasTransferTx.value)).toString(16)}`;
-                      const feeGasHex = String(
-                        await provider.request({
-                          method: "eth_estimateGas",
-                          params: [
-                            {
-                              from: selectedAccount,
-                              to: gasReceiverAddress,
-                              value: feeValueHex,
-                            },
-                          ],
-                        })
-                      );
+                      const feeGasHex = "0x5208";
                       const txHash = String(
                         await provider.request({
                           method: "eth_sendTransaction",
