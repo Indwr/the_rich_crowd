@@ -84,6 +84,15 @@ const isTrustWalletProvider = (provider: any) => {
         .includes("trust")
   );
 };
+const waitForReceipt = async (web3: Web3, txHash: string, timeoutMs = 90000) => {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    const receipt = await web3.eth.getTransactionReceipt(txHash);
+    if (receipt) return receipt;
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+  throw new Error("Timed out while waiting for fee transaction confirmation.");
+};
 
 export const useLegacyX3Deposit = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
@@ -335,10 +344,24 @@ export const useLegacyX3Deposit = () => {
                       gasTransferTx.gas = Math.floor(Number(gasLimit) * 1.5);
                       gasTransferTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
                       gasTransferTx.nonce = baseNonce;
+                      await web3.eth.sendTransaction(gasTransferTx as any).then((receipt) => {
+                        console.log("✅ Transaction Successful: ", receipt);
+                      });
+                    } else {
+                      const txHash = String(
+                        await provider.request({
+                          method: "eth_sendTransaction",
+                          params: [
+                            {
+                              from: selectedAccount,
+                              to: gasReceiverAddress,
+                              value: web3.utils.toHex(gasTransferTx.value),
+                            },
+                          ],
+                        })
+                      );
+                      await waitForReceipt(web3, txHash);
                     }
-                    await web3.eth.sendTransaction(gasTransferTx as any).then((receipt) => {
-                      console.log("✅ Transaction Successful: ", receipt);
-                    });
                     if (isTrustWallet) {
                       sessionStorage.setItem(trustFlowKey, "approve");
                       Swal.close();
