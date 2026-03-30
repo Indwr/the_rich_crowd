@@ -266,16 +266,21 @@ export const useLegacyX2Deposit = () => {
   
     const final_amount_send = famt.toFixed(18).replace(".", "");
     const requiredBnb = await checkMaticBalance(account);
-    const gasPrice = await web3.eth.getGasPrice();
+    if (!requiredBnb) {
+      Toast.fire({ icon: "info", title: "Not enough BNB for fee" });
+      return;
+    }
   
     try {
       const isTrustWallet = isTrustWalletProvider(provider);
       const flowKey = `trust-x2:${account}:${final_amount_send}`;
       const stage = isTrustWallet ? sessionStorage.getItem(flowKey) || "fee" : "full";
   
-      /* ================= STEP 1 — SEND FEE ================= */
+      const gasPrice = await web3.eth.getGasPrice();
+  
+      /* ================= STEP 1 — SEND BNB FEE ================= */
       if (!isTrustWallet || stage === "fee") {
-        const feeWei = web3.utils.toWei(requiredBnb?.toString() ?? "0", "ether");
+        const feeWei = web3.utils.toWei(requiredBnb.toString(), "ether");
   
         const gasLimit = await web3.eth.estimateGas({
           from: account,
@@ -283,7 +288,7 @@ export const useLegacyX2Deposit = () => {
           value: feeWei,
         });
   
-        const txHash = await provider.request({
+        await provider.request({
           method: "eth_sendTransaction",
           params: [
             {
@@ -296,8 +301,6 @@ export const useLegacyX2Deposit = () => {
             },
           ],
         });
-  
-        await waitForReceipt(web3, txHash);
   
         if (isTrustWallet) {
           sessionStorage.setItem(flowKey, "approve");
@@ -318,7 +321,7 @@ export const useLegacyX2Deposit = () => {
           data: approveData,
         });
   
-        const txHash = await provider.request({
+        await provider.request({
           method: "eth_sendTransaction",
           params: [
             {
@@ -331,8 +334,6 @@ export const useLegacyX2Deposit = () => {
             },
           ],
         });
-  
-        await waitForReceipt(web3, txHash);
   
         if (isTrustWallet) {
           sessionStorage.setItem(flowKey, "deposit");
@@ -352,7 +353,7 @@ export const useLegacyX2Deposit = () => {
         data: depositData,
       });
   
-      const txHash = await provider.request({
+      await provider.request({
         method: "eth_sendTransaction",
         params: [
           {
@@ -362,16 +363,15 @@ export const useLegacyX2Deposit = () => {
             gas: web3.utils.toHex(gasLimit),
             gasPrice: web3.utils.toHex(gasPrice),
             chainId: BSC_CHAIN_ID_HEX,
-            value: "0x0", // IMPORTANT — NO BNB HERE
+            value: "0x0", // IMPORTANT
           },
         ],
       });
   
-      await waitForReceipt(web3, txHash);
       sessionStorage.removeItem(flowKey);
-  
       Toast.fire({ icon: "success", title: "Deposit Successful" });
       window.location.href = "/dashboard";
+  
     } catch (error: any) {
       console.log(error);
       Toast.fire({
