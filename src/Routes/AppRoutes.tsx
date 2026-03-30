@@ -71,7 +71,7 @@ const AppRoutes = () => {
               <Route
                 path="x3-staking"
                 element={
-                  <PreviewProtectedRoute>
+                  <PreviewProtectedRoute allowInPreview>
                     <X3Staking />
                   </PreviewProtectedRoute>
                 }
@@ -79,7 +79,7 @@ const AppRoutes = () => {
               <Route
                 path="auto-compounding"
                 element={
-                  <PreviewProtectedRoute>
+                  <PreviewProtectedRoute allowInPreview>
                     <AutoCompounding />
                   </PreviewProtectedRoute>
                 }
