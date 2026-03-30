@@ -122,12 +122,12 @@ const Dashboard = () => {
 
   const totalIncome = (dashboardSummary?.total_income ?? 0) + (dashboardSummary?.total_income_x3 ?? 0);
 
-  const handleProtectedNavigation = (path: string) => {
+  const handleProtectedNavigation = (path: string, allowInPreview = false) => {
     const profileRaw = Cookies.get(userKey);
     if (profileRaw) {
       try {
         const profile = JSON.parse(profileRaw) as { previewUserId?: string };
-        if (profile?.previewUserId) {
+        if (profile?.previewUserId && !allowInPreview) {
           toast.error("This feature is not available in preview mode.");
           return;
         }
@@ -678,14 +678,14 @@ const Dashboard = () => {
                 <button
                   className="x3-action-btn x3-action-btn-staking"
                   type="button"
-                  onClick={() => handleProtectedNavigation("/x3-staking")}
+                  onClick={() => handleProtectedNavigation("/x3-staking", true)}
                 >
                   Start X3 Staking <i className="fas fa-arrow-right" />
                 </button>
                 <button
                   className="x3-action-btn x3-action-btn-compounding"
                   type="button"
-                  onClick={() => handleProtectedNavigation("/auto-compounding")}
+                  onClick={() => handleProtectedNavigation("/auto-compounding", true)}
                 >
                   Start Auto Compounding <i className="fas fa-arrow-right" />
                 </button>

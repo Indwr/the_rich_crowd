@@ -5,9 +5,10 @@ import { userKey } from "src/utils/constants";
 
 interface PreviewProtectedRouteProps {
   children: ReactElement;
+  allowInPreview?: boolean;
 }
 
-const PreviewProtectedRoute = ({ children }: PreviewProtectedRouteProps) => {
+const PreviewProtectedRoute = ({ children, allowInPreview = false }: PreviewProtectedRouteProps) => {
   const profileRaw = Cookies.get(userKey);
   let isPreview = false;
   if (profileRaw) {
@@ -19,7 +20,7 @@ const PreviewProtectedRoute = ({ children }: PreviewProtectedRouteProps) => {
     }
   }
 
-  if (isPreview) {
+  if (isPreview && !allowInPreview) {
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -11,8 +11,28 @@ const ProfileDobField = ({ value, onChange, disabled }: ProfileDobFieldProps) =>
   const isoValue = useMemo(() => dobToInputValue(value), [value]);
   const maxDate = useMemo(() => todayIsoMax(), []);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const isTokenPocketBrowser = useMemo(() => {
+    if (typeof navigator === "undefined") return false;
+    return /tokenpocket/i.test(navigator.userAgent);
+  }, []);
+  const isNativeDateInputSupported = useMemo(() => {
+    if (typeof document === "undefined") return true;
+    const input = document.createElement("input");
+    input.setAttribute("type", "date");
+    return input.type === "date";
+  }, []);
+  const useTextFallback = isTokenPocketBrowser || !isNativeDateInputSupported;
+  const textValue = useMemo(() => {
+    if (!value) return "";
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      const [yyyy, mm, dd] = value.split("-");
+      return `${dd}-${mm}-${yyyy}`;
+    }
+    return value;
+  }, [value]);
 
   const openDatePicker = () => {
+    if (useTextFallback) return;
     if (disabled) return;
     const input = inputRef.current;
     if (!input) return;
@@ -39,11 +59,14 @@ const ProfileDobField = ({ value, onChange, disabled }: ProfileDobFieldProps) =>
         <input
           ref={inputRef}
           id="profile-dob"
-          type="date"
+          type={useTextFallback ? "text" : "date"}
           className="custom-input profile-dob-wrap__input"
-          value={isoValue}
+          value={useTextFallback ? textValue : isoValue}
           min="1900-01-01"
-          max={maxDate}
+          max={useTextFallback ? undefined : maxDate}
+          placeholder={useTextFallback ? "DD-MM-YYYY" : undefined}
+          inputMode={useTextFallback ? "numeric" : undefined}
+          pattern={useTextFallback ? "\\d{1,2}[-/]\\d{1,2}[-/]\\d{4}" : undefined}
           disabled={disabled}
           onFocus={openDatePicker}
           onChange={(e) => onChange(e.target.value)}
