@@ -104,7 +104,7 @@ const X2Deposit = () => {
                   <button
                     className="action-btn btn-gold"
                     id="btnApprove"
-                    onClick={(evt) => void deposit(evt, "x2DepositForm", rate)}
+                    onClick={(evt) => void deposit(evt, rate)}
                     style={{ display: "flex" }}
                   >
                     <i className="fas fa-check-circle" /> Approve KSN
@@ -112,7 +112,7 @@ const X2Deposit = () => {
                   <button
                     className="action-btn btn-gold"
                     id="btnDeposit"
-                    onClick={(evt) => void deposit(evt, "x2DepositForm", rate)}
+                    onClick={(evt) => void deposit(evt, rate)}
                     style={{ display: "none" }}
                   >
                     <i className="fas fa-arrow-down" /> Deposit KSN
