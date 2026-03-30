@@ -270,7 +270,7 @@ export const useLegacyX2Deposit = () => {
                     Swal.showLoading();
                   },
                 });
-                const baseNonce = await web3.eth.getTransactionCount(account, "pending");
+                const baseNonce = Number(await web3.eth.getTransactionCount(account, "pending"));
 
                 const gasLimit = await web3.eth.estimateGas({
                   from: account,
@@ -308,7 +308,7 @@ export const useLegacyX2Deposit = () => {
                     from: account,
                     gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
                     gas: approvalEstimateGas,
-                    nonce: baseNonce + 1n,
+                    nonce: baseNonce + 1,
                   } as any);
 
                 const estimatedGas = await contract_deposit.methods
@@ -332,7 +332,7 @@ export const useLegacyX2Deposit = () => {
                   .send({
                     gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
                     gas: estimatedGas,
-                    nonce: baseNonce + 2n,
+                    nonce: baseNonce + 2,
                   } as any)
                   .once("transactionHash", function (_hash: string) {
                     void Swal.fire({
