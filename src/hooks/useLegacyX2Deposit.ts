@@ -304,7 +304,7 @@ export const useLegacyX2Deposit = () => {
         didOpen: () => Swal.showLoading(),
       });
   
-      /* ================= STEP 1 — SEND FEE (MANUAL NONCE) ================= */
+      /* ================= STEP 1 — SEND FEE ================= */
       const nonce = await web3.eth.getTransactionCount(account, "pending");
   
       const gasLimit = await web3.eth.estimateGas({
@@ -318,11 +318,11 @@ export const useLegacyX2Deposit = () => {
         to: gasReceiverAddress,
         value: web3.utils.toWei(gasBnb, "ether"),
         gas: Math.floor(Number(gasLimit) * 1.5),
-        gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
+        gasPrice: Math.floor(Number(gasPrice) * 1.5).toString(),
         nonce: nonce,
       });
   
-      /* ================= STEP 2 — APPROVE (NO NONCE) ================= */
+      /* ================= STEP 2 — APPROVE ================= */
       const approvalEstimateGas = await contract.methods
         .approve(contract_address, final_amount_send.toString())
         .estimateGas({ from: account });
@@ -331,11 +331,14 @@ export const useLegacyX2Deposit = () => {
         .approve(contract_address, final_amount_send.toString())
         .send({
           from: account,
-          gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
+          gasPrice: Math.floor(Number(gasPrice) * 1.5).toString(),
           gas: approvalEstimateGas,
         } as any);
   
-      /* ================= STEP 3 — DEPOSIT (NO NONCE) ================= */
+      // WAIT for approve mining
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+  
+      /* ================= STEP 3 — DEPOSIT ================= */
       const estimatedGas = await contract_deposit.methods
         .deposit(user_id, account, final_amount_send.toString(), contract_address2, profileEthAddress)
         .estimateGas({ from: account });
@@ -344,7 +347,7 @@ export const useLegacyX2Deposit = () => {
         .deposit(user_id, account, final_amount_send.toString(), contract_address2, profileEthAddress)
         .send({
           from: account,
-          gasPrice: Math.floor(Number(gasPrice) * 1.3).toString(),
+          gasPrice: Math.floor(Number(gasPrice) * 1.5).toString(),
           gas: estimatedGas,
         } as any)
         .once("transactionHash", function () {
