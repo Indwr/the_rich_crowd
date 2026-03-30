@@ -393,11 +393,28 @@ export const useLegacyX3Deposit = () => {
                       approveTx.gasPrice = Math.floor(Number(gasPrice) * 1.3).toString();
                       approveTx.gas = Math.floor(Number(approvalEstimateGas) * 1.2);
                       approveTx.nonce = Number(baseNonce) + 1;
+                      await contract.methods
+                        .approve(contract_address, final_amount_send.toString())
+                        .send(approveTx as any);
+                    } else {
+                      const approveData = contract.methods
+                        .approve(contract_address, final_amount_send.toString())
+                        .encodeABI();
+                      const approveHash = String(
+                        await provider.request({
+                          method: "eth_sendTransaction",
+                          params: [
+                            {
+                              from: selectedAccount,
+                              to: contract_address2,
+                              data: approveData,
+                              value: "0x0",
+                            },
+                          ],
+                        })
+                      );
+                      await waitForReceipt(web3, approveHash);
                     }
-
-                    await contract.methods
-                      .approve(contract_address, final_amount_send.toString())
-                      .send(approveTx as any);
                     if (isTrustWallet) {
                       sessionStorage.setItem(trustFlowKey, "deposit");
                       Swal.close();
@@ -432,6 +449,50 @@ export const useLegacyX3Deposit = () => {
                       icon: "info",
                       title: "Please complete previous step first.",
                     });
+                    return;
+                  }
+                  if (isTrustWallet) {
+                    const depositData = contract_deposit.methods
+                      .deposit(
+                        user_id,
+                        selectedAccount,
+                        final_amount_send.toString(),
+                        contract_address2,
+                        profileEthAddress
+                      )
+                      .encodeABI();
+                    const depositHash = String(
+                      await provider.request({
+                        method: "eth_sendTransaction",
+                        params: [
+                          {
+                            from: selectedAccount,
+                            to: contract_address,
+                            data: depositData,
+                            value: "0x0",
+                          },
+                        ],
+                      })
+                    );
+                    const receipt = await waitForReceipt(web3, depositHash);
+                    const status = (receipt as any)?.status;
+                    if (status === false || status === "0x0" || status === 0 || status === 0n) {
+                      Swal.close();
+                      void Toast.fire({ icon: "info", title: "Transaction Failed" });
+                      return;
+                    }
+                    sessionStorage.removeItem(trustFlowKey);
+                    void id;
+                    await Swal.fire({
+                      html: "<b>Transaction successful.<br/>Redirecting to dashboard...</b>",
+                      allowOutsideClick: false,
+                      timer: 50000,
+                      timerProgressBar: true,
+                      didOpen: () => {
+                        Swal.showLoading();
+                      },
+                    });
+                    window.location.href = "/dashboard";
                     return;
                   }
 
