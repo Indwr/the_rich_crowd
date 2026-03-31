@@ -3009,9 +3009,14 @@ body {
   inset: 0;
   z-index: 1050;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 1.25rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: max(1.25rem, env(safe-area-inset-top, 0px), 6vh) 1.25rem
+    max(1.25rem, env(safe-area-inset-bottom, 0px));
   background: rgba(0, 0, 0, 0.72);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -3031,6 +3036,8 @@ body {
   position: relative;
   width: 100%;
   max-width: 440px;
+  flex-shrink: 0;
+  margin-inline: auto;
   background: linear-gradient(165deg, #1c1c1c 0%, #0a0a0a 100%);
   border: 1px solid rgba(244, 196, 48, 0.28);
   border-radius: 20px;
@@ -3306,9 +3313,9 @@ body {
 
 /* Notifications — larger read modal */
 .notification-view-overlay {
-  padding: 1rem;
   align-items: flex-start;
-  padding-top: min(6vh, 3rem);
+  padding: max(1rem, env(safe-area-inset-top, 0px), min(6vh, 3rem)) 1rem
+    max(1rem, env(safe-area-inset-bottom, 0px));
 }
 
 .notification-view-modal {
