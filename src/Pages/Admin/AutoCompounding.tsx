@@ -292,7 +292,7 @@ const AutoCompounding = () => {
               >
                 <i className="fa-solid fa-circle-xmark"></i>
               </button>
-              <h2>Interest Calculator</h2>
+              <h2>Auto Compounding Calculator</h2>
 
               {/* Amount Input */}
               <div className="input-group">
