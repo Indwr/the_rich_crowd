@@ -3032,6 +3032,24 @@ body {
   }
 }
 
+/* Dashboard — APR announcement (reuses convert modal shell) */
+.dashboard-apr-notice-overlay {
+  align-items: center;
+}
+
+.dashboard-apr-notice-modal {
+  max-width: 460px;
+}
+
+.dashboard-apr-notice__footnote {
+  margin-top: 1rem;
+  margin-bottom: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-grey);
+  font-weight: 400;
+}
+
 .x3-convert-modal {
   position: relative;
   width: 100%;
