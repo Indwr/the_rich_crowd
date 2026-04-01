@@ -32,6 +32,7 @@ const Dashboard = () => {
   } = useDashboardData();
   const { copyText } = useCopyToClipboard();
   const [previewId, setPreviewId] = useState("");
+  const [showAprNotice, setShowAprNotice] = useState(true);
   const [tokenSupply, setTokenSupply] = useState<TokenSupplySnapshot | null>(null);
   const { tokenPrice } = useTokenPrice(0.02004);
   const user = dashboardResponse?.data?.user;
@@ -121,6 +122,10 @@ const Dashboard = () => {
   };
 
   const totalIncome = (dashboardSummary?.total_income ?? 0) + (dashboardSummary?.total_income_x3 ?? 0);
+
+  const dismissAprNotice = () => {
+    setShowAprNotice(false);
+  };
 
   const handleProtectedNavigation = (path: string, allowInPreview = false) => {
     const profileRaw = Cookies.get(userKey);
@@ -238,6 +243,57 @@ const Dashboard = () => {
 
   return (
     <>
+      {showAprNotice && (
+        <div
+          className="x3-convert-modal-overlay dashboard-apr-notice-overlay"
+          role="presentation"
+          onClick={dismissAprNotice}
+        >
+          <div
+            className="x3-convert-modal dashboard-apr-notice-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="apr-notice-title"
+            aria-describedby="apr-notice-desc"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="x3-convert-modal__accent" aria-hidden />
+            <div className="x3-convert-modal__body">
+              <button
+                type="button"
+                className="x3-convert-modal__close"
+                onClick={dismissAprNotice}
+                aria-label="Close notice"
+              >
+                <i className="fas fa-times" aria-hidden />
+              </button>
+              <div className="x3-convert-modal__header">
+                <div className="x3-convert-modal__icon-wrap" aria-hidden>
+                  <i className="fas fa-info-circle" />
+                </div>
+                <h2 id="apr-notice-title">MPR processing update</h2>
+                <p className="x3-convert-modal__subtitle" id="apr-notice-desc">
+                  We are currently experiencing a technical issue with MPR processing. Our team is
+                  working to resolve it as quickly as possible, and we expect distributions to be
+                  completed by tomorrow.
+                </p>
+                <p className="dashboard-apr-notice__footnote">
+                  We apologize for the inconvenience and appreciate your patience and understanding.
+                </p>
+              </div>
+              <div className="x3-convert-modal__footer">
+                <button
+                  type="button"
+                  className="x3-convert-modal__btn-confirm"
+                  onClick={dismissAprNotice}
+                >
+                  Understood
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="dashboard-container animate__animated animate__fadeIn">
         <div className="user-container animate__animated animate__fadeInDown">
           <div className="user-greeting">
